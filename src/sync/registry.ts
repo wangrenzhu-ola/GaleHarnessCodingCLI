@@ -5,6 +5,7 @@ import { syncToCodex } from "./codex"
 import { syncToCopilot } from "./copilot"
 import { syncToDroid } from "./droid"
 import { syncToGemini } from "./gemini"
+import { syncToKimi } from "./kimi"
 import { syncToKiro } from "./kiro"
 import { syncToOpenClaw } from "./openclaw"
 import { syncToOpenCode } from "./opencode"
@@ -31,6 +32,7 @@ export type SyncTargetName =
   | "kiro"
   | "qwen"
   | "openclaw"
+  | "kimi"
 
 export type SyncTargetDefinition = {
   name: SyncTargetName
@@ -119,6 +121,12 @@ export const syncTargets: SyncTargetDefinition[] = [
     detectPaths: (home) => [path.join(home, ".openclaw")],
     resolveOutputRoot: (home) => path.join(home, ".openclaw"),
     sync: syncToOpenClaw,
+  },
+  {
+    name: "kimi",
+    detectPaths: (home) => [path.join(home, ".kimi")],
+    resolveOutputRoot: (home) => path.join(home, ".kimi"),
+    sync: syncToKimi,
   },
 ]
 
