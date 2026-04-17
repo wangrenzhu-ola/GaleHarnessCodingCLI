@@ -2,7 +2,7 @@
 # This is the canonical schema for the experiment log file that accumulates
 # across an optimization run.
 #
-# Location: .context/galeharness-cli/ce-optimize/<spec-name>/experiment-log.yaml
+# Location: .context/compound-engineering/ce-optimize/<spec-name>/experiment-log.yaml
 #
 # PERSISTENCE MODEL:
 # The experiment log on disk is the SINGLE SOURCE OF TRUTH. The agent's
@@ -245,7 +245,7 @@ experiment_entry:
 # ============================================================================
 #
 # Written after each batch to:
-#   .context/galeharness-cli/ce-optimize/<spec-name>/strategy-digest.md
+#   .context/compound-engineering/ce-optimize/<spec-name>/strategy-digest.md
 #
 # Contains a compressed summary of:
 # - What hypothesis categories have been tried

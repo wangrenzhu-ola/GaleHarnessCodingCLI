@@ -1,18 +1,18 @@
 ---
-name: gh-update
+name: ce-update
 description: |
-  Check if GaleHarnessCLI is up to date and fix stale cache if not.
-  Use when the user says "update gale harness", "check gale harness version",
-  "gh update", "is gale harness up to date", "update gh plugin", or reports issues
-  that might stem from a stale plugin version. This skill only works
+  Check if the compound-engineering plugin is up to date and fix stale cache if not.
+  Use when the user says "update compound engineering", "check compound engineering version",
+  "ce update", "is compound engineering up to date", "update ce plugin", or reports issues
+  that might stem from a stale compound-engineering plugin version. This skill only works
   in Claude Code — it relies on the plugin harness cache layout.
 disable-model-invocation: true
 ce_platforms: [claude]
 ---
 
-# Check & Fix GaleHarnessCLI Version
+# Check & Fix Plugin Version
 
-Verify the installed GaleHarnessCLI plugin version matches the latest released
+Verify the installed compound-engineering plugin version matches the latest released
 version, and fix stale marketplace/cache state if it doesn't. Claude Code only.
 
 ## Pre-resolved context
@@ -28,10 +28,10 @@ below handles those cases.
 !`echo "${CLAUDE_PLUGIN_ROOT}" 2>/dev/null || echo '__CE_UPDATE_ROOT_FAILED__'`
 
 **Latest released version:**
-!`gh release list --repo wangrenzhu-ola/GaleHarnessCLI --limit 30 --json tagName --jq '[.[] | select(.tagName | startswith("compound-engineering-v"))][0].tagName | sub("compound-engineering-v";"")' 2>/dev/null || echo '__CE_UPDATE_VERSION_FAILED__'`
+!`gh release list --repo EveryInc/compound-engineering-plugin --limit 30 --json tagName --jq '[.[] | select(.tagName | startswith("compound-engineering-v"))][0].tagName | sub("compound-engineering-v";"")' 2>/dev/null || echo '__CE_UPDATE_VERSION_FAILED__'`
 
 **Cached version folder(s):**
-!`ls "${CLAUDE_PLUGIN_ROOT}/cache/gale-harness-cli/compound-engineering/" 2>/dev/null || echo '__CE_UPDATE_CACHE_FAILED__'`
+!`ls "${CLAUDE_PLUGIN_ROOT}/cache/compound-engineering-plugin/compound-engineering/" 2>/dev/null || echo '__CE_UPDATE_CACHE_FAILED__'`
 
 ## Decision logic
 
@@ -61,7 +61,7 @@ construct the delete path.
 
 **Clear the stale cache:**
 ```bash
-rm -rf "<plugin-root-path>/cache/gale-harness-cli/compound-engineering"
+rm -rf "<plugin-root-path>/cache/compound-engineering-plugin/compound-engineering"
 ```
 
 Tell the user:

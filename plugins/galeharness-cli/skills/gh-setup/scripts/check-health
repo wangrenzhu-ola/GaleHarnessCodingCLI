@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GaleHarnessCLI environment health check
+# Compound Engineering environment health check
 # Outputs a formatted diagnostic report in one pass
 
 set -o pipefail
@@ -19,29 +19,6 @@ deps=(
   "silicon|recommended|NONINTERACTIVE=1 HOMEBREW_NO_AUTO_UPDATE=1 brew install -q silicon|https://github.com/Aloxaf/silicon"
   "ffmpeg|recommended|NONINTERACTIVE=1 HOMEBREW_NO_AUTO_UPDATE=1 brew install -q ffmpeg|https://ffmpeg.org/download.html"
 )
-
-# =====================================================
-#  HKTMemory check
-# =====================================================
-
-check_hkt_memory() {
-  local status="missing"
-  local config_status="missing"
-
-  # Check if HKTMemory is installed
-  if [ -d "vendor/hkt-memory" ] && [ -f "vendor/hkt-memory/scripts/hkt_memory_v5.py" ]; then
-    status="installed"
-  fi
-
-  # Check if environment variables are configured
-  if [ -n "$HKT_MEMORY_API_KEY" ] && [ -n "$HKT_MEMORY_BASE_URL" ]; then
-    config_status="configured"
-  elif [ -n "$HKT_MEMORY_API_KEY" ] || [ -n "$HKT_MEMORY_BASE_URL" ]; then
-    config_status="partial"
-  fi
-
-  echo "$status|$config_status"
-}
 
 # =====================================================
 #  Args
@@ -89,13 +66,6 @@ for entry in "${deps[@]}"; do
 done
 
 # =====================================================
-#  HKTMemory check
-# =====================================================
-
-hkt_memory_result=$(check_hkt_memory)
-IFS='|' read -r hkt_status hkt_config <<< "$hkt_memory_result"
-
-# =====================================================
 #  Project checks (repo only)
 # =====================================================
 
@@ -106,10 +76,10 @@ example_cfg="skip"
 if [ "$in_repo" = "yes" ]; then
   repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
   legacy_cfg="missing"
-  [ -f "$repo_root/galeharness-cli.local.md" ] && legacy_cfg="present"
+  [ -f "$repo_root/compound-engineering.local.md" ] && legacy_cfg="present"
 
-  if [ -e "$repo_root/.galeharness-cli/config.local.yaml" ] || [ -d "$repo_root/.galeharness-cli" ]; then
-    if git check-ignore -q "$repo_root/.galeharness-cli/config.local.yaml" 2>/dev/null; then
+  if [ -e "$repo_root/.compound-engineering/config.local.yaml" ] || [ -d "$repo_root/.compound-engineering" ]; then
+    if git check-ignore -q "$repo_root/.compound-engineering/config.local.yaml" 2>/dev/null; then
       repo_cfg_gitignore="ok"
     else
       repo_cfg_gitignore="missing"
@@ -118,7 +88,7 @@ if [ "$in_repo" = "yes" ]; then
 
   script_dir="$(cd "$(dirname "$0")" && pwd)"
   template="$script_dir/../references/config-template.yaml"
-  example="$repo_root/.galeharness-cli/config.local.example.yaml"
+  example="$repo_root/.compound-engineering/config.local.example.yaml"
   if [ ! -f "$example" ]; then
     example_cfg="missing"
   elif [ -f "$template" ] && ! diff -q "$template" "$example" >/dev/null 2>&1; then
@@ -159,34 +129,6 @@ for result in "${results[@]}"; do
   fi
 done
 
-# --- HKTMemory ---
-
-section "HKTMemory (vector knowledge base)"
-
-if [ "$hkt_status" = "installed" ]; then
-  ok "HKTMemory installed"
-  case "$hkt_config" in
-    configured)
-      ok "API configured (HKT_MEMORY_API_KEY + HKT_MEMORY_BASE_URL)"
-      ;;
-    partial)
-      warn "API partially configured (missing some env vars)"
-      issues=$((issues + 1))
-      detail "Set HKT_MEMORY_API_KEY and HKT_MEMORY_BASE_URL"
-      ;;
-    *)
-      warn "API not configured"
-      issues=$((issues + 1))
-      detail "Set HKT_MEMORY_API_KEY and HKT_MEMORY_BASE_URL for vector search"
-      detail "Or run with file-based storage only"
-      ;;
-  esac
-else
-  warn "HKTMemory not installed"
-  issues=$((issues + 1))
-  detail "Run: bash vendor/hkt-memory/install.sh"
-fi
-
 # --- Project ---
 
 if [ "$in_repo" = "yes" ]; then
@@ -206,7 +148,7 @@ if [ "$in_repo" = "yes" ]; then
     section "Project"
 
     if [ "$legacy_cfg" = "present" ]; then
-      warn "Outdated GaleHarnessCLI config in this repo"
+      warn "Outdated Compound Engineering config in this repo"
       issues=$((issues + 1))
     fi
 
@@ -216,7 +158,7 @@ if [ "$in_repo" = "yes" ]; then
     fi
 
     if [ "$example_cfg" = "missing" ]; then
-      warn "Example config missing (.galeharness-cli/config.local.example.yaml)"
+      warn "Example config missing (.compound-engineering/config.local.example.yaml)"
       issues=$((issues + 1))
     elif [ "$example_cfg" = "outdated" ]; then
       warn "Example config outdated (new settings available)"

@@ -40,26 +40,6 @@ Determine how to proceed based on what was provided in `<input_document>`.
    | **Small / Medium** | Clear scope, under ~10 files | Build a task list from discovery. Proceed to Phase 1 step 2 |
    | **Large** | Cross-cutting, architectural decisions, 10+ files, touches auth/payments/migrations | Inform the user this would benefit from `/gh:brainstorm` or `/gh:plan` to surface edge cases and scope boundaries. Honor their choice. If proceeding, build a task list and continue to Phase 1 step 2 |
 
-3. **HKTMemory Retrieve**
-
-   Before proceeding, query the vector memory database for related implementations and solutions:
-
-   1. Extract a 1-2 sentence search query from: work description, plan title, component names, problem domain
-   2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
-      ```bash
-      uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
-        --query "<extracted query>" \
-        --layer all --limit 10 --min-similarity 0.35 \
-        --vector-weight 0.7 --bm25-weight 0.3
-      ```
-   3. If results returned, incorporate as context during implementation:
-      ```
-      ## Related memories from HKTMemory
-      Source: vector database. Treat as additional context.
-      [results here, each tagged with (similarity: X.XX)]
-      ```
-   4. If no results or command error, proceed silently without blocking.
-
 ---
 
 ### Phase 1: Quick Start
@@ -318,25 +298,6 @@ Determine how to proceed based on what was provided in `<input_document>`.
 ### Phase 3-4: Quality Check and Ship It
 
 When all Phase 2 tasks are complete and execution transitions to quality check, read `references/shipping-workflow.md` for the full shipping workflow: quality checks, code review, final validation, PR creation, and notification.
-
-### Phase 5: HKTMemory Store
-
-After the work is complete (features implemented, tests passing, code committed):
-
-1. Create a work summary capturing:
-   - What was implemented (feature/bug fix/refactor)
-   - Key files modified
-   - Approach taken and patterns followed
-   - Any notable discoveries or solutions
-2. Run:
-   ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
-     --content "<work summary>" \
-     --title "Work: <brief description>" \
-     --topic "work-execution" \
-     --layer all
-   ```
-3. Log: `Stored work summary to HKTMemory` on success, or note the error (non-blocking).
 
 ## Key Principles
 

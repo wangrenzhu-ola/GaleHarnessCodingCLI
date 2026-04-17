@@ -1,28 +1,10 @@
-# GaleHarnessCLI Plugin
+# Compounding Engineering Plugin
 
-AI-powered development tools with **HKTMemory vector knowledge base** — every phase of the workflow reads from and writes to memory, creating a compounding knowledge system that gets smarter with every use.
-
-## Workflow
-
-```
-Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
-    ^
-  Ideate (可选)
-```
-
-**Each phase automatically interacts with HKTMemory:**
-- **Before execution**: Retrieve relevant memories from previous cycles
-- **After completion**: Store new knowledge for future cycles
+AI-powered development tools that get smarter with every use. Make each unit of engineering work easier than the last.
 
 ## Getting Started
 
-After installing, run `/gh-setup` in any project. It:
-- Diagnoses your environment
-- **Installs HKTMemory vector knowledge base (required)**
-- **Interactively configures HKTMemory API credentials** (with file-mode fallback)
-- Installs missing tools
-- Bootstraps project config
-- Verifies HKTMemory connection
+After installing, run `/ce-setup` in any project. It diagnoses your environment, installs missing tools, and bootstraps project config in one interactive flow.
 
 ## Components
 
@@ -33,38 +15,36 @@ After installing, run `/gh-setup` in any project. It:
 
 ## Skills
 
-### Core Workflow (Memory-Enabled)
+### Core Workflow
 
-The primary entry points for engineering work, invoked as slash commands. **Every skill automatically retrieves memories before execution and stores new knowledge after completion.**
+The primary entry points for engineering work, invoked as slash commands:
 
-| Skill | Description | Memory Read | Memory Write |
-|-------|-------------|-------------|--------------|
-| `/gh:ideate` | Discover high-impact project improvements through divergent ideation and adversarial filtering | Past improvements | New opportunities |
-| `/gh:brainstorm` | Explore requirements and approaches before planning | Related requirements | Requirements doc |
-| `/gh:plan` | Create structured plans for any multi-step task with automatic confidence checking | Similar solutions | Technical plan |
-| `/gh:work` | Execute work items systematically | Implementation patterns | Implementation summary |
-| `/gh:review` | Structured code review with tiered persona agents, confidence gating, and dedup pipeline | Review patterns | Review findings |
-| `/gh:compound` | Document solved problems to compound team knowledge | Related solutions | Complete knowledge |
-| `/gh:compound-refresh` | Refresh stale or drifting learnings and decide whether to keep, update, replace, or archive them | Existing learnings | Updated learnings |
-| `/gh:debug` | Systematically find root causes and fix bugs | Similar issues | Debug experience |
-| `/gh:optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring | Optimization strategies | Optimization results |
+| Skill | Description |
+|-------|-------------|
+| `/gh:ideate` | Discover high-impact project improvements through divergent ideation and adversarial filtering |
+| `/gh:brainstorm` | Explore requirements and approaches before planning |
+| `/gh:plan` | Create structured plans for any multi-step task -- software features, research workflows, events, study plans -- with automatic confidence checking |
+| `/gh:review` | Structured code review with tiered persona agents, confidence gating, and dedup pipeline |
+| `/gh:work` | Execute work items systematically |
+| `/ce-debug` | Systematically find root causes and fix bugs -- traces causal chains, forms testable hypotheses, and implements test-first fixes |
+| `/gh:compound` | Document solved problems to compound team knowledge |
+| `/gh:compound-refresh` | Refresh stale or drifting learnings and decide whether to keep, update, replace, or archive them |
+| `/ce-optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring |
 
-**Cross-environment sync**: The `memory/` directory is committed to git, allowing knowledge to sync across environments.
-
-For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/README.md) for usage guidance, example specs, and links to the schema and workflow docs.
+For `/ce-optimize`, see [`skills/ce-optimize/README.md`](./skills/ce-optimize/README.md) for usage guidance, example specs, and links to the schema and workflow docs.
 
 ### Research & Context
 
 | Skill | Description |
 |-------|-------------|
-| `/gh:sessions` | Ask questions about session history across Claude Code, Codex, and Cursor |
-| `/gh:slack-research` | Search Slack for interpreted organizational context -- decisions, constraints, and discussion arcs |
+| `/ce-sessions` | Ask questions about session history across Claude Code, Codex, and Cursor |
+| `/ce-slack-research` | Search Slack for interpreted organizational context -- decisions, constraints, and discussion arcs |
 
 ### Git Workflow
 
 | Skill | Description |
 |-------|-------------|
-| `gh:pr-description` | Write or regenerate a value-first PR title and body from the current branch or a specified PR; used directly or by other skills |
+| `ce-pr-description` | Write or regenerate a value-first PR title and body from the current branch or a specified PR; used directly or by other skills |
 | `git-clean-gone-branches` | Clean up local branches whose remote tracking branch is gone |
 | `git-commit` | Create a git commit with a value-communicating message |
 | `git-commit-push-pr` | Commit, push, and open a PR with an adaptive description; also update an existing PR description (delegates title/body generation to `ce-pr-description`) |
@@ -74,16 +54,16 @@ For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/RE
 
 | Skill | Description |
 |-------|-------------|
-| `/gh:changelog` | Create engaging changelogs for recent merges |
-| `/gh:demo-reel` | Capture a visual demo reel (GIF demos, terminal recordings, screenshots) for PRs with project-type-aware tier selection |
-| `/gh:report-bug` | Report a bug in GaleHarnessCLI |
+| `/changelog` | Create engaging changelogs for recent merges |
+| `/gh-demo-reel` | Capture a visual demo reel (GIF demos, terminal recordings, screenshots) for PRs with project-type-aware tier selection |
+| `/report-bug-ce` | Report a bug in the compound-engineering plugin |
 | `/resolve-pr-feedback` | Resolve PR review feedback in parallel |
 | `/sync` | Sync Claude Code config across machines |
 | `/test-browser` | Run browser tests on PR-affected pages |
 | `/test-xcode` | Build and test iOS apps on simulator using XcodeBuildMCP |
 | `/onboarding` | Generate `ONBOARDING.md` to help new contributors understand the codebase |
-| `/gh-setup` | Diagnose environment, install HKTMemory, configure credentials, install missing tools, and bootstrap project config |
-| `/gh-update` | Check GaleHarnessCLI plugin version and fix stale cache (Claude Code only) |
+| `/ce-setup` | Diagnose environment, install missing tools, and bootstrap project config |
+| `/ce-update` | Check compound-engineering plugin version and fix stale cache (Claude Code only) |
 | `/todo-resolve` | Resolve todos in parallel |
 | `/todo-triage` | Triage and prioritize pending todos |
 
@@ -101,14 +81,13 @@ For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/RE
 
 | Skill | Description |
 |-------|-------------|
-| `claude-permissions-optimizer` | Optimize Claude Code permissions from session history |
 | `document-review` | Review documents using parallel persona agents for role-specific feedback |
 
 ### Content & Collaboration
 
 | Skill | Description |
 |-------|-------------|
-| `gale-style-editor` | Review copy for Every's style guide compliance |
+| `every-style-editor` | Review copy for Every's style guide compliance |
 | `proof` | Create, edit, and share documents via Proof collaborative editor |
 | `todo-create` | File-based todo tracking system |
 
@@ -122,6 +101,7 @@ For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/RE
 
 | Skill | Description |
 |-------|-------------|
+| `/gh:polish-beta` | Human-in-the-loop polish phase after /gh:review — verifies review + CI, starts a dev server from `.claude/launch.json`, generates a testable checklist, and dispatches polish sub-agents for fixes. Emits stacked-PR seeds for oversized work |
 | `/lfg` | Full autonomous engineering workflow |
 
 ## Agents
@@ -143,11 +123,11 @@ Agents are specialized subagents invoked by skills — you typically don't call 
 | `data-migration-expert` | Validate ID mappings match production, check for swapped values |
 | `data-migrations-reviewer` | Migration safety with confidence calibration |
 | `deployment-verification-agent` | Create Go/No-Go deployment checklists for risky data changes |
-| `gale-dhh-rails-reviewer` | Rails review from DHH's perspective |
-| `gale-julik-frontend-races-reviewer` | Review JavaScript/Stimulus code for race conditions |
-| `gale-rails-reviewer` | Rails code review with strict conventions |
-| `gale-python-reviewer` | Python code review with strict conventions |
-| `gale-typescript-reviewer` | TypeScript code review with strict conventions |
+| `dhh-rails-reviewer` | Rails review from DHH's perspective |
+| `julik-frontend-races-reviewer` | Review JavaScript/Stimulus code for race conditions |
+| `kieran-rails-reviewer` | Rails code review with strict conventions |
+| `kieran-python-reviewer` | Python code review with strict conventions |
+| `kieran-typescript-reviewer` | TypeScript code review with strict conventions |
 | `maintainability-reviewer` | Coupling, complexity, naming, dead code |
 | `pattern-recognition-specialist` | Analyze code for patterns and anti-patterns |
 | `performance-oracle` | Performance analysis and optimization |
@@ -209,23 +189,10 @@ Agents are specialized subagents invoked by skills — you typically don't call 
 ## Installation
 
 ```bash
-claude /plugin install galeharness-cli
+claude /plugin install compound-engineering
 ```
 
-Then run `/gh-setup` to:
-- Check your environment
-- **Install HKTMemory (required)**
-- **Configure HKTMemory credentials interactively**
-- Install recommended tools
-
-### HKTMemory Configuration
-
-During setup, you'll be prompted for:
-- `HKT_MEMORY_API_KEY` - Your API key (or skip for file-only mode)
-- `HKT_MEMORY_BASE_URL` - API endpoint (default: https://open.bigmodel.cn/api/paas/v4/)
-- `HKT_MEMORY_MODEL` - Embedding model (default: embedding-3)
-
-**File-only mode**: If you don't have an API key, HKTMemory will work in file-only mode using local storage (`memory/` directory).
+Then run `/ce-setup` to check your environment and install recommended tools.
 
 ## Version History
 

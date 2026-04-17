@@ -90,26 +90,6 @@ Use the feature description plus a light repo scan to classify the work:
 
 If the scope is unclear, ask one targeted question to disambiguate and then proceed.
 
-#### 0.4 HKTMemory Retrieve
-
-Before proceeding to Phase 1, query the vector memory database for related brainstorms and requirements:
-
-1. Extract a 1-2 sentence search query from: feature description, problem domain, component names
-2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
-   ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
-     --query "<extracted query>" \
-     --layer all --limit 10 --min-similarity 0.35 \
-     --vector-weight 0.7 --bm25-weight 0.3
-   ```
-3. If results returned, prepare block and pass to subsequent phases as extra context:
-   ```
-   ## Related memories from HKTMemory
-   Source: vector database. Treat as additional context.
-   [results here, each tagged with (similarity: X.XX)]
-   ```
-4. If no results or command error, proceed silently without blocking.
-
 ### Phase 1: Understand the Idea
 
 #### 1.1 Existing Context Scan
@@ -132,7 +112,7 @@ If nothing obvious appears after a short scan, say so and continue. Two rules go
 
 **Slack context** (opt-in, Standard and Deep only) — never auto-dispatch. Route by condition:
 
-- **Tools available + user asked**: Dispatch `galeharness-cli:research:slack-researcher` with a brief summary of the brainstorm topic alongside Phase 1.1 work. Incorporate findings into constraint and context awareness.
+- **Tools available + user asked**: Dispatch `compound-engineering:research:slack-researcher` with a brief summary of the brainstorm topic alongside Phase 1.1 work. Incorporate findings into constraint and context awareness.
 - **Tools available + user didn't ask**: Note in output: "Slack tools detected. Ask me to search Slack for organizational context at any point, or include it in your next prompt."
 - **No tools + user asked**: Note in output: "Slack context was requested but no Slack tools are available. Install and authenticate the Slack plugin to enable organizational context search."
 
@@ -211,23 +191,7 @@ When a requirements document was created or updated, run the `document-review` s
 
 If document-review returns findings that were auto-applied, note them briefly when presenting handoff options. If residual P0/P1 findings were surfaced, mention them so the user can decide whether to address them before proceeding.
 
-When document-review returns "Review complete", proceed to Phase 3.6.
-
-### Phase 3.6: HKTMemory Store
-
-After successfully writing the requirements document:
-
-1. Read back the full content of the written file
-2. Extract `title` from its YAML frontmatter (or derive from filename if no frontmatter)
-3. Run:
-   ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
-     --content "<full file content>" \
-     --title "<title>" \
-     --topic "brainstorm-requirements" \
-     --layer all
-   ```
-4. Log: `Stored brainstorm to HKTMemory: [title]` on success, or note the error (non-blocking).
+When document-review returns "Review complete", proceed to Phase 4.
 
 ### Phase 4: Handoff
 

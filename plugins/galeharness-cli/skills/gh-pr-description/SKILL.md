@@ -189,7 +189,7 @@ Decide whether evidence capture is possible from the full branch diff.
 **This skill does NOT prompt the user** to capture evidence. The decision logic is:
 
 1. **PR mode invocation** (any form: bare number, `#NN`, `pr:<N>`, or a full URL — anything that resolves to an existing PR whose body we fetched) **and the existing body contains a `## Demo` or `## Screenshots` section with image embeds:** preserve it verbatim unless the steering text asks to refresh or remove it. Include the preserved block in the returned body. This applies regardless of which input shape the caller used; what matters is that a PR exists and its body was read.
-2. **Current-branch mode or PR mode without an evidence block:** omit the evidence section entirely. If the caller wants to capture evidence, the caller is responsible for invoking `ce-demo-reel` separately and splicing the result in, or for asking this skill to regenerate with updated steering text after capture.
+2. **Current-branch mode or PR mode without an evidence block:** omit the evidence section entirely. If the caller wants to capture evidence, the caller is responsible for invoking `gh-demo-reel` separately and splicing the result in, or for asking this skill to regenerate with updated steering text after capture.
 
 Do not label test output as "Demo" or "Screenshots". Place any preserved evidence block before the Compound Engineering badge.
 
@@ -328,7 +328,7 @@ Assemble the body in this order:
 ```markdown
 ---
 
-[![GaleHarnessCLI](https://img.shields.io/badge/Built_with-GaleHarnessCLI-6366f1)](https://github.com/wangrenzhu-ola/GaleHarnessCLI)
+[![Compound Engineering](https://img.shields.io/badge/Built_with-Compound_Engineering-6366f1)](https://github.com/EveryInc/compound-engineering-plugin)
 ![HARNESS](https://img.shields.io/badge/MODEL_SLUG-COLOR?logo=LOGO&logoColor=white)
 ```
 

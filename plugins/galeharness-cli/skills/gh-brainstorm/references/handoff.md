@@ -6,7 +6,7 @@ This content is loaded when Phase 4 begins — after the requirements document i
 
 #### 4.1 Present Next-Step Options
 
-Present next steps using the platform's blocking question tool when available (see Interaction Rules in the main skill). Otherwise present numbered options in chat and end the turn.
+Present the options using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, present the numbered options in chat and wait for the user's reply before proceeding.
 
 If `Resolve Before Planning` contains any items:
 - Ask the blocking questions now, one at a time, by default
@@ -18,15 +18,15 @@ If `Resolve Before Planning` contains any items:
 
 **Question when blocking questions remain and user wants to pause:** "Brainstorm paused. Planning is blocked until the remaining questions are resolved. What would you like to do next?"
 
-Present only the options that apply:
-- **Proceed to planning (Recommended)** - Run `/gh:plan` for structured implementation planning
-- **Proceed directly to work** - Only offer this when scope is lightweight, success criteria are clear, scope boundaries are clear, and no meaningful technical or research questions remain
-- **Run additional document review** - Offer this only when a requirements document exists. Runs another pass for further refinement
-- **Ask more questions** - Continue clarifying scope, preferences, or edge cases
-- **Share to Proof** - Offer this only when a requirements document exists
-- **Done for now** - Return later
+Present only the options that apply, keeping the total at 4 or fewer:
 
-If the direct-to-work gate is not satisfied, omit that option entirely.
+- **Proceed to planning (Recommended)** - Move to `/gh:plan` for structured implementation planning. Shown only when `Resolve Before Planning` is empty.
+- **Proceed directly to work** - Skip planning and move to `/gh:work`; suited to lightweight, well-defined changes. Shown only when `Resolve Before Planning` is empty **and** scope is lightweight, success criteria are clear, scope boundaries are clear, and no meaningful technical or research questions remain (the "direct-to-work gate").
+- **Continue the brainstorm** - Answer more clarifying questions to tighten scope, edge cases, and preferences. Always shown.
+- **View & share in Proof** - Open the requirements doc in Proof to read, comment, collaborate, and share a link. Shown only when a requirements document exists **and** the direct-to-work gate is not satisfied (when both conditions collide, `Proceed directly to work` takes priority and Proof becomes reachable via free-form request).
+- **Done for now** - Pause; the requirements doc is saved and can be resumed later. Always shown.
+
+**Surface additional document review contextually, not as a menu fixture:** When the prior document-review pass surfaced residual P0/P1 findings that the user has not addressed, mention them adjacent to the menu and offer another review pass in prose (e.g., "Document review flagged 2 P1 findings you may want to address — want me to run another pass?"). Do not add it to the option list.
 
 #### 4.2 Handle the Selected Option
 
@@ -38,7 +38,9 @@ Immediately run `/gh:plan` in the current session. Pass the requirements documen
 
 Immediately run `/gh:work` in the current session using the finalized brainstorm output as context. If a compact requirements document exists, pass its path. Do not print the closing summary first.
 
-**If user selects "Share to Proof":**
+**If user selects "Continue the brainstorm":** Return to Phase 1.3 (Collaborative Dialogue) and continue asking the user clarifying questions one at a time to further refine scope, edge cases, constraints, and preferences. Continue until the user is satisfied, then return to Phase 4. Do not show the closing summary yet.
+
+**If user selects "View & share in Proof":**
 
 ```bash
 CONTENT=$(cat docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md)
@@ -53,13 +55,11 @@ Display the URL prominently: `View & collaborate in Proof: <PROOF_URL>`
 
 If the curl fails, skip silently. Then return to the Phase 4 options.
 
-**If user selects "Ask more questions":** Return to Phase 1.3 (Collaborative Dialogue) and continue asking the user questions one at a time to further refine the design. Probe deeper into edge cases, constraints, preferences, or areas not yet explored. Continue until the user is satisfied, then return to Phase 4. Do not show the closing summary yet.
+**If the user asks to run another document review** (either from the contextual prompt when P0/P1 findings remain, or by free-form request):
 
-**If user selects "Run additional document review":**
+Load the `document-review` skill and apply it to the requirements document for another pass. When document-review returns "Review complete", return to the normal Phase 4 options and present only the options that still apply. Do not show the closing summary yet.
 
-Load the `document-review` skill and apply it to the requirements document for another pass.
-
-When document-review returns "Review complete", return to the normal Phase 4 options and present only the options that still apply. Do not show the closing summary yet.
+**If user selects "Done for now":** Display the closing summary (see 4.3) and end the turn.
 
 #### 4.3 Closing Summary
 

@@ -8,15 +8,15 @@ disable-model-invocation: true
 
 ## Overview
 
-The `.context/galeharness-cli/todos/` directory is a file-based tracking system for code review feedback, technical debt, feature requests, and work items. Each todo is a markdown file with YAML frontmatter.
+The `.context/compound-engineering/todos/` directory is a file-based tracking system for code review feedback, technical debt, feature requests, and work items. Each todo is a markdown file with YAML frontmatter.
 
-> **Legacy support:** Always check both `.context/galeharness-cli/todos/` (canonical) and `todos/` (legacy) when reading. Write new todos only to the canonical path. This directory has a multi-session lifecycle -- do not clean it up as scratch.
+> **Legacy support:** Always check both `.context/compound-engineering/todos/` (canonical) and `todos/` (legacy) when reading. Write new todos only to the canonical path. This directory has a multi-session lifecycle -- do not clean it up as scratch.
 
 ## Directory Paths
 
 | Purpose | Path |
 |---------|------|
-| **Canonical (write here)** | `.context/galeharness-cli/todos/` |
+| **Canonical (write here)** | `.context/compound-engineering/todos/` |
 | **Legacy (read-only)** | `todos/` |
 
 ## File Naming Convention
@@ -56,7 +56,7 @@ dependencies: ["001"]     # Issue IDs this is blocked by
 
 ### Creating a New Todo
 
-1. `mkdir -p .context/galeharness-cli/todos/`
+1. `mkdir -p .context/compound-engineering/todos/`
 2. Search both paths for `[0-9]*-*.md`, find the highest numeric prefix, increment, zero-pad to 3 digits.
 3. Use the todo template included below, write to canonical path as `{NEXT_ID}-pending-{priority}-{description}.md`.
 4. Fill Problem Statement, Findings, Proposed Solutions, Acceptance Criteria, and initial Work Log entry.

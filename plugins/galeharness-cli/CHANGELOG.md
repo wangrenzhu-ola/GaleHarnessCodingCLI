@@ -1,6 +1,6 @@
 # Changelog
 
-This file is no longer the canonical changelog for compound-engineering releases.
+This file is no longer the canonical changelog for GaleHarnessCLI releases.
 
 Historical entries are preserved below, but new release history is recorded in the root [`CHANGELOG.md`](../../CHANGELOG.md).
 
@@ -16,19 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * GaleHarnessCLI 初始发布 ([912b5ce](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/912b5ce6904e6a2871d0bf56e69ac0059e6ba8eb))
 
-## [1.2.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/galeharness-cli-v1.1.0...galeharness-cli-v1.2.0) (2026-04-17)
+## [1.2.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.1.0...galeharness-cli-v1.2.0) (2026-04-17)
 
 
 ### Features
 
-* GaleHarnessCLI 初始发布 ([912b5ce](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/912b5ce6904e6a2871d0bf56e69ac0059e6ba8eb))
+* GaleHarnessCLI 初始发布 ([912b5ce](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/912b5ce6904e6a2871d0bf56e69ac0059e6ba8eb))
 
-## [1.1.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/galeharness-cli-v1.0.0...galeharness-cli-v1.1.0) (2026-04-17)
+## [1.1.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.0.0...galeharness-cli-v1.1.0) (2026-04-17)
 
 
 ### Features
 
-* **gh-setup:** add HKTMemory integration and rename from ce-setup ([de48163](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/de481636085db854d684e872ee7c437c0a1f12b3))
+* **gh-setup:** add HKTMemory integration and rename from ce-setup ([de48163](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/de481636085db854d684e872ee7c437c0a1f12b3))
 
 ## 1.0.0 (2026-04-16)
 
@@ -37,371 +37,363 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * **galeharness-cli:** Synchronize galeharness-cli versions
 
-## [2.66.1](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.66.0...compound-engineering-v2.66.1) (2026-04-16)
-
-
-### Bug Fixes
-
-* **ce-compound, ce-compound-refresh:** use injected memory block ([#569](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/569)) ([0b3d4b2](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/0b3d4b283c8e3165931816607cf86017d8273bbe))
-
-## [2.66.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.65.0...compound-engineering-v2.66.0) (2026-04-15)
 
 
 ### Features
 
-* **ce-optimize:** Auto-research loop for tuning system prompts / vector clustering / evaluating different code solution / etc ([#446](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/446)) ([8f20aa0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/8f20aa0406a7cda4ff11da45b971e38681650678))
-* **ce-pr-description:** focused skill for PR description generation ([#561](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/561)) ([8ec6d33](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/8ec6d339fee38cf4306e6586f726486cbae713b0))
+* **ce-optimize:** Auto-research loop for tuning system prompts / vector clustering / evaluating different code solution / etc ([#446](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/446)) ([8f20aa0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/8f20aa0406a7cda4ff11da45b971e38681650678))
+* **ce-pr-description:** focused skill for PR description generation ([#561](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/561)) ([8ec6d33](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/8ec6d339fee38cf4306e6586f726486cbae713b0))
 
 
 ### Bug Fixes
 
-* **ce-plan:** close escape hatches that let the skill abandon direct invocations ([#554](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/554)) ([e4d5f24](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/e4d5f241bd3945784905a32d7fb7ef9305c621e8))
-* **ce-review:** always fetch base branch to prevent stale merge-base ([#544](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/544)) ([4e0ed2c](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/4e0ed2cc8ddadf6d5504210e1210728e6f7cc9aa))
-* **ce-update:** use correct marketplace name in cache path ([#566](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/566)) ([d8305dd](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/d8305dd159ebe9d89df9c4af5a7d0fb2b128801b))
-* **ce-work,ce-work-beta:** add safety checks for parallel subagent dispatch ([#557](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/557)) ([5cae4d1](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/5cae4d1dab212d7e438f0b081986e987c860d4d5))
-* **document-review, review:** restrict reviewer agents to read-only tools ([#553](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/553)) ([e45c435](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/e45c435b996f7c0bf5ae0e23c0ab95b3fbd9204c))
-* **git-commit-push-pr:** rewrite descriptions as net result, not changelog ([#558](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/558)) ([a559903](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/a55990387d48fa7af598880746ff862cc8f10acd))
+* **ce-plan:** close escape hatches that let the skill abandon direct invocations ([#554](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/554)) ([e4d5f24](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e4d5f241bd3945784905a32d7fb7ef9305c621e8))
+* **ce-review:** always fetch base branch to prevent stale merge-base ([#544](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/544)) ([4e0ed2c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4e0ed2cc8ddadf6d5504210e1210728e6f7cc9aa))
+* **ce-update:** use correct marketplace name in cache path ([#566](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/566)) ([d8305dd](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d8305dd159ebe9d89df9c4af5a7d0fb2b128801b))
+* **ce-work,ce-work-beta:** add safety checks for parallel subagent dispatch ([#557](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/557)) ([5cae4d1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/5cae4d1dab212d7e438f0b081986e987c860d4d5))
+* **document-review, review:** restrict reviewer agents to read-only tools ([#553](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/553)) ([e45c435](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e45c435b996f7c0bf5ae0e23c0ab95b3fbd9204c))
+* **git-commit-push-pr:** rewrite descriptions as net result, not changelog ([#558](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/558)) ([a559903](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a55990387d48fa7af598880746ff862cc8f10acd))
 
-## [2.65.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.64.0...compound-engineering-v2.65.0) (2026-04-11)
+## [2.65.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.64.0...compound-engineering-v2.65.0) (2026-04-11)
 
 
 ### Features
 
-* **ce-setup:** unified setup skill with dependency management and config bootstrapping ([#345](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/345)) ([354dbb7](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/354dbb75828f0152f4cbbb3b50ce4511fa6710c7))
+* **ce-setup:** unified setup skill with dependency management and config bootstrapping ([#345](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/345)) ([354dbb7](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/354dbb75828f0152f4cbbb3b50ce4511fa6710c7))
 
 
 ### Bug Fixes
 
-* **ce-demo-reel:** two-stage upload for reviewable approval gate ([#546](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/546)) ([5454053](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/545405380dba78bc0efd35f7675e8c27d99bf8c9))
-* **cleanup:** remove rclone, agent-browser, lint, and bug-reproduction-validator ([#545](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/545)) ([1372b2c](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/1372b2cffd06989dee8eb9df26d7c94ac30f032a))
+* **gh-demo-reel:** two-stage upload for reviewable approval gate ([#546](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/546)) ([5454053](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/545405380dba78bc0efd35f7675e8c27d99bf8c9))
+* **cleanup:** remove rclone, agent-browser, lint, and bug-reproduction-validator ([#545](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/545)) ([1372b2c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1372b2cffd06989dee8eb9df26d7c94ac30f032a))
 
-## [2.64.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.63.1...compound-engineering-v2.64.0) (2026-04-10)
+## [2.64.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.63.1...compound-engineering-v2.64.0) (2026-04-10)
 
 
 ### Features
 
-* **ce-debug:** add systematic debugging skill ([#543](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/543)) ([e38223a](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/e38223ae91921ebacabd10ff7cd1105ba3c10b25))
-* **ce-demo-reel:** add demo reel skill with Python capture pipeline ([#541](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/541)) ([b979143](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/b979143ad0460a985dd224e7f1858416d79551fb))
-* **ce-plan:** add output structure and scope sub-categorization ([#542](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/542)) ([f3cc754](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/f3cc7545e5eca0c3774b2803fa5515ff98a8fc1e))
-* **ce-review:** add compact returns to reduce orchestrator context during merge ([#535](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/535)) ([a5ce094](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/a5ce09477291766ffc03e0ae4e9e1e0f80560c2b))
-* **ce-update:** add plugin version check skill and ce_platforms filtering ([#532](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/532)) ([d37f0ed](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/d37f0ed16f94aaec2a7b435a0aaa018de5631ed3))
-* **ce-work-beta:** add beta Codex delegation mode ([#476](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/476)) ([31b0686](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/31b0686c2e88808381560314f10ce276c86e11e2))
-* **ce-work:** reduce token usage by extracting late-sequence references ([#540](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/540)) ([bb59547](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/bb59547a2efdd4e7213c149f51abd9c9a17016dd))
-* **session-historian:** cross-platform session history agent and /ce-sessions skill ([#534](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/534)) ([3208ec7](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/3208ec71f8f2209abc76baf97e3967406755317d))
-* **slack-researcher:** add /ce-slack-research skill and improve agent ([#538](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/538)) ([042ee73](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/042ee732398d1f41b9b91953569a54e40303332d))
+* **ce-debug:** add systematic debugging skill ([#543](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/543)) ([e38223a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e38223ae91921ebacabd10ff7cd1105ba3c10b25))
+* **gh-demo-reel:** add demo reel skill with Python capture pipeline ([#541](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/541)) ([b979143](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/b979143ad0460a985dd224e7f1858416d79551fb))
+* **ce-plan:** add output structure and scope sub-categorization ([#542](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/542)) ([f3cc754](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/f3cc7545e5eca0c3774b2803fa5515ff98a8fc1e))
+* **ce-review:** add compact returns to reduce orchestrator context during merge ([#535](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/535)) ([a5ce094](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a5ce09477291766ffc03e0ae4e9e1e0f80560c2b))
+* **ce-update:** add plugin version check skill and ce_platforms filtering ([#532](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/532)) ([d37f0ed](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d37f0ed16f94aaec2a7b435a0aaa018de5631ed3))
+* **ce-work-beta:** add beta Codex delegation mode ([#476](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/476)) ([31b0686](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/31b0686c2e88808381560314f10ce276c86e11e2))
+* **ce-work:** reduce token usage by extracting late-sequence references ([#540](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/540)) ([bb59547](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/bb59547a2efdd4e7213c149f51abd9c9a17016dd))
+* **session-historian:** cross-platform session history agent and /ce-sessions skill ([#534](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/534)) ([3208ec7](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/3208ec71f8f2209abc76baf97e3967406755317d))
+* **slack-researcher:** add /ce-slack-research skill and improve agent ([#538](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/538)) ([042ee73](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/042ee732398d1f41b9b91953569a54e40303332d))
 
 
 ### Bug Fixes
 
-* **ce-compound:** explicit mode prompt and lightweight rename ([#528](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/528)) ([0ae91dc](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c))
-* **git-commit-push-pr:** remove harness slug from badge table ([#539](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/539)) ([044a035](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/044a035e77298c4b8d2152ac2cba36fc00f5b99a))
+* **ce-compound:** explicit mode prompt and lightweight rename ([#528](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/528)) ([0ae91dc](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c))
+* **git-commit-push-pr:** remove harness slug from badge table ([#539](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/539)) ([044a035](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/044a035e77298c4b8d2152ac2cba36fc00f5b99a))
 
-## [2.63.1](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.63.0...compound-engineering-v2.63.1) (2026-04-07)
+## [2.63.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.63.0...compound-engineering-v2.63.1) (2026-04-07)
 
 
 ### Bug Fixes
 
-* **ce-review:** add recursion guard to reviewer subagent template ([#527](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/527)) ([bafe9f0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/bafe9f0968054c78db23e7e7f4d5dbc2ddb4a450))
-* **document-review:** widen autofix classification beyond trivial fixes ([#524](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/524)) ([9a82222](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/9a82222aba25d6e64355053fca5954f3dfbd8285))
+* **ce-review:** add recursion guard to reviewer subagent template ([#527](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/527)) ([bafe9f0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/bafe9f0968054c78db23e7e7f4d5dbc2ddb4a450))
+* **document-review:** widen autofix classification beyond trivial fixes ([#524](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/524)) ([9a82222](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9a82222aba25d6e64355053fca5954f3dfbd8285))
 
-## [2.63.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.62.1...compound-engineering-v2.63.0) (2026-04-06)
+## [2.63.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.62.1...compound-engineering-v2.63.0) (2026-04-06)
 
 
 ### Features
 
-* **ce-plan,ce-brainstorm:** universal planning and brainstorming for non-software tasks ([#519](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/519)) ([320a045](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/320a04524142830a40a44bd72c4bf5d30931221c))
-* **slack-researcher:** add Slack organizational context research agent ([#495](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/495)) ([b3960ec](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/b3960ec64b212d1c8f3885370762e0f124354c28))
+* **ce-plan,ce-brainstorm:** universal planning and brainstorming for non-software tasks ([#519](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/519)) ([320a045](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/320a04524142830a40a44bd72c4bf5d30931221c))
+* **slack-researcher:** add Slack organizational context research agent ([#495](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/495)) ([b3960ec](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/b3960ec64b212d1c8f3885370762e0f124354c28))
 
 
 ### Bug Fixes
 
-* **document-review:** add recursion guard to reviewer subagent template ([#523](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/523)) ([36d8119](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/36d811916637b3436aafd548319e077b6248bae3))
-* **review,work:** omit mode parameter in subagent dispatch to respect user permissions ([#522](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/522)) ([949bdef](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/949bdef909ea71e9c5b885e31c028809f0f25017))
-* **slack-researcher:** make Slack research opt-in, surface workspace identity ([#521](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/521)) ([6f9069d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/6f9069df7ac3551677f8f7a1cd7ad51946f88847))
+* **document-review:** add recursion guard to reviewer subagent template ([#523](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/523)) ([36d8119](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/36d811916637b3436aafd548319e077b6248bae3))
+* **review,work:** omit mode parameter in subagent dispatch to respect user permissions ([#522](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/522)) ([949bdef](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/949bdef909ea71e9c5b885e31c028809f0f25017))
+* **slack-researcher:** make Slack research opt-in, surface workspace identity ([#521](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/521)) ([6f9069d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/6f9069df7ac3551677f8f7a1cd7ad51946f88847))
 
-## [2.62.1](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.62.0...compound-engineering-v2.62.1) (2026-04-05)
+## [2.62.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.62.0...compound-engineering-v2.62.1) (2026-04-05)
 
 
 ### Bug Fixes
 
-* **ce-brainstorm:** reduce token cost by extracting late-sequence content ([#511](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/511)) ([bdeb793](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/bdeb7935fcdb147b73107177769c2e968463d93f))
-* **ce-ideate,ce-review:** reduce token cost and latency ([#515](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/515)) ([f4e0904](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/f4e09044ba4073f9447d783bfb7a72326ff7bf6b))
-* **document-review:** promote pattern-resolved findings to auto ([#507](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/507)) ([b223e39](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/b223e39a6374566fcc4ae269811d62a2e97c4827))
-* **document-review:** reduce token cost and latency ([#509](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/509)) ([9da73a6](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/9da73a60919bfc025efc2ca8b4000c45a7a27b42))
-* **git-commit-push-pr:** simplify PR probe pre-resolution ([#513](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/513)) ([f6544eb](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/f6544eba0e6851b8772bb9920583ffda5c80cccc))
+* **ce-brainstorm:** reduce token cost by extracting late-sequence content ([#511](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/511)) ([bdeb793](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/bdeb7935fcdb147b73107177769c2e968463d93f))
+* **ce-ideate,ce-review:** reduce token cost and latency ([#515](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/515)) ([f4e0904](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/f4e09044ba4073f9447d783bfb7a72326ff7bf6b))
+* **document-review:** promote pattern-resolved findings to auto ([#507](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/507)) ([b223e39](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/b223e39a6374566fcc4ae269811d62a2e97c4827))
+* **document-review:** reduce token cost and latency ([#509](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/509)) ([9da73a6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9da73a60919bfc025efc2ca8b4000c45a7a27b42))
+* **git-commit-push-pr:** simplify PR probe pre-resolution ([#513](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/513)) ([f6544eb](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/f6544eba0e6851b8772bb9920583ffda5c80cccc))
 
-## [2.62.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.61.0...compound-engineering-v2.62.0) (2026-04-03)
+## [2.62.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.61.0...compound-engineering-v2.62.0) (2026-04-03)
 
 
 ### Features
 
-* **ce-plan:** reduce token usage by extracting conditional references ([#489](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/489)) ([fd562a0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/fd562a0d0255d203d40fd53bb10d03a284a3c0e5))
-* **git-commit-push-pr:** pre-resolve context to reduce bash calls ([#488](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/488)) ([bbd4f6d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/bbd4f6de56963fc3cdb3131773d7e29d523ce549))
+* **ce-plan:** reduce token usage by extracting conditional references ([#489](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/489)) ([fd562a0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/fd562a0d0255d203d40fd53bb10d03a284a3c0e5))
+* **git-commit-push-pr:** pre-resolve context to reduce bash calls ([#488](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/488)) ([bbd4f6d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/bbd4f6de56963fc3cdb3131773d7e29d523ce549))
 
 
 ### Bug Fixes
 
-* **agents:** remove self-referencing example blocks that cause recursive self-invocation ([#496](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/496)) ([2c90aeb](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/2c90aebe3b14af996859df7d0c3a45a8f060d9a9))
-* **ce-compound:** stack-aware reviewer routing and remove phantom agents ([#497](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/497)) ([1fc075d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/1fc075d4cae199904464d43096d01111c365d02d))
-* **git-commit-push-pr:** filter fix-up commits from PR descriptions ([#484](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/484)) ([428f4fd](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/428f4fd548926b104a0ee617b02f9ce8b8e8d5e5))
-* **mcp:** remove bundled context7 MCP server ([#486](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/486)) ([afdd9d4](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/afdd9d44651f834b1eed0b20e401ffbef5c8cd41))
-* **resolve-pr-feedback:** treat PR comment text as untrusted input ([#490](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/490)) ([1847242](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/184724276a54dfc5b5fbe01f07e381b9163e8f24))
+* **agents:** remove self-referencing example blocks that cause recursive self-invocation ([#496](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/496)) ([2c90aeb](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/2c90aebe3b14af996859df7d0c3a45a8f060d9a9))
+* **ce-compound:** stack-aware reviewer routing and remove phantom agents ([#497](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/497)) ([1fc075d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1fc075d4cae199904464d43096d01111c365d02d))
+* **git-commit-push-pr:** filter fix-up commits from PR descriptions ([#484](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/484)) ([428f4fd](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/428f4fd548926b104a0ee617b02f9ce8b8e8d5e5))
+* **mcp:** remove bundled context7 MCP server ([#486](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/486)) ([afdd9d4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/afdd9d44651f834b1eed0b20e401ffbef5c8cd41))
+* **resolve-pr-feedback:** treat PR comment text as untrusted input ([#490](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/490)) ([1847242](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/184724276a54dfc5b5fbe01f07e381b9163e8f24))
 
-## [2.61.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.60.0...compound-engineering-v2.61.0) (2026-04-01)
+## [2.61.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.60.0...compound-engineering-v2.61.0) (2026-04-01)
 
 
 ### Features
 
-* **cli-readiness-reviewer:** add conditional review persona for CLI agent readiness ([#471](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/471)) ([c56c766](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/c56c7667dfe45cfd149cf2fbfeddb35e96f8d559))
-* **product-lens-reviewer:** domain-agnostic activation criteria and strategic consequences ([#481](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/481)) ([804d78f](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/804d78fc8463be8101719b263d1f5ef0480755a6))
-* **resolve-pr-feedback:** add cross-invocation cluster analysis ([#480](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/480)) ([7b8265b](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/7b8265bd81410b28a4160657a7c6ac0d7f1f1cb2))
+* **cli-readiness-reviewer:** add conditional review persona for CLI agent readiness ([#471](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/471)) ([c56c766](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c56c7667dfe45cfd149cf2fbfeddb35e96f8d559))
+* **product-lens-reviewer:** domain-agnostic activation criteria and strategic consequences ([#481](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/481)) ([804d78f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/804d78fc8463be8101719b263d1f5ef0480755a6))
+* **resolve-pr-feedback:** add cross-invocation cluster analysis ([#480](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/480)) ([7b8265b](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/7b8265bd81410b28a4160657a7c6ac0d7f1f1cb2))
 
 
 ### Bug Fixes
 
-* **ce-plan, ce-brainstorm:** enforce repo-relative paths in generated documents ([#473](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/473)) ([33a8d9d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/33a8d9dc118a53a35cd15e0e6e44b3592f58ac4f))
+* **ce-plan, ce-brainstorm:** enforce repo-relative paths in generated documents ([#473](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/473)) ([33a8d9d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/33a8d9dc118a53a35cd15e0e6e44b3592f58ac4f))
 
-## [2.60.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.59.0...compound-engineering-v2.60.0) (2026-03-31)
+## [2.60.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.59.0...compound-engineering-v2.60.0) (2026-03-31)
 
 
 ### Features
 
-* **ce-brainstorm:** add conditional visual aids to requirements documents ([#437](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/437)) ([bd02ca7](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/bd02ca7df04cf2c1c6301de3774e99d283d3d3ca))
-* **ce-compound:** add discoverability check for docs/solutions/ in instruction files ([#456](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/456)) ([5ac8a2c](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/5ac8a2c2c8c258458307e476d6693cc387deb27e))
-* **ce-compound:** add track-based schema for bug vs knowledge learnings ([#445](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/445)) ([739109c](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/739109c03ccd45474331625f35730924d17f63ef))
-* **ce-plan:** add conditional visual aids to plan documents ([#440](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/440)) ([4c7f51f](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/4c7f51f35bae56dd9c9dc2653372910c39b8b504))
-* **ce-plan:** add interactive deepening mode for on-demand plan strengthening ([#443](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/443)) ([ca78057](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/ca78057241ec64f36c562e3720a388420bdb347f))
-* **ce-review:** enforce table format, require question tool, fix autofix_class calibration ([#454](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/454)) ([847ce3f](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/847ce3f156a5cdf75667d9802e95d68e6b3c53a4))
-* **ce-review:** improve signal-to-noise with confidence rubric, FP suppression, and intent verification ([#434](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/434)) ([03f5aa6](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/03f5aa65b098e2ab8e25670594e0f554ea3cafbe))
-* **ce-work:** suggest branch rename when worktree name is meaningless ([#451](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/451)) ([e872e15](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/e872e15efa5514dcfea84a1a9e276bad3290cbc3))
-* **cli-agent-readiness-reviewer:** add smart output defaults criterion ([#448](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/448)) ([a01a8aa](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/a01a8aa0d29474c031a5b403f4f9bfc42a23ad78))
-* **git-commit-push-pr:** add conditional visual aids to PR descriptions ([#444](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/444)) ([44e3e77](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/44e3e77dc039d31a86194b0254e4e92839d9d5e9))
-* **git-commit-push-pr:** precompute shield badge version via skill preprocessing ([#464](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/464)) ([6ca7aef](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/6ca7aef7f33ebdf29f579cb4342c209d2bd40aad))
-* **resolve-pr-feedback:** add gated feedback clustering to detect systemic issues ([#441](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/441)) ([a301a08](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/a301a082057494e122294f4e7c1c3f5f87103f35))
-* **skills:** clean up argument-hint across ce:* skills ([#436](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/436)) ([d2b24e0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/d2b24e07f6f2fde11cac65258cb1e76927238b5d))
-* **test-xcode:** add triggering context to skill description ([#466](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/466)) ([87facd0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/87facd05dac94603780d75acb9da381dd7c61f1b))
-* **testing:** close the testing gap in gh:work, gh:plan, and testing-reviewer ([#438](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/438)) ([35678b8](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/35678b8add6a603cf9939564bcd2df6b83338c52))
+* **ce-brainstorm:** add conditional visual aids to requirements documents ([#437](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/437)) ([bd02ca7](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/bd02ca7df04cf2c1c6301de3774e99d283d3d3ca))
+* **ce-compound:** add discoverability check for docs/solutions/ in instruction files ([#456](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/456)) ([5ac8a2c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/5ac8a2c2c8c258458307e476d6693cc387deb27e))
+* **ce-compound:** add track-based schema for bug vs knowledge learnings ([#445](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/445)) ([739109c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/739109c03ccd45474331625f35730924d17f63ef))
+* **ce-plan:** add conditional visual aids to plan documents ([#440](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/440)) ([4c7f51f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4c7f51f35bae56dd9c9dc2653372910c39b8b504))
+* **ce-plan:** add interactive deepening mode for on-demand plan strengthening ([#443](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/443)) ([ca78057](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ca78057241ec64f36c562e3720a388420bdb347f))
+* **ce-review:** enforce table format, require question tool, fix autofix_class calibration ([#454](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/454)) ([847ce3f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/847ce3f156a5cdf75667d9802e95d68e6b3c53a4))
+* **ce-review:** improve signal-to-noise with confidence rubric, FP suppression, and intent verification ([#434](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/434)) ([03f5aa6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/03f5aa65b098e2ab8e25670594e0f554ea3cafbe))
+* **ce-work:** suggest branch rename when worktree name is meaningless ([#451](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/451)) ([e872e15](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e872e15efa5514dcfea84a1a9e276bad3290cbc3))
+* **cli-agent-readiness-reviewer:** add smart output defaults criterion ([#448](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/448)) ([a01a8aa](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a01a8aa0d29474c031a5b403f4f9bfc42a23ad78))
+* **git-commit-push-pr:** add conditional visual aids to PR descriptions ([#444](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/444)) ([44e3e77](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/44e3e77dc039d31a86194b0254e4e92839d9d5e9))
+* **git-commit-push-pr:** precompute shield badge version via skill preprocessing ([#464](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/464)) ([6ca7aef](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/6ca7aef7f33ebdf29f579cb4342c209d2bd40aad))
+* **resolve-pr-feedback:** add gated feedback clustering to detect systemic issues ([#441](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/441)) ([a301a08](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a301a082057494e122294f4e7c1c3f5f87103f35))
+* **skills:** clean up argument-hint across ce:* skills ([#436](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/436)) ([d2b24e0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d2b24e07f6f2fde11cac65258cb1e76927238b5d))
+* **test-xcode:** add triggering context to skill description ([#466](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/466)) ([87facd0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/87facd05dac94603780d75acb9da381dd7c61f1b))
+* **testing:** close the testing gap in gh:work, gh:plan, and testing-reviewer ([#438](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/438)) ([35678b8](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/35678b8add6a603cf9939564bcd2df6b83338c52))
 
 
 ### Bug Fixes
 
-* **ce-brainstorm:** distinguish verification from technical design in Phase 1.1 ([#465](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/465)) ([8ec31d7](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/8ec31d703fc9ed19bf6377da0a9a29da935b719d))
-* **ce-compound:** require question tool for "What's next?" prompt ([#460](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/460)) ([9bf3b07](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/9bf3b07185a4aeb6490116edec48599b736dc86f))
-* **ce-plan:** reinforce mandatory document-review after auto deepening ([#450](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/450)) ([42fa8c3](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/42fa8c3e084db464ee0e04673f7c38cd422b32d6))
-* **ce-plan:** route confidence-gate pass to document-review ([#462](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/462)) ([1962f54](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/1962f546b5e5288c7ce5d8658f942faf71651c81))
-* **ce-work:** make code review invocation mandatory by default ([#453](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/453)) ([7f3aba2](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/7f3aba29e84c3166de75438d554455a71f4f3c22))
-* **document-review:** show contextual next-step in Phase 5 menu ([#459](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/459)) ([2b7283d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/2b7283da7b48dc073670c5f4d116e58255f0ffcb))
-* **git-commit-push-pr:** quiet expected no-pr gh exit ([#439](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/439)) ([1f49948](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/1f499482bc65456fa7dd0f73fb7f2fa58a4c5910))
-* **resolve-pr-feedback:** add actionability filter and lower cluster gate to 3+ ([#461](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/461)) ([2619ad9](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/2619ad9f58e6c45968ec10d7f8aa7849fe43eb25))
-* **review:** harden ce-review base resolution ([#452](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/452)) ([638b38a](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/638b38abd267d415ad2d6b72eba3dfe12beefad9))
+* **ce-brainstorm:** distinguish verification from technical design in Phase 1.1 ([#465](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/465)) ([8ec31d7](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/8ec31d703fc9ed19bf6377da0a9a29da935b719d))
+* **ce-compound:** require question tool for "What's next?" prompt ([#460](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/460)) ([9bf3b07](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9bf3b07185a4aeb6490116edec48599b736dc86f))
+* **ce-plan:** reinforce mandatory document-review after auto deepening ([#450](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/450)) ([42fa8c3](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/42fa8c3e084db464ee0e04673f7c38cd422b32d6))
+* **ce-plan:** route confidence-gate pass to document-review ([#462](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/462)) ([1962f54](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1962f546b5e5288c7ce5d8658f942faf71651c81))
+* **ce-work:** make code review invocation mandatory by default ([#453](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/453)) ([7f3aba2](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/7f3aba29e84c3166de75438d554455a71f4f3c22))
+* **document-review:** show contextual next-step in Phase 5 menu ([#459](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/459)) ([2b7283d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/2b7283da7b48dc073670c5f4d116e58255f0ffcb))
+* **git-commit-push-pr:** quiet expected no-pr gh exit ([#439](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/439)) ([1f49948](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1f499482bc65456fa7dd0f73fb7f2fa58a4c5910))
+* **resolve-pr-feedback:** add actionability filter and lower cluster gate to 3+ ([#461](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/461)) ([2619ad9](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/2619ad9f58e6c45968ec10d7f8aa7849fe43eb25))
+* **review:** harden ce-review base resolution ([#452](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/452)) ([638b38a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/638b38abd267d415ad2d6b72eba3dfe12beefad9))
 
-## [2.59.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.58.1...compound-engineering-v2.59.0) (2026-03-29)
+## [2.59.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.58.1...compound-engineering-v2.59.0) (2026-03-29)
 
 
 ### Features
 
-* **ce-review:** add headless mode for programmatic callers ([#430](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/430)) ([3706a97](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/3706a9764b6e73b7a155771956646ddef73f04a5))
-* **ce-work:** accept bare prompts and add test discovery ([#423](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/423)) ([6dabae6](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/6dabae6683fb2c37dc47616f172835eacc105d11))
-* **document-review:** collapse batch_confirm tier into auto ([#432](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/432)) ([0f5715d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/0f5715d562fffc626ddfde7bd0e1652143710a44))
-* **review:** make review mandatory across pipeline skills ([#433](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/433)) ([9caaf07](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/9caaf071d9b74fd938567542167768f6cdb7a56f))
+* **ce-review:** add headless mode for programmatic callers ([#430](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/430)) ([3706a97](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/3706a9764b6e73b7a155771956646ddef73f04a5))
+* **ce-work:** accept bare prompts and add test discovery ([#423](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/423)) ([6dabae6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/6dabae6683fb2c37dc47616f172835eacc105d11))
+* **document-review:** collapse batch_confirm tier into auto ([#432](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/432)) ([0f5715d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/0f5715d562fffc626ddfde7bd0e1652143710a44))
+* **review:** make review mandatory across pipeline skills ([#433](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/433)) ([9caaf07](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9caaf071d9b74fd938567542167768f6cdb7a56f))
 
-## [2.58.1](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.58.0...compound-engineering-v2.58.1) (2026-03-28)
+## [2.58.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.58.0...compound-engineering-v2.58.1) (2026-03-28)
 
 
 ### Miscellaneous Chores
 
 * **compound-engineering:** Synchronize compound-engineering versions
 
-## [2.57.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.56.1...compound-engineering-v2.57.0) (2026-03-28)
+## [2.57.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.56.1...compound-engineering-v2.57.0) (2026-03-28)
 
 
 ### Features
 
-* **document-review:** add headless mode for programmatic callers ([#425](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/425)) ([4e4a656](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/4e4a6563b4aa7375e9d1c54bd73442f3b675f100))
+* **document-review:** add headless mode for programmatic callers ([#425](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/425)) ([4e4a656](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4e4a6563b4aa7375e9d1c54bd73442f3b675f100))
 
-## [2.56.1](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.56.0...compound-engineering-v2.56.1) (2026-03-28)
+## [2.56.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.56.0...compound-engineering-v2.56.1) (2026-03-28)
 
 
 ### Bug Fixes
 
-* **onboarding:** resolve section count contradiction with skip rule ([#421](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/421)) ([d2436e7](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/d2436e7c933129784c67799a5b9555bccce2e46d))
+* **onboarding:** resolve section count contradiction with skip rule ([#421](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/421)) ([d2436e7](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d2436e7c933129784c67799a5b9555bccce2e46d))
 
-## [2.56.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.55.0...compound-engineering-v2.56.0) (2026-03-28)
+## [2.56.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.55.0...compound-engineering-v2.56.0) (2026-03-28)
 
 
 ### Features
 
-* **ce-plan:** add decision matrix form, unchanged invariants, and risk table format ([#417](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/417)) ([ccb371e](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/ccb371e0b7917420f5ca2c58433f5fc057211f04))
+* **ce-plan:** add decision matrix form, unchanged invariants, and risk table format ([#417](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/417)) ([ccb371e](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ccb371e0b7917420f5ca2c58433f5fc057211f04))
 
 
 ### Bug Fixes
 
-* **cli-agent-readiness-reviewer:** remove top-5 cap on improvements ([#419](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/419)) ([16eb8b6](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/16eb8b660790f8de820d0fba709316c7270703c1))
-* **document-review:** enforce interactive questions and fix autofix classification ([#415](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/415)) ([d447296](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/d44729603da0c73d4959c372fac0198125a39c60))
+* **cli-agent-readiness-reviewer:** remove top-5 cap on improvements ([#419](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/419)) ([16eb8b6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/16eb8b660790f8de820d0fba709316c7270703c1))
+* **document-review:** enforce interactive questions and fix autofix classification ([#415](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/415)) ([d447296](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d44729603da0c73d4959c372fac0198125a39c60))
 
-## [2.55.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.54.1...compound-engineering-v2.55.0) (2026-03-27)
+## [2.55.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.54.1...compound-engineering-v2.55.0) (2026-03-27)
 
 
 ### Features
 
-* add adversarial review agents for code and documents ([#403](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/403)) ([5e6cd5c](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/5e6cd5c90950588fb9b0bc3a5cbecba2a1387080))
-* add CLI agent-readiness reviewer and principles guide ([#391](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/391)) ([13aa3fa](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/13aa3fa8465dce6c037e1bb8982a2edad13f199a))
-* add project-standards-reviewer as always-on gh:review persona ([#402](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/402)) ([b30288c](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/b30288c44e500013afe30b34f744af57cae117db))
-* **ce-brainstorm:** group requirements by logical concern, tighten autofix classification ([#412](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/412)) ([90684c4](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/90684c4e8272b41c098ef2452c40d86d460ea578))
-* **ce-plan:** strengthen test scenario guidance across plan and work skills ([#410](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/410)) ([615ec5d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/615ec5d3feb14785530bbfe2b4a50afe29ccbc47))
-* **ce-review:** add base: and plan: arguments, extract scope detection ([#405](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/405)) ([914f9b0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/914f9b0d9822786d9ba6dc2307a543ae5a25c6e9))
-* **document-review:** smarter autofix, batch-confirm, and error/omission classification ([#401](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/401)) ([0863cfa](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/0863cfa4cbebcd121b0757abf374e5095d42f989))
-* **onboarding:** add consumer perspective and split architecture diagrams ([#413](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/413)) ([31326a5](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/31326a54584a12c473944fa488bea26410fd6fce))
+* add adversarial review agents for code and documents ([#403](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/403)) ([5e6cd5c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/5e6cd5c90950588fb9b0bc3a5cbecba2a1387080))
+* add CLI agent-readiness reviewer and principles guide ([#391](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/391)) ([13aa3fa](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/13aa3fa8465dce6c037e1bb8982a2edad13f199a))
+* add project-standards-reviewer as always-on gh:review persona ([#402](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/402)) ([b30288c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/b30288c44e500013afe30b34f744af57cae117db))
+* **ce-brainstorm:** group requirements by logical concern, tighten autofix classification ([#412](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/412)) ([90684c4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/90684c4e8272b41c098ef2452c40d86d460ea578))
+* **ce-plan:** strengthen test scenario guidance across plan and work skills ([#410](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/410)) ([615ec5d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/615ec5d3feb14785530bbfe2b4a50afe29ccbc47))
+* **ce-review:** add base: and plan: arguments, extract scope detection ([#405](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/405)) ([914f9b0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/914f9b0d9822786d9ba6dc2307a543ae5a25c6e9))
+* **document-review:** smarter autofix, batch-confirm, and error/omission classification ([#401](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/401)) ([0863cfa](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/0863cfa4cbebcd121b0757abf374e5095d42f989))
+* **onboarding:** add consumer perspective and split architecture diagrams ([#413](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/413)) ([31326a5](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/31326a54584a12c473944fa488bea26410fd6fce))
 
 
 ### Bug Fixes
 
-* add strict YAML validation for plugin frontmatter ([#399](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/399)) ([0877b69](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/0877b693ced341cec699ea959dc39f8bd78f33ef))
-* consolidate compound-docs into ce-compound skill ([#390](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/390)) ([daddb7d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/daddb7d72f280a3bd9645c54d091844c198a324d))
-* document SwiftUI Text link tap limitation in test-xcode skill ([#400](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/400)) ([6ddaec3](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/6ddaec3b6ed5b6a91aeaddadff3960714ef10dc1))
-* harden git workflow skills with better state handling ([#406](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/406)) ([f83305e](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/f83305e22af09c37f452cf723c1b08bb0e7c8bdf))
-* improve agent-native-reviewer with triage, prioritization, and stack-aware search ([#387](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/387)) ([e792166](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/e7921660ad42db8e9af56ec36f36ce8d1af13238))
-* replace broken markdown link refs in skills ([#392](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/392)) ([506ad01](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/506ad01b4f056b0d8d0d440bfb7821f050aba156))
+* add strict YAML validation for plugin frontmatter ([#399](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/399)) ([0877b69](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/0877b693ced341cec699ea959dc39f8bd78f33ef))
+* consolidate compound-docs into ce-compound skill ([#390](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/390)) ([daddb7d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/daddb7d72f280a3bd9645c54d091844c198a324d))
+* document SwiftUI Text link tap limitation in test-xcode skill ([#400](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/400)) ([6ddaec3](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/6ddaec3b6ed5b6a91aeaddadff3960714ef10dc1))
+* harden git workflow skills with better state handling ([#406](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/406)) ([f83305e](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/f83305e22af09c37f452cf723c1b08bb0e7c8bdf))
+* improve agent-native-reviewer with triage, prioritization, and stack-aware search ([#387](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/387)) ([e792166](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e7921660ad42db8e9af56ec36f36ce8d1af13238))
+* replace broken markdown link refs in skills ([#392](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/392)) ([506ad01](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/506ad01b4f056b0d8d0d440bfb7821f050aba156))
 
-## [2.54.1](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.54.0...compound-engineering-v2.54.1) (2026-03-26)
-
-
-### Bug Fixes
-
-* prevent orphaned opening paragraphs in PR descriptions ([#393](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/393)) ([4b44a94](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/4b44a94e23c8621771b8813caebce78060a61611))
-
-## [2.54.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.53.0...compound-engineering-v2.54.0) (2026-03-26)
-
-
-### Features
-
-* add new `onboarding` skill to create onboarding guide for repo ([#384](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/384)) ([27b9831](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/27b9831084d69c4c8cf13d0a45c901268420de59))
-* replace manual review agent config with gh:review delegation ([#381](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/381)) ([fed9fd6](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/fed9fd68db283c64ec11293f88a8ad7a6373e2fe))
+## [2.54.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.54.0...compound-engineering-v2.54.1) (2026-03-26)
 
 
 ### Bug Fixes
 
-* add default-branch guard to commit skills ([#386](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/386)) ([31f07c0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/31f07c00473e9d8bd6d447cf04081c0a9631e34a))
-* scope commit-push-pr descriptions to full branch diff ([#385](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/385)) ([355e739](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/355e7392b21a28c8725f87a8f9c473a86543ce4a))
+* prevent orphaned opening paragraphs in PR descriptions ([#393](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/393)) ([4b44a94](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4b44a94e23c8621771b8813caebce78060a61611))
 
-## [2.53.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.52.0...compound-engineering-v2.53.0) (2026-03-25)
+## [2.54.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.53.0...compound-engineering-v2.54.0) (2026-03-26)
 
 
 ### Features
 
-* add git commit and branch helper skills ([#378](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/378)) ([fe08af2](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/fe08af2b417b707b6d3192a954af7ff2ab0fe667))
-* improve `resolve-pr-feedback` skill ([#379](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/379)) ([2ba4f3f](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/2ba4f3fd58d4e57dfc6c314c2992c18ba1fb164b))
-* improve commit-push-pr skill with net-result focus and badging ([#380](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/380)) ([efa798c](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/efa798c52cb9d62e9ef32283227a8df68278ff3a))
-* integrate orphaned stack-specific reviewers into gh:review ([#375](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/375)) ([ce9016f](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/ce9016fac5fde9a52753cf94a4903088f05aeece))
+* add new `onboarding` skill to create onboarding guide for repo ([#384](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/384)) ([27b9831](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/27b9831084d69c4c8cf13d0a45c901268420de59))
+* replace manual review agent config with gh:review delegation ([#381](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/381)) ([fed9fd6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/fed9fd68db283c64ec11293f88a8ad7a6373e2fe))
 
 
 ### Bug Fixes
 
-* guard CONTEXTUAL_RISK_FLAGS lookup against prototype pollution ([#377](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/377)) ([8ebc77b](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/8ebc77b8e6c71e5bef40fcded9131c4457a387d7))
+* add default-branch guard to commit skills ([#386](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/386)) ([31f07c0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/31f07c00473e9d8bd6d447cf04081c0a9631e34a))
+* scope commit-push-pr descriptions to full branch diff ([#385](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/385)) ([355e739](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/355e7392b21a28c8725f87a8f9c473a86543ce4a))
 
-## [2.52.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.51.0...compound-engineering-v2.52.0) (2026-03-25)
-
-
-### Features
-
-* add consolidation support and overlap detection to `gh:compound` and `gh:compound-refresh` skills ([#372](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/372)) ([fe27f85](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/fe27f85810268a8e713ef2c921f0aec1baf771d7))
-* optimize `gh:compound` speed and effectiveness ([#370](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/370)) ([4e3af07](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/4e3af079623ae678b9a79fab5d1726d78f242ec2))
-* promote `gh:review-beta` to stable `gh:review` ([#371](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/371)) ([7c5ff44](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/7c5ff445e3065fd13e00bcd57041f6c35b36f90b))
-* rationalize todo skill names and optimize skills ([#368](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/368)) ([2612ed6](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/2612ed6b3d86364c74dc024e4ce35dde63fefbf6))
-
-## [2.51.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.50.0...compound-engineering-v2.51.0) (2026-03-24)
+## [2.53.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.52.0...compound-engineering-v2.53.0) (2026-03-25)
 
 
 ### Features
 
-* add `gh:review-beta` with structured persona pipeline ([#348](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/348)) ([e932276](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/e9322768664e194521894fe770b87c7dabbb8a22))
-* promote gh:plan-beta and deepen-plan-beta to stable ([#355](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/355)) ([169996a](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/169996a75e98a29db9e07b87b0911cc80270f732))
-* redesign `document-review` skill with persona-based review ([#359](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/359)) ([18d22af](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/18d22afde2ae08a50c94efe7493775bc97d9a45a))
-
-## [2.50.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.49.0...compound-engineering-v2.50.0) (2026-03-23)
-
-
-### Features
-
-* **ce-work:** add Codex delegation mode ([#328](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/328)) ([341c379](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/341c37916861c8bf413244de72f83b93b506575f))
-* improve `feature-video` skill with GitHub native video upload ([#344](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/344)) ([4aa50e1](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/4aa50e1bada07e90f36282accb3cd81134e706cd))
-* rewrite `frontend-design` skill with layered architecture and visual verification ([#343](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/343)) ([423e692](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/423e69272619e9e3c14750f5219cbf38684b6c96))
+* add git commit and branch helper skills ([#378](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/378)) ([fe08af2](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/fe08af2b417b707b6d3192a954af7ff2ab0fe667))
+* improve `resolve-pr-feedback` skill ([#379](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/379)) ([2ba4f3f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/2ba4f3fd58d4e57dfc6c314c2992c18ba1fb164b))
+* improve commit-push-pr skill with net-result focus and badging ([#380](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/380)) ([efa798c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/efa798c52cb9d62e9ef32283227a8df68278ff3a))
+* integrate orphaned stack-specific reviewers into gh:review ([#375](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/375)) ([ce9016f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ce9016fac5fde9a52753cf94a4903088f05aeece))
 
 
 ### Bug Fixes
 
-* quote frontend-design skill description ([#353](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/353)) ([86342db](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/86342db36c0d09b65afe11241e095dda2ad2cdb0))
+* guard CONTEXTUAL_RISK_FLAGS lookup against prototype pollution ([#377](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/377)) ([8ebc77b](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/8ebc77b8e6c71e5bef40fcded9131c4457a387d7))
 
-## [2.49.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.48.0...compound-engineering-v2.49.0) (2026-03-22)
-
-
-### Features
-
-* add execution mode toggle and context pressure bounds to parallel skills ([#336](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/336)) ([216d6df](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/216d6dfb2c9320c3354f8c9f30e831fca74865cd))
-* fix skill transformation pipeline across all targets ([#334](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/334)) ([4087e1d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/4087e1df82138f462a64542831224e2718afafa7))
-* improve reproduce-bug skill, sync agent-browser, clean up redundant skills ([#333](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/333)) ([affba1a](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/affba1a6a0d9320b529d429ad06fd5a3b5200bd8))
-
-## [2.48.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.47.0...compound-engineering-v2.48.0) (2026-03-22)
+## [2.52.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.51.0...compound-engineering-v2.52.0) (2026-03-25)
 
 
 ### Features
 
-* **git-worktree:** auto-trust mise and direnv configs in new worktrees ([#312](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/312)) ([cfbfb67](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/cfbfb6710a846419cc07ad17d9dbb5b5a065801c))
-* make skills platform-agnostic across coding agents ([#330](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/330)) ([52df90a](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/52df90a16688ee023bbdb203969adcc45d7d2ba2))
+* add consolidation support and overlap detection to `gh:compound` and `gh:compound-refresh` skills ([#372](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/372)) ([fe27f85](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/fe27f85810268a8e713ef2c921f0aec1baf771d7))
+* optimize `gh:compound` speed and effectiveness ([#370](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/370)) ([4e3af07](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4e3af079623ae678b9a79fab5d1726d78f242ec2))
+* promote `gh:review-beta` to stable `gh:review` ([#371](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/371)) ([7c5ff44](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/7c5ff445e3065fd13e00bcd57041f6c35b36f90b))
+* rationalize todo skill names and optimize skills ([#368](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/368)) ([2612ed6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/2612ed6b3d86364c74dc024e4ce35dde63fefbf6))
 
-## [2.47.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.46.0...compound-engineering-v2.47.0) (2026-03-20)
+## [2.51.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.50.0...compound-engineering-v2.51.0) (2026-03-24)
 
 
 ### Features
 
-* improve `repo-research-analyst` by adding a structured technology scan ([#327](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/327)) ([1c28d03](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/1c28d0321401ad50a51989f5e6293d773ac1a477))
+* add `gh:review-beta` with structured persona pipeline ([#348](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/348)) ([e932276](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e9322768664e194521894fe770b87c7dabbb8a22))
+* promote gh:plan-beta and deepen-plan-beta to stable ([#355](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/355)) ([169996a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/169996a75e98a29db9e07b87b0911cc80270f732))
+* redesign `document-review` skill with persona-based review ([#359](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/359)) ([18d22af](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/18d22afde2ae08a50c94efe7493775bc97d9a45a))
+
+## [2.50.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.49.0...compound-engineering-v2.50.0) (2026-03-23)
+
+
+### Features
+
+* **ce-work:** add Codex delegation mode ([#328](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/328)) ([341c379](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/341c37916861c8bf413244de72f83b93b506575f))
+* improve `feature-video` skill with GitHub native video upload ([#344](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/344)) ([4aa50e1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4aa50e1bada07e90f36282accb3cd81134e706cd))
+* rewrite `frontend-design` skill with layered architecture and visual verification ([#343](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/343)) ([423e692](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/423e69272619e9e3c14750f5219cbf38684b6c96))
 
 
 ### Bug Fixes
 
-* **skills:** update ralph-wiggum references to ralph-loop in lfg/slfg ([#324](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/324)) ([ac756a2](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/ac756a267c5e3d5e4ceb2f99939dbb93491ac4d2))
+* quote frontend-design skill description ([#353](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/353)) ([86342db](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/86342db36c0d09b65afe11241e095dda2ad2cdb0))
 
-## [2.46.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.45.0...compound-engineering-v2.46.0) (2026-03-20)
-
-
-### Features
-
-* add optional high-level technical design to plan-beta skills ([#322](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/322)) ([3ba4935](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/3ba4935926b05586da488119f215057164d97489))
-
-## [2.45.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.44.0...compound-engineering-v2.45.0) (2026-03-19)
+## [2.49.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.48.0...compound-engineering-v2.49.0) (2026-03-22)
 
 
 ### Features
 
-* edit resolve_todos_parallel skill for complete todo lifecycle ([#292](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/292)) ([88c89bc](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/88c89bc204c928d2f36e2d1f117d16c998ecd096))
-* integrate claude code auto memory as supplementary data source for gh:compound and gh:compound-refresh ([#311](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/311)) ([5c1452d](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/5c1452d4cc80b623754dd6fe09c2e5b6ae86e72e))
+* add execution mode toggle and context pressure bounds to parallel skills ([#336](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/336)) ([216d6df](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/216d6dfb2c9320c3354f8c9f30e831fca74865cd))
+* fix skill transformation pipeline across all targets ([#334](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/334)) ([4087e1d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4087e1df82138f462a64542831224e2718afafa7))
+* improve reproduce-bug skill, sync agent-browser, clean up redundant skills ([#333](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/333)) ([affba1a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/affba1a6a0d9320b529d429ad06fd5a3b5200bd8))
 
-## [2.44.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/compound-engineering-v2.43.0...compound-engineering-v2.44.0) (2026-03-18)
+## [2.48.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.47.0...compound-engineering-v2.48.0) (2026-03-22)
 
 
 ### Features
 
-* **plugin:** add execution posture signaling to gh:plan-beta and gh:work ([#309](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/309)) ([748f72a](https://github.com/wangrenzhu-ola/GaleHarnessCLI/commit/748f72a57f713893af03a4d8ed69c2311f492dbd))
+* **git-worktree:** auto-trust mise and direnv configs in new worktrees ([#312](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/312)) ([cfbfb67](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/cfbfb6710a846419cc07ad17d9dbb5b5a065801c))
+* make skills platform-agnostic across coding agents ([#330](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/330)) ([52df90a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/52df90a16688ee023bbdb203969adcc45d7d2ba2))
+
+## [2.47.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.46.0...compound-engineering-v2.47.0) (2026-03-20)
+
+
+### Features
+
+* improve `repo-research-analyst` by adding a structured technology scan ([#327](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/327)) ([1c28d03](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1c28d0321401ad50a51989f5e6293d773ac1a477))
+
+
+### Bug Fixes
+
+* **skills:** update ralph-wiggum references to ralph-loop in lfg/slfg ([#324](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/324)) ([ac756a2](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ac756a267c5e3d5e4ceb2f99939dbb93491ac4d2))
+
+## [2.46.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.45.0...compound-engineering-v2.46.0) (2026-03-20)
+
+
+### Features
+
+* add optional high-level technical design to plan-beta skills ([#322](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/322)) ([3ba4935](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/3ba4935926b05586da488119f215057164d97489))
+
+## [2.45.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.44.0...compound-engineering-v2.45.0) (2026-03-19)
+
+
+### Features
+
+* edit resolve_todos_parallel skill for complete todo lifecycle ([#292](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/292)) ([88c89bc](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/88c89bc204c928d2f36e2d1f117d16c998ecd096))
+* integrate claude code auto memory as supplementary data source for gh:compound and gh:compound-refresh ([#311](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/311)) ([5c1452d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/5c1452d4cc80b623754dd6fe09c2e5b6ae86e72e))
+
+## [2.44.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/compound-engineering-v2.43.0...compound-engineering-v2.44.0) (2026-03-18)
+
+
+### Features
+
+* **plugin:** add execution posture signaling to gh:plan-beta and gh:work ([#309](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/309)) ([748f72a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/748f72a57f713893af03a4d8ed69c2311f492dbd))
 
 ## [2.39.0] - 2026-03-10
 
 ### Added
 
-- **gh:compound context budget precheck** — Warns when context is constrained and offers compact-safe mode to avoid compaction mid-compound ([#235](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/235))
-- **gh:plan daily sequence numbers** — Plan filenames now include a 3-digit daily sequence number (e.g., `2026-03-10-001-feat-...`) to prevent collisions ([#238](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/238))
-- **gh:review serial mode** — Pass `--serial` flag (or auto-detects when 6+ agents configured) to run review agents sequentially, preventing context limit crashes ([#237](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/237))
-- **agent-browser inspection & debugging commands** — Added JS eval, console/errors, network, storage, device emulation, element debugging, recording/tracing, tabs, and advanced mouse commands to agent-browser skill ([#236](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/236))
-- **test-browser port detection** — Auto-detects dev server port from CLAUDE.md, package.json, or .env files; supports `--port` flag ([#233](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/233))
-- **lfg phase gating** — Added explicit GATE checks between /lfg steps to enforce plan-before-work ordering ([#231](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/231))
+- **gh:compound context budget precheck** — Warns when context is constrained and offers compact-safe mode to avoid compaction mid-compound ([#235](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/235))
+- **gh:plan daily sequence numbers** — Plan filenames now include a 3-digit daily sequence number (e.g., `2026-03-10-001-feat-...`) to prevent collisions ([#238](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/238))
+- **gh:review serial mode** — Pass `--serial` flag (or auto-detects when 6+ agents configured) to run review agents sequentially, preventing context limit crashes ([#237](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/237))
+- **agent-browser inspection & debugging commands** — Added JS eval, console/errors, network, storage, device emulation, element debugging, recording/tracing, tabs, and advanced mouse commands to agent-browser skill ([#236](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/236))
+- **test-browser port detection** — Auto-detects dev server port from CLAUDE.md, package.json, or .env files; supports `--port` flag ([#233](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/233))
+- **lfg phase gating** — Added explicit GATE checks between /lfg steps to enforce plan-before-work ordering ([#231](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/231))
 
 ### Fixed
 
-- **Context7 API key auth** — MCP server config now passes `CONTEXT7_API_KEY` via `x-api-key` header to avoid anonymous rate limits ([#232](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/232))
+- **Context7 API key auth** — MCP server config now passes `CONTEXT7_API_KEY` via `x-api-key` header to avoid anonymous rate limits ([#232](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/232))
 - **CLI: MCP server merge order** — `sync` now correctly overwrites same-named MCP servers with plugin values instead of preserving stale entries
 
 ### Removed
 
-- **gale-style-editor agent** — Removed duplicate agent; functionality already exists as `gale-style-editor` skill ([#234](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/234))
+- **every-style-editor agent** — Removed duplicate agent; functionality already exists as `every-style-editor` skill ([#234](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/234))
 
 ### Contributors
 
@@ -413,7 +405,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Cross-platform `AskUserQuestion` fallback** — `setup` skill and `create-new-skill`/`add-workflow` workflows now include an "Interaction Method" preamble that instructs non-Claude LLMs (Codex, Gemini, Copilot, Kiro) to use numbered lists instead of `AskUserQuestion`, preventing silent auto-configuration. ([#204](https://github.com/wangrenzhu-ola/GaleHarnessCLI/issues/204))
+- **Cross-platform `AskUserQuestion` fallback** — `setup` skill and `create-new-skill`/`add-workflow` workflows now include an "Interaction Method" preamble that instructs non-Claude LLMs (Codex, Gemini, Copilot, Kiro) to use numbered lists instead of `AskUserQuestion`, preventing silent auto-configuration. ([#204](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/204))
 - **Codex AGENTS.md `AskUserQuestion` mapping** — Strengthened from "ask the user in chat" to structured numbered-list guidance with multi-select support and a "never skip or auto-configure" rule.
 - **Skill compliance checklist** — Added `AskUserQuestion` lint rule to `CLAUDE.md` to prevent recurrence.
 
@@ -433,9 +425,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **CLI: auto-detect install targets** — `bunx @gale/harness-cli install galeharness-cli --to all` auto-detects installed AI coding tools and installs to all of them in one command. ([#191](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/191))
-- **CLI: Gemini sync** — `sync --target gemini` symlinks personal skills to `.gemini/skills/` and merges MCP servers into `.gemini/settings.json`. ([#191](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/191))
-- **CLI: sync defaults to `--target all`** — Running `sync` with no target now syncs to all detected tools automatically. ([#191](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/191))
+- **CLI: auto-detect install targets** — `bunx @every-env/compound-plugin install compound-engineering --to all` auto-detects installed AI coding tools and installs to all of them in one command. ([#191](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/191))
+- **CLI: Gemini sync** — `sync --target gemini` symlinks personal skills to `.gemini/skills/` and merges MCP servers into `.gemini/settings.json`. ([#191](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/191))
+- **CLI: sync defaults to `--target all`** — Running `sync` with no target now syncs to all detected tools automatically. ([#191](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/191))
 
 ---
 
@@ -443,8 +435,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **`/workflows:review` rendering** — Fixed broken markdown output: "Next Steps" items 3 & 4 and Severity Breakdown no longer leak outside the Summary Report template, section numbering fixed (was jumping 5→7, now correct), removed orphaned fenced code block delimiters that caused the entire End-to-End Testing section to render as a code block, and fixed unclosed quoted string in section 1. ([#214](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/214)) — thanks [@XSAM](https://github.com/XSAM)!
-- **`.worktrees` gitignore** — Added `.worktrees/` to `.gitignore` to prevent worktree directories created by the `git-worktree` skill from being tracked. ([#213](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/213)) — thanks [@XSAM](https://github.com/XSAM)!
+- **`/workflows:review` rendering** — Fixed broken markdown output: "Next Steps" items 3 & 4 and Severity Breakdown no longer leak outside the Summary Report template, section numbering fixed (was jumping 5→7, now correct), removed orphaned fenced code block delimiters that caused the entire End-to-End Testing section to render as a code block, and fixed unclosed quoted string in section 1. ([#214](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/214)) — thanks [@XSAM](https://github.com/XSAM)!
+- **`.worktrees` gitignore** — Added `.worktrees/` to `.gitignore` to prevent worktree directories created by the `git-worktree` skill from being tracked. ([#213](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/213)) — thanks [@XSAM](https://github.com/XSAM)!
 
 ---
 
@@ -462,14 +454,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **OpenClaw install target** — `bunx @gale/harness-cli install galeharness-cli --to openclaw` now installs the plugin to OpenClaw's extensions directory. ([#217](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/217)) — thanks [@TrendpilotAI](https://github.com/TrendpilotAI)!
-- **Qwen Code install target** — `bunx @gale/harness-cli install galeharness-cli --to qwen` now installs the plugin to Qwen Code's extensions directory. ([#220](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/220)) — thanks [@rlam3](https://github.com/rlam3)!
-- **Windsurf install target** — `bunx @gale/harness-cli install galeharness-cli --to windsurf` converts plugins to Windsurf format. Agents become Windsurf skills, commands become flat workflows, and MCP servers write to `mcp_config.json`. Defaults to global scope (`~/.codeium/windsurf/`); use `--scope workspace` for project-level output. ([#202](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/202)) — thanks [@rburnham52](https://github.com/rburnham52)!
+- **OpenClaw install target** — `bunx @every-env/compound-plugin install compound-engineering --to openclaw` now installs the plugin to OpenClaw's extensions directory. ([#217](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/217)) — thanks [@TrendpilotAI](https://github.com/TrendpilotAI)!
+- **Qwen Code install target** — `bunx @every-env/compound-plugin install compound-engineering --to qwen` now installs the plugin to Qwen Code's extensions directory. ([#220](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/220)) — thanks [@rlam3](https://github.com/rlam3)!
+- **Windsurf install target** — `bunx @every-env/compound-plugin install compound-engineering --to windsurf` converts plugins to Windsurf format. Agents become Windsurf skills, commands become flat workflows, and MCP servers write to `mcp_config.json`. Defaults to global scope (`~/.codeium/windsurf/`); use `--scope workspace` for project-level output. ([#202](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/202)) — thanks [@rburnham52](https://github.com/rburnham52)!
 
 ### Fixed
 
-- **`create-agent-skill` / `heal-skill` YAML crash** — `argument-hint` values containing special characters now properly quoted to prevent YAML parse errors in the Claude Code TUI. ([#219](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/219)) — thanks [@solon](https://github.com/solon)!
-- **`resolve-pr-parallel` skill name** — Renamed from `resolve_pr_parallel` (underscore) to `resolve-pr-parallel` (hyphen) to match the standard naming convention. ([#202](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/202)) — thanks [@rburnham52](https://github.com/rburnham52)!
+- **`create-agent-skill` / `heal-skill` YAML crash** — `argument-hint` values containing special characters now properly quoted to prevent YAML parse errors in the Claude Code TUI. ([#219](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/219)) — thanks [@solon](https://github.com/solon)!
+- **`resolve-pr-parallel` skill name** — Renamed from `resolve_pr_parallel` (underscore) to `resolve-pr-parallel` (hyphen) to match the standard naming convention. ([#202](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/202)) — thanks [@rburnham52](https://github.com/rburnham52)!
 
 ---
 
@@ -504,7 +496,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Gemini CLI target** — New converter target for [Gemini CLI](https://github.com/google-gemini/gemini-cli). Install with `--to gemini` to convert agents to `.gemini/skills/*/SKILL.md`, commands to `.gemini/commands/*.toml` (TOML format with `description` + `prompt`), and MCP servers to `.gemini/settings.json`. Skills pass through unchanged (identical SKILL.md standard). Namespaced commands create directory structure (`workflows:plan` → `commands/workflows/plan.toml`). 29 new tests. ([#190](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/190))
+- **Gemini CLI target** — New converter target for [Gemini CLI](https://github.com/google-gemini/gemini-cli). Install with `--to gemini` to convert agents to `.gemini/skills/*/SKILL.md`, commands to `.gemini/commands/*.toml` (TOML format with `description` + `prompt`), and MCP servers to `.gemini/settings.json`. Skills pass through unchanged (identical SKILL.md standard). Namespaced commands create directory structure (`workflows:plan` → `commands/workflows/plan.toml`). 29 new tests. ([#190](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/190))
 
 ---
 
@@ -524,14 +516,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`setup` skill** — Interactive configurator for review agents
   - Auto-detects project type (Rails, Python, TypeScript, etc.)
   - Two paths: "Auto-configure" (one click) or "Customize" (pick stack, focus areas, depth)
-  - Writes `galeharness-cli.local.md` in project root (tool-agnostic — works for Claude, Codex, OpenCode)
+  - Writes `compound-engineering.local.md` in project root (tool-agnostic — works for Claude, Codex, OpenCode)
   - Invoked automatically by `/workflows:review` when no settings file exists
 - **`learnings-researcher` in `/workflows:review`** — Always-run agent that searches `docs/solutions/` for past issues related to the PR
 - **`schema-drift-detector` wired into `/workflows:review`** — Conditional agent for PRs with migrations
 
 ### Changed
 
-- **`/workflows:review`** — Now reads review agents from `galeharness-cli.local.md` settings file. Falls back to invoking setup skill if no file exists.
+- **`/workflows:review`** — Now reads review agents from `compound-engineering.local.md` settings file. Falls back to invoking setup skill if no file exists.
 - **`/workflows:work`** — Review agents now configurable via settings file
 - **`/release-docs` command** — Moved from plugin to local `.claude/commands/` (repo maintenance, not distributed)
 
@@ -545,7 +537,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Factory Droid target** — New converter target for [Factory Droid](https://docs.factory.ai). Install with `--to droid` to output agents, commands, and skills to `~/.factory/`. Includes tool name mapping (Claude → Factory), namespace prefix stripping, Task syntax conversion, and agent reference rewriting. 13 new tests (9 converter + 4 writer). ([#174](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/174))
+- **Factory Droid target** — New converter target for [Factory Droid](https://docs.factory.ai). Install with `--to droid` to output agents, commands, and skills to `~/.factory/`. Includes tool name mapping (Claude → Factory), namespace prefix stripping, Task syntax conversion, and agent reference rewriting. 13 new tests (9 converter + 4 writer). ([#174](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/174))
 
 ---
 
@@ -628,9 +620,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Merged PRs
 
-- [#102](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/102) feat(research): add mandatory API deprecation validation
-- [#101](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/101) feat: Add /workflows:brainstorm command and skill
-- [#100](https://github.com/wangrenzhu-ola/GaleHarnessCLI/pull/100) feat(workflows:plan): Add smart research decision logic
+- [#102](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/102) feat(research): add mandatory API deprecation validation
+- [#101](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/101) feat: Add /workflows:brainstorm command and skill
+- [#100](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/100) feat(workflows:plan): Add smart research decision logic
 
 ### Contributors
 
@@ -980,7 +972,7 @@ These updates operationalize a key insight from building agent-native mobile app
 - **All skills** - Fixed spec compliance issues across 12 skills:
   - Reference files now use proper markdown links (`[file.md](./references/file.md)`) instead of backtick text
   - Descriptions now use third person ("This skill should be used when...") per skill-creator spec
-  - Affected skills: agent-native-architecture, andrew-kane-gem-writer, compound-docs, create-agent-skills, dhh-rails-style, dspy-ruby, gale-style-editor, file-todos, frontend-design, gemini-imagegen
+  - Affected skills: agent-native-architecture, andrew-kane-gem-writer, compound-docs, create-agent-skills, dhh-rails-style, dspy-ruby, every-style-editor, file-todos, frontend-design, gemini-imagegen
 
 ### Added
 

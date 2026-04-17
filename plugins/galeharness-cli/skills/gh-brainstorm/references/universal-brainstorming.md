@@ -48,5 +48,5 @@ When the conversation has enough material to narrow — reflect back what you've
 **Then offer next steps** using the platform's question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini):
 - **Create a plan** → hand off to `/gh:plan` with the decided goal and constraints
 - **Save summary to disk** → write the summary as a markdown file in the current working directory
-- **Share to Proof** → load the `proof` skill to create a shareable web link for others to review
+- **View & share in Proof** → load the `proof` skill to open the summary in Proof for reading, collaborating, and sharing a link
 - **Done** → the conversation was the value, no artifact needed

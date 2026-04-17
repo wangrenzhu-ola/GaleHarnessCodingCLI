@@ -31,22 +31,22 @@ If artifact-backed mode was used:
 
 **Pipeline mode:** If invoked from an automated workflow such as LFG, SLFG, or any `disable-model-invocation` context, skip the interactive menu below and return control to the caller immediately. The plan file has already been written, the confidence check has already run, and document-review has already run — the caller (e.g., lfg, slfg) determines the next step.
 
-After document-review completes, present the options using the platform's blocking question tool when available (see Interaction Method). Otherwise present numbered options in chat and wait for the user's reply before proceeding.
+After document-review completes, present the options using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, present the numbered options in chat and wait for the user's reply before proceeding.
 
 **Question:** "Plan ready at `docs/plans/YYYY-MM-DD-NNN-<type>-<name>-plan.md`. What would you like to do next?"
 
 **Options:**
-1. **Start `/gh:work`** - Begin implementing this plan in the current environment (recommended)
-2. **Open plan in editor** - Open the plan file for review
-3. **Run additional document review** - Another pass for further refinement
-4. **Share to Proof** - Upload the plan for collaborative review and sharing
-5. **Start `/gh:work` in another session** - Begin implementing in a separate agent session when the current platform supports it
-6. **Create Issue** - Create an issue in the configured tracker
+1. **Start `/gh:work`** (recommended) - Begin implementing this plan in the current session
+2. **Create Issue** - Create a tracked issue from this plan in your configured issue tracker (GitHub or Linear)
+3. **View & share in Proof** - Open the plan in Proof to read, comment, collaborate, and share a link
+4. **Done for now** - Pause; the plan file is saved and can be resumed later
+
+**Surface additional document review contextually, not as a menu fixture:** When the prior document-review pass surfaced residual P0/P1 findings that the user has not addressed, mention them adjacent to the menu and offer another review pass in prose (e.g., "Document review flagged 2 P1 findings you may want to address — want me to run another pass before you pick?"). Do not add it to the option list.
 
 Based on selection:
-- **Open plan in editor** -> Open `docs/plans/<plan_filename>.md` using the current platform's file-open or editor mechanism (e.g., `open` on macOS, `xdg-open` on Linux, or the IDE's file-open API)
-- **Run additional document review** -> Load the `document-review` skill with the plan path for another pass
-- **Share to Proof** -> Upload the plan:
+- **Start `/gh:work`** -> Call `/gh:work` with the plan path
+- **Create Issue** -> Follow the Issue Creation section below
+- **View & share in Proof** -> Upload the plan:
   ```bash
   CONTENT=$(cat docs/plans/<plan_filename>.md)
   TITLE="Plan: <plan title from frontmatter>"
@@ -56,32 +56,34 @@ Based on selection:
   PROOF_URL=$(echo "$RESPONSE" | jq -r '.tokenUrl')
   ```
   Display `View & collaborate in Proof: <PROOF_URL>` if successful, then return to the options
-- **`/gh:work`** -> Call `/gh:work` with the plan path
-- **`/gh:work` in another session** -> If the current platform supports launching a separate agent session, start `/gh:work` with the plan path there. Otherwise, explain the limitation briefly and offer to run `/gh:work` in the current session instead.
-- **Create Issue** -> Follow the Issue Creation section below
+- **Done for now** -> Display a brief confirmation that the plan file is saved and end the turn
+- **If the user asks for another document review** (either from the contextual prompt when P0/P1 findings remain, or by free-form request) -> Load the `document-review` skill with the plan path for another pass, then return to the options
 - **Other** -> Accept free text for revisions and loop back to options
 
 ## Issue Creation
 
-When the user selects "Create Issue", detect their project tracker from `AGENTS.md` or, if needed for compatibility, `CLAUDE.md`:
+When the user selects "Create Issue", detect their project tracker:
 
-1. Look for `project_tracker: github` or `project_tracker: linear`
-2. If GitHub:
+1. Read `AGENTS.md` (or `CLAUDE.md` for compatibility) at the repo root and look for `project_tracker: github` or `project_tracker: linear`.
+2. If `project_tracker: github`:
 
    ```bash
    gh issue create --title "<type>: <title>" --body-file <plan_path>
    ```
 
-3. If Linear:
+3. If `project_tracker: linear`:
 
    ```bash
    linear issue create --title "<title>" --description "$(cat <plan_path>)"
    ```
 
-4. If no tracker is configured:
-   - Ask which tracker they use using the platform's blocking question tool when available (see Interaction Method)
-   - Suggest adding the tracker to `AGENTS.md` for future runs
+4. If no tracker is configured, ask the user which tracker they use with the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, ask in chat and wait for the reply. Options: `GitHub`, `Linear`, `Skip`. Then:
+   - Proceed with the chosen tracker's command above
+   - Offer to persist the choice by adding `project_tracker: <value>` to `AGENTS.md`, where `<value>` is the lowercase tracker key (`github` or `linear`) — not the display label — so future runs match the detector in step 1 and skip this prompt
+   - If `Skip`, return to the options without creating an issue
+
+5. If the detected tracker's CLI is not installed or not authenticated, surface a clear error (e.g., "`gh` CLI not found — install it or create the issue manually") and return to the options.
 
 After issue creation:
 - Display the issue URL
-- Ask whether to proceed to `/gh:work`
+- Ask whether to proceed to `/gh:work` using the platform's blocking question tool

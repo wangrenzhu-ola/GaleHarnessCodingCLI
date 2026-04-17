@@ -190,7 +190,7 @@ Launch research subagents. Each returns text data to the orchestrator.
 
 #### 4. **Session Historian** (foreground, after launching the above — only if the user opted in)
    - **Skip entirely** if the user declined session history in the follow-up question
-   - Dispatched as `galeharness-cli:research:session-historian`
+   - Dispatched as `compound-engineering:research:session-historian`
    - Dispatch in **foreground** — this agent reads session files outside the working directory (`~/.claude/projects/`, `~/.codex/sessions/`, `~/.cursor/projects/`) which background agents may not have access to
    - Searches prior Claude Code, Codex, and Cursor sessions for the same project to find related investigation context
    - Correlates sessions by repo name across all platforms (matches sessions from main checkouts, worktrees, and Conductor workspaces)
@@ -354,13 +354,13 @@ After the learning is written and the refresh decision is made, check whether th
 
 Based on problem type, optionally invoke specialized agents to review the documentation:
 
-- **performance_issue** → `galeharness-cli:review:performance-oracle`
-- **security_issue** → `galeharness-cli:review:security-sentinel`
-- **database_issue** → `galeharness-cli:review:data-integrity-guardian`
-- Any code-heavy issue → always run `galeharness-cli:review:code-simplicity-reviewer`, and additionally run the kieran reviewer that matches the repo's primary stack:
-  - Ruby/Rails → also run `galeharness-cli:review:gale-rails-reviewer`
-  - Python → also run `galeharness-cli:review:gale-python-reviewer`
-  - TypeScript/JavaScript → also run `galeharness-cli:review:gale-typescript-reviewer`
+- **performance_issue** → `compound-engineering:review:performance-oracle`
+- **security_issue** → `compound-engineering:review:security-sentinel`
+- **database_issue** → `compound-engineering:review:data-integrity-guardian`
+- Any code-heavy issue → always run `compound-engineering:review:code-simplicity-reviewer`, and additionally run the kieran reviewer that matches the repo's primary stack:
+  - Ruby/Rails → also run `compound-engineering:review:kieran-rails-reviewer`
+  - Python → also run `compound-engineering:review:kieran-python-reviewer`
+  - TypeScript/JavaScript → also run `compound-engineering:review:kieran-typescript-reviewer`
   - Other stacks → no kieran reviewer needed
 
 </parallel_tasks>
@@ -479,7 +479,7 @@ Subagent Results:
 
 Specialized Agent Reviews (Auto-Triggered):
   ✓ performance-oracle: Validated query optimization approach
-  ✓ gale-rails-reviewer: Code examples meet Rails conventions
+  ✓ kieran-rails-reviewer: Code examples meet Rails conventions
   ✓ code-simplicity-reviewer: Solution is appropriately minimal
 
 File created:
@@ -545,20 +545,20 @@ Writes the final learning directly into `docs/solutions/`.
 Based on problem type, these agents can enhance documentation:
 
 ### Code Quality & Review
-- **galeharness-cli:review:gale-rails-reviewer**: Reviews code examples for Rails best practices
-- **galeharness-cli:review:gale-python-reviewer**: Reviews code examples for Python best practices
-- **galeharness-cli:review:gale-typescript-reviewer**: Reviews code examples for TypeScript best practices
-- **galeharness-cli:review:code-simplicity-reviewer**: Ensures solution code is minimal and clear
-- **galeharness-cli:review:pattern-recognition-specialist**: Identifies anti-patterns or repeating issues
+- **compound-engineering:review:kieran-rails-reviewer**: Reviews code examples for Rails best practices
+- **compound-engineering:review:kieran-python-reviewer**: Reviews code examples for Python best practices
+- **compound-engineering:review:kieran-typescript-reviewer**: Reviews code examples for TypeScript best practices
+- **compound-engineering:review:code-simplicity-reviewer**: Ensures solution code is minimal and clear
+- **compound-engineering:review:pattern-recognition-specialist**: Identifies anti-patterns or repeating issues
 
 ### Specific Domain Experts
-- **galeharness-cli:review:performance-oracle**: Analyzes performance_issue category solutions
-- **galeharness-cli:review:security-sentinel**: Reviews security_issue solutions for vulnerabilities
-- **galeharness-cli:review:data-integrity-guardian**: Reviews database_issue migrations and queries
+- **compound-engineering:review:performance-oracle**: Analyzes performance_issue category solutions
+- **compound-engineering:review:security-sentinel**: Reviews security_issue solutions for vulnerabilities
+- **compound-engineering:review:data-integrity-guardian**: Reviews database_issue migrations and queries
 
 ### Enhancement & Research
-- **galeharness-cli:research:best-practices-researcher**: Enriches solution with industry best practices
-- **galeharness-cli:research:framework-docs-researcher**: Links to framework/library documentation references
+- **compound-engineering:research:best-practices-researcher**: Enriches solution with industry best practices
+- **compound-engineering:research:framework-docs-researcher**: Links to framework/library documentation references
 
 ### When to Invoke
 - **Auto-triggered** (optional): Agents can run post-documentation for enhancement

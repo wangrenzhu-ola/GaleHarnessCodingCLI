@@ -109,9 +109,9 @@ Run agents in parallel in the **foreground** (do not use background dispatch —
    >
    > Focus hint: {focus_hint}
 
-2. **Learnings search** — dispatch `galeharness-cli:research:learnings-researcher` with a brief summary of the ideation focus.
+2. **Learnings search** — dispatch `compound-engineering:research:learnings-researcher` with a brief summary of the ideation focus.
 
-3. **Issue intelligence** (conditional) — if issue-tracker intent was detected in Phase 0.2, dispatch `galeharness-cli:research:issue-intelligence-analyst` with the focus hint. If a focus hint is present, pass it so the agent can weight its clustering toward that area. Run this in parallel with agents 1 and 2.
+3. **Issue intelligence** (conditional) — if issue-tracker intent was detected in Phase 0.2, dispatch `compound-engineering:research:issue-intelligence-analyst` with the focus hint. If a focus hint is present, pass it so the agent can weight its clustering toward that area. Run this in parallel with agents 1 and 2.
 
    If the agent returns an error (gh not installed, no remote, auth failure), log a warning to the user ("Issue analysis unavailable: {reason}. Proceeding with standard ideation.") and continue with the existing two-agent grounding.
 
@@ -125,7 +125,7 @@ Consolidate all results into a short grounding summary. When issue intelligence 
 
 **Slack context** (opt-in) — never auto-dispatch. Route by condition:
 
-- **Tools available + user asked**: Dispatch `galeharness-cli:research:slack-researcher` with the focus hint in parallel with other Phase 1 agents. Include findings in the grounding summary.
+- **Tools available + user asked**: Dispatch `compound-engineering:research:slack-researcher` with the focus hint in parallel with other Phase 1 agents. Include findings in the grounding summary.
 - **Tools available + user didn't ask**: Note in output: "Slack tools detected. Ask me to search Slack for organizational context at any point, or include it in your next prompt."
 - **No tools + user asked**: Note in output: "Slack context was requested but no Slack tools are available. Install and authenticate the Slack plugin to enable organizational context search."
 

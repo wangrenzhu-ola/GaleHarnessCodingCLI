@@ -165,26 +165,6 @@ Classify the work into one of these plan depths:
 
 If depth is unclear, ask one targeted question and then continue.
 
-#### 0.7 HKTMemory Retrieve
-
-Before proceeding to Phase 1, query the vector memory database for related plans and technical approaches:
-
-1. Extract a 1-2 sentence search query from: feature description, requirements doc, technical components, problem domain
-2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
-   ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
-     --query "<extracted query>" \
-     --layer all --limit 10 --min-similarity 0.35 \
-     --vector-weight 0.7 --bm25-weight 0.3
-   ```
-3. If results returned, prepare block and pass to Phase 1 research agents as extra context:
-   ```
-   ## Related memories from HKTMemory
-   Source: vector database. Treat as additional context for research.
-   [results here, each tagged with (similarity: X.XX)]
-   ```
-4. If no results or command error, proceed silently without blocking.
-
 ### Phase 1: Gather Context
 
 #### 1.1 Local Research (Always Runs)
@@ -195,8 +175,8 @@ Prepare a concise planning context summary (a paragraph or two) to pass as input
 
 Run these agents in parallel:
 
-- Task galeharness-cli:research:repo-research-analyst(Scope: technology, architecture, patterns. {planning context summary})
-- Task galeharness-cli:research:learnings-researcher(planning context summary)
+- Task compound-engineering:research:repo-research-analyst(Scope: technology, architecture, patterns. {planning context summary})
+- Task compound-engineering:research:learnings-researcher(planning context summary)
 Collect:
 - Technology stack and versions (used in section 1.2 to make sharper external research decisions)
 - Architectural patterns and conventions to follow
@@ -206,7 +186,7 @@ Collect:
 
 **Slack context** (opt-in) — never auto-dispatch. Route by condition:
 
-- **Tools available + user asked**: Dispatch `galeharness-cli:research:slack-researcher` with the planning context summary in parallel with other Phase 1.1 agents. If the origin document has a Slack context section, pass it verbatim so the researcher focuses on gaps. Include findings in consolidation.
+- **Tools available + user asked**: Dispatch `compound-engineering:research:slack-researcher` with the planning context summary in parallel with other Phase 1.1 agents. If the origin document has a Slack context section, pass it verbatim so the researcher focuses on gaps. Include findings in consolidation.
 - **Tools available + user didn't ask**: Note in output: "Slack tools detected. Ask me to search Slack for organizational context at any point, or include it in your next prompt."
 - **No tools + user asked**: Note in output: "Slack context was requested but no Slack tools are available. Install and authenticate the Slack plugin to enable organizational context search."
 
@@ -264,8 +244,8 @@ Announce the decision briefly before continuing. Examples:
 
 If Step 1.2 indicates external research is useful, run these agents in parallel:
 
-- Task galeharness-cli:research:best-practices-researcher(planning context summary)
-- Task galeharness-cli:research:framework-docs-researcher(planning context summary)
+- Task compound-engineering:research:best-practices-researcher(planning context summary)
+- Task compound-engineering:research:framework-docs-researcher(planning context summary)
 
 #### 1.4 Consolidate Research
 
@@ -703,22 +683,6 @@ Plan written to docs/plans/[filename]
 ```
 
 **Pipeline mode:** If invoked from an automated workflow such as LFG, SLFG, or any `disable-model-invocation` context, skip interactive questions. Make the needed choices automatically and proceed to writing the plan.
-
-#### 5.25 HKTMemory Store
-
-After successfully writing the plan file:
-
-1. Read back the full content of the written file
-2. Extract `title` from its YAML frontmatter (or derive from filename if no frontmatter)
-3. Run:
-   ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
-     --content "<full file content>" \
-     --title "<title>" \
-     --topic "technical-plan" \
-     --layer all
-   ```
-4. Log: `Stored plan to HKTMemory: [title]` on success, or note the error (non-blocking).
 
 #### 5.3 Confidence Check and Deepening
 

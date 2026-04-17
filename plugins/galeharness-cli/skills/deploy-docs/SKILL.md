@@ -108,5 +108,5 @@ Provide a summary:
 - [ ] Commit any pending changes
 - [ ] Push to main branch
 - [ ] Verify GitHub Pages workflow exists
-- [ ] Check deployment at https://wangrenzhu-ola.github.io/GaleHarnessCLI/
+- [ ] Check deployment at https://everyinc.github.io/compound-engineering-plugin/
 ```

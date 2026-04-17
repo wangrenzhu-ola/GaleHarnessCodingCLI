@@ -1,5 +1,5 @@
 ---
-name: ce-demo-reel
+name: gh-demo-reel
 description: "Capture a visual demo reel (GIF, terminal recording, screenshots) for PR descriptions. Use when shipping UI changes, CLI features, or any work with observable behavior that benefits from visual proof. Also use when asked to add a demo, record a GIF, screenshot a feature, show what changed visually, create a demo reel, capture evidence, add proof to a PR, or create a before/after comparison."
 argument-hint: "[what to capture, e.g. 'the new settings page' or 'CLI output of the migrate command']"
 ---
@@ -164,5 +164,5 @@ The `Description` is a 1-line summary derived from the capture hypothesis in Ste
 **Label convention:**
 - Browser reel, terminal recording, screenshot reel: label as "Demo"
 - Static screenshots: label as "Screenshots"
-- The caller applies the label when formatting. ce-demo-reel does not generate markdown.
+- The caller applies the label when formatting. gh-demo-reel does not generate markdown.
 - Test output is never labeled "Demo" or "Screenshots"

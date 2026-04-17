@@ -74,13 +74,13 @@ Present a one-time consent warning using the platform's blocking question tool (
 Present the sandbox mode choice: (1) yolo (recommended), (2) full-auto.
 
 On acceptance:
-- Resolve the repo root: `git rev-parse --show-toplevel`. Write `work_delegate_consent: true` and `work_delegate_sandbox: <chosen-mode>` to `<repo-root>/.galeharness-cli/config.local.yaml`
-- To write: (1) if file or directory does not exist, create `<repo-root>/.galeharness-cli/` and write the YAML file; (2) if file exists, merge new keys preserving existing keys
+- Resolve the repo root: `git rev-parse --show-toplevel`. Write `work_delegate_consent: true` and `work_delegate_sandbox: <chosen-mode>` to `<repo-root>/.compound-engineering/config.local.yaml`
+- To write: (1) if file or directory does not exist, create `<repo-root>/.compound-engineering/` and write the YAML file; (2) if file exists, merge new keys preserving existing keys
 - Update `consent_granted` and `sandbox_mode` in the resolved state
 
 On decline:
 - Ask whether to disable delegation entirely for this project
-- If yes: write `work_delegate: false` to `<repo-root>/.galeharness-cli/config.local.yaml` (using the same repo root resolved above). To write: (1) if file or directory does not exist, create `<repo-root>/.galeharness-cli/` and write the YAML file; (2) if file exists, merge new keys preserving existing keys. Set `delegation_active` to false, proceed in standard mode
+- If yes: write `work_delegate: false` to `<repo-root>/.compound-engineering/config.local.yaml` (using the same repo root resolved above). To write: (1) if file or directory does not exist, create `<repo-root>/.compound-engineering/` and write the YAML file; (2) if file exists, merge new keys preserving existing keys. Set `delegation_active` to false, proceed in standard mode
 - If no: set `delegation_active` to false for this invocation only, proceed in standard mode
 
 **Headless consent:** If running in a headless or non-interactive context, delegation proceeds only if `work_delegate_consent` is already `true` in the config file. If consent is not recorded, set `delegation_active` to false silently.
@@ -91,9 +91,9 @@ Delegate all units in one batch. If the plan exceeds 5 units, split into batches
 
 ## Prompt Template
 
-At the start of delegated execution, generate a short unique run ID (e.g., 8 hex chars from a timestamp or random source). All scratch files for this invocation go under `.context/galeharness-cli/codex-delegation/<run-id>/`. Create the directory if it does not exist.
+At the start of delegated execution, generate a short unique run ID (e.g., 8 hex chars from a timestamp or random source). All scratch files for this invocation go under `.context/compound-engineering/codex-delegation/<run-id>/`. Create the directory if it does not exist.
 
-Before each batch, write a prompt file to `.context/galeharness-cli/codex-delegation/<run-id>/prompt-batch-<batch-num>.md`.
+Before each batch, write a prompt file to `.context/compound-engineering/codex-delegation/<run-id>/prompt-batch-<batch-num>.md`.
 
 Build the prompt from the batch's implementation units using these XML-tagged sections:
 
@@ -169,7 +169,7 @@ Report your result via the --output-schema mechanism. Fill in every field:
 
 ## Result Schema
 
-Write the result schema to `.context/galeharness-cli/codex-delegation/<run-id>/result-schema.json` once at the start of delegated execution:
+Write the result schema to `.context/compound-engineering/codex-delegation/<run-id>/result-schema.json` once at the start of delegated execution:
 
 ```json
 {
@@ -186,7 +186,7 @@ Write the result schema to `.context/galeharness-cli/codex-delegation/<run-id>/r
 }
 ```
 
-Each batch's result is written to `.context/galeharness-cli/codex-delegation/<run-id>/result-batch-<batch-num>.json` via the `-o` flag. On plan failure, files are left in place for debugging.
+Each batch's result is written to `.context/compound-engineering/codex-delegation/<run-id>/result-batch-<batch-num>.json` via the `-o` flag. On plan failure, files are left in place for debugging.
 
 If the result JSON is absent or malformed after a successful exit code, classify as task failure.
 
@@ -225,9 +225,9 @@ codex exec \
   -m "<delegate_model>" \
   -c 'model_reasoning_effort="<delegate_effort>"' \
   $SANDBOX_FLAG \
-  --output-schema .context/galeharness-cli/codex-delegation/<run-id>/result-schema.json \
-  -o .context/galeharness-cli/codex-delegation/<run-id>/result-batch-<batch-num>.json \
-  - < .context/galeharness-cli/codex-delegation/<run-id>/prompt-batch-<batch-num>.md
+  --output-schema .context/compound-engineering/codex-delegation/<run-id>/result-schema.json \
+  -o .context/compound-engineering/codex-delegation/<run-id>/result-batch-<batch-num>.json \
+  - < .context/compound-engineering/codex-delegation/<run-id>/prompt-batch-<batch-num>.md
 ```
 
 Critical: `run_in_background: true` must be set as a **Bash tool parameter**, not as a shell `&` suffix. The tool parameter is what removes the timeout ceiling. A shell `&` inside a foreground Bash call still hits the 2-minute default timeout.
@@ -241,7 +241,7 @@ Do not improvise CLI flags or modify this invocation template.
 After the launch call returns, make a **new, separate** foreground Bash tool call that polls for the result file. This keeps the agent's turn active so the user cannot interfere with the working tree.
 
 ```bash
-RESULT_FILE=".context/galeharness-cli/codex-delegation/<run-id>/result-batch-<batch-num>.json"
+RESULT_FILE=".context/compound-engineering/codex-delegation/<run-id>/result-batch-<batch-num>.json"
 for i in $(seq 1 6); do
   test -s "$RESULT_FILE" && echo "DONE" && exit 0
   sleep 10
@@ -304,7 +304,7 @@ git commit -m "feat(<scope>): <batch summary>"
 **Scratch cleanup:** After the last batch completes:
 
 ```bash
-rm -rf .context/galeharness-cli/codex-delegation/<run-id>/
+rm -rf .context/compound-engineering/codex-delegation/<run-id>/
 ```
 
 ## Mixed-Model Attribution
