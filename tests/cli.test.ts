@@ -652,6 +652,7 @@ describe("CLI", () => {
     await fs.mkdir(path.join(tempHome, ".qwen"), { recursive: true })
     await fs.mkdir(path.join(tempHome, ".openclaw"), { recursive: true })
     await fs.mkdir(path.join(tempHome, ".kimi"), { recursive: true })
+    await fs.mkdir(path.join(tempHome, ".qoder"), { recursive: true })
     await fs.mkdir(path.join(tempCwd, ".cursor"), { recursive: true })
 
     const proc = Bun.spawn([
@@ -690,6 +691,7 @@ describe("CLI", () => {
     expect(stdout).toContain("Synced to copilot")
     expect(stdout).toContain("Synced to gemini")
     expect(stdout).toContain("Synced to kimi")
+    expect(stdout).toContain("Synced to qoder")
     expect(stdout).not.toContain("cursor")
 
     expect(await exists(path.join(tempHome, ".config", "opencode", "commands", "workflows", "plan.md"))).toBe(true)

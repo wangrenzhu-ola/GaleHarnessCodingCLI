@@ -14,12 +14,13 @@ export function resolveTargetOutputRoot(options: {
   qoderHome?: string
   traeHome?: string
   cursorHome?: string
+  kimiHome?: string
   pluginName?: string
   plugin?: ClaudePlugin
   hasExplicitOutput: boolean
   scope?: TargetScope
 }): string {
-  const { targetName, outputRoot, codexHome, piHome, openclawHome, qwenHome, qoderHome, traeHome, cursorHome, pluginName, plugin, hasExplicitOutput, scope } = options
+  const { targetName, outputRoot, codexHome, piHome, openclawHome, qwenHome, qoderHome, traeHome, cursorHome, kimiHome, pluginName, plugin, hasExplicitOutput, scope } = options
   if (targetName === "codex") return codexHome
   if (targetName === "pi") return piHome
   if (targetName === "droid") return path.join(os.homedir(), ".factory")
@@ -56,6 +57,12 @@ export function resolveTargetOutputRoot(options: {
   }
   if (targetName === "trae") {
     return traeHome ?? path.join(os.homedir(), ".trae")
+  }
+  if (targetName === "kimi") {
+    return kimiHome ?? path.join(os.homedir(), ".kimi")
+  }
+  if (targetName === "claude") {
+    return options.claudeHome ?? path.join(os.homedir(), ".claude")
   }
   return outputRoot
 }

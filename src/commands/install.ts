@@ -114,6 +114,7 @@ export default defineCommand({
       const openclawHome = resolveTargetHome(args.openclawHome, path.join(os.homedir(), ".openclaw", "extensions"))
       const qwenHome = resolveTargetHome(args.qwenHome, path.join(os.homedir(), ".qwen", "extensions"))
       const qoderHome = resolveTargetHome(args.qoderHome, path.join(os.homedir(), ".qoder"))
+      const kimiHome = path.join(os.homedir(), ".kimi")
 
       const options: ClaudeToOpenCodeOptions = {
         agentMode: String(args.agentMode) === "primary" ? "primary" : "subagent",
@@ -155,6 +156,7 @@ export default defineCommand({
             openclawHome,
             qwenHome,
             qoderHome,
+            kimiHome,
             pluginName: plugin.manifest.name,
             plugin,
             hasExplicitOutput,
@@ -192,6 +194,7 @@ export default defineCommand({
         openclawHome,
         qwenHome,
         qoderHome,
+        kimiHome,
         pluginName: plugin.manifest.name,
         plugin,
         hasExplicitOutput,
@@ -226,6 +229,7 @@ export default defineCommand({
           openclawHome,
           qwenHome,
           qoderHome,
+          kimiHome,
           pluginName: plugin.manifest.name,
           plugin,
           hasExplicitOutput,

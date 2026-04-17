@@ -10,6 +10,7 @@ import { syncToKiro } from "./kiro"
 import { syncToOpenClaw } from "./openclaw"
 import { syncToOpenCode } from "./opencode"
 import { syncToPi } from "./pi"
+import { syncToQoder } from "./qoder"
 import { syncToQwen } from "./qwen"
 import { syncToWindsurf } from "./windsurf"
 
@@ -33,6 +34,7 @@ export type SyncTargetName =
   | "qwen"
   | "openclaw"
   | "kimi"
+  | "qoder"
 
 export type SyncTargetDefinition = {
   name: SyncTargetName
@@ -127,6 +129,12 @@ export const syncTargets: SyncTargetDefinition[] = [
     detectPaths: (home) => [path.join(home, ".kimi")],
     resolveOutputRoot: (home) => path.join(home, ".kimi"),
     sync: syncToKimi,
+  },
+  {
+    name: "qoder",
+    detectPaths: (home) => [path.join(home, ".qoder")],
+    resolveOutputRoot: (home) => path.join(home, ".qoder"),
+    sync: syncToQoder,
   },
 ]
 
