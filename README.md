@@ -253,6 +253,31 @@ bun link
 gale-harness install ./plugins/galeharness-cli --to qoder
 ```
 
+**支持的平台 (13个)：**
+
+| 平台 | 说明 |
+|------|------|
+| `opencode` | OpenCode |
+| `codex` | OpenAI Codex |
+| `droid` | Droid |
+| `pi` | PI |
+| `copilot` | GitHub Copilot |
+| `gemini` | Gemini CLI |
+| `kiro` | Kiro |
+| `windsurf` | Windsurf |
+| `openclaw` | OpenClaw |
+| `qwen` | Qwen |
+| `qoder` | Qoder |
+| `trae` | Trae (字节跳动) |
+| `cursor` | Cursor |
+
+**一键安装到所有平台：**
+
+```bash
+# 安装到所有检测到的平台
+gale-harness install ./plugins/galeharness-cli --to all
+```
+
 **Claude Code** —— 本地插件模式：
 
 ```bash
@@ -317,6 +342,8 @@ bun run src/index.ts install ./plugins/galeharness-cli --to all
 | `windsurf` | `~/.codeium/windsurf/` (global) 或 `.windsurf/` (workspace) | Agents 成为 skills；命令成为 flat workflows |
 | `qwen` | `~/.qwen/extensions/<plugin>/` | Agents 作为 `.yaml` |
 | `qoder` | `~/.qoder/` | Skills, agents, commands 作为 `.md` 文件 |
+| `trae` | `~/.trae/` | Skills, agents, commands 作为 `.md` 文件 (Agent Skills 标准) |
+| `cursor` | `~/.cursor/rules/` | Skills 作为 `.mdc` 规则文件 |
 
 所有平台都是实验性的，可能随格式演进变化。
 
@@ -358,6 +385,9 @@ bun run src/index.ts sync --target copilot
 bun run src/index.ts sync --target windsurf
 bun run src/index.ts sync --target kiro
 bun run src/index.ts sync --target qwen
+bun run src/index.ts sync --target qoder
+bun run src/index.ts sync --target trae
+bun run src/index.ts sync --target cursor
 
 # 同步到所有检测到的平台
 bun run src/index.ts sync --target all

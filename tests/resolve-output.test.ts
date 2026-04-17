@@ -26,18 +26,18 @@ describe("resolveTargetOutputRoot", () => {
     expect(result).toBe(path.join(os.homedir(), ".factory"))
   })
 
-  test("cursor with no explicit output uses cwd", () => {
+  test("cursor defaults to ~/.cursor", () => {
     const result = resolveTargetOutputRoot({ ...baseOptions, targetName: "cursor" })
-    expect(result).toBe(path.join(process.cwd(), ".cursor"))
+    expect(result).toBe(path.join(os.homedir(), ".cursor"))
   })
 
-  test("cursor with explicit output uses outputRoot", () => {
+  test("cursor with cursorHome override", () => {
     const result = resolveTargetOutputRoot({
       ...baseOptions,
       targetName: "cursor",
-      hasExplicitOutput: true,
+      cursorHome: "/custom/cursor",
     })
-    expect(result).toBe(path.join("/tmp/output", ".cursor"))
+    expect(result).toBe("/custom/cursor")
   })
 
   test("windsurf default scope (global) resolves to ~/.codeium/windsurf/", () => {
@@ -127,5 +127,33 @@ describe("resolveTargetOutputRoot", () => {
       pluginName: "my-plugin",
     })
     expect(result).toBe(path.join(os.homedir(), ".qwen", "extensions", "my-plugin"))
+  })
+
+  test("qoder defaults to ~/.qoder", () => {
+    const result = resolveTargetOutputRoot({ ...baseOptions, targetName: "qoder" })
+    expect(result).toBe(path.join(os.homedir(), ".qoder"))
+  })
+
+  test("qoder with qoderHome override", () => {
+    const result = resolveTargetOutputRoot({
+      ...baseOptions,
+      targetName: "qoder",
+      qoderHome: "/custom/qoder",
+    })
+    expect(result).toBe("/custom/qoder")
+  })
+
+  test("trae defaults to ~/.trae", () => {
+    const result = resolveTargetOutputRoot({ ...baseOptions, targetName: "trae" })
+    expect(result).toBe(path.join(os.homedir(), ".trae"))
+  })
+
+  test("trae with traeHome override", () => {
+    const result = resolveTargetOutputRoot({
+      ...baseOptions,
+      targetName: "trae",
+      traeHome: "/custom/trae",
+    })
+    expect(result).toBe("/custom/trae")
   })
 })

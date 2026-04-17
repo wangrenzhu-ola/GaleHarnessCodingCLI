@@ -10,6 +10,8 @@ import { convertClaudeToWindsurf } from "../converters/claude-to-windsurf"
 import { convertClaudeToOpenClaw } from "../converters/claude-to-openclaw"
 import { convertClaudeToQwen } from "../converters/claude-to-qwen"
 import { convertClaudeToQoder } from "../converters/claude-to-qoder"
+import { convertClaudeToTrae } from "../converters/claude-to-trae"
+import { convertClaudeToCursor } from "../converters/claude-to-cursor"
 import { writeOpenCodeBundle } from "./opencode"
 import { writeCodexBundle } from "./codex"
 import { writeDroidBundle } from "./droid"
@@ -21,6 +23,8 @@ import { writeWindsurfBundle } from "./windsurf"
 import { writeOpenClawBundle } from "./openclaw"
 import { writeQwenBundle } from "./qwen"
 import { writeQoderBundle } from "./qoder"
+import { writeTraeBundle } from "./trae"
+import { writeCursorBundle } from "./cursor"
 
 export type TargetScope = "global" | "workspace"
 
@@ -127,5 +131,17 @@ export const targets: Record<string, TargetHandler> = {
     implemented: true,
     convert: convertClaudeToQoder as TargetHandler["convert"],
     write: writeQoderBundle as TargetHandler["write"],
+  },
+  trae: {
+    name: "trae",
+    implemented: true,
+    convert: convertClaudeToTrae as TargetHandler["convert"],
+    write: writeTraeBundle as TargetHandler["write"],
+  },
+  cursor: {
+    name: "cursor",
+    implemented: true,
+    convert: convertClaudeToCursor as TargetHandler["convert"],
+    write: writeCursorBundle as TargetHandler["write"],
   },
 }

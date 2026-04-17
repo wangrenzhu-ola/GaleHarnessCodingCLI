@@ -12,28 +12,19 @@ export function resolveTargetOutputRoot(options: {
   openclawHome?: string
   qwenHome?: string
   qoderHome?: string
+  traeHome?: string
+  cursorHome?: string
   pluginName?: string
   plugin?: ClaudePlugin
   hasExplicitOutput: boolean
   scope?: TargetScope
 }): string {
-  const { targetName, outputRoot, codexHome, piHome, claudeHome, openclawHome, qwenHome, qoderHome, pluginName, plugin, hasExplicitOutput, scope } = options
-  if (targetName === "claude") {
-    const home = claudeHome ?? path.join(os.homedir(), ".claude")
-    const publisher =
-      plugin?.manifest.author?.name ??
-      ((plugin?.manifest.repository || plugin?.manifest.homepage || "") as string).match(/github\.com\/([^/]+)/)?.[1] ??
-      "local"
-    const name = pluginName ?? plugin?.manifest.name ?? "plugin"
-    const version = plugin?.manifest.version ?? "0.0.0"
-    return path.join(home, "plugins", "cache", publisher, name, version)
-  }
+  const { targetName, outputRoot, codexHome, piHome, openclawHome, qwenHome, qoderHome, traeHome, cursorHome, pluginName, plugin, hasExplicitOutput, scope } = options
   if (targetName === "codex") return codexHome
   if (targetName === "pi") return piHome
   if (targetName === "droid") return path.join(os.homedir(), ".factory")
   if (targetName === "cursor") {
-    const base = hasExplicitOutput ? outputRoot : process.cwd()
-    return path.join(base, ".cursor")
+    return cursorHome ?? path.join(os.homedir(), ".cursor")
   }
   if (targetName === "gemini") {
     const base = hasExplicitOutput ? outputRoot : process.cwd()
@@ -62,6 +53,9 @@ export function resolveTargetOutputRoot(options: {
   }
   if (targetName === "qoder") {
     return qoderHome ?? path.join(os.homedir(), ".qoder")
+  }
+  if (targetName === "trae") {
+    return traeHome ?? path.join(os.homedir(), ".trae")
   }
   return outputRoot
 }
