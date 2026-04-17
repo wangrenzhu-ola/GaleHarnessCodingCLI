@@ -12,7 +12,70 @@ Ask the user each question below using the platform's blocking question tool (e.
 
 Interactive setup for compound-engineering — diagnoses environment health, cleans obsolete repo-local CE config, and helps configure required tools. Review agent selection is handled automatically by `gh:review`; project-specific review guidance belongs in `CLAUDE.md` or `AGENTS.md`.
 
-## Phase 1: Diagnose
+## Phase 0: Detect Platform
+
+Before any other step, determine whether this is a Windows environment.
+
+Run the following detection. On Windows PowerShell, `$env:OS` is set to `Windows_NT`. On POSIX (macOS/Linux), it is unset.
+
+**Windows detection:** Try running `$env:OS` in the current shell. If the output is `Windows_NT`, set `IS_WINDOWS=true` and follow the **Windows path** below. Otherwise, follow the **standard path**.
+
+If shell detection is unavailable, ask the user: "Are you on Windows?" and route accordingly.
+
+### Windows Path (PowerShell)
+
+On Windows, `bash` is not available in the default Trae shell (PowerShell v5.x). Skip Steps 1-2 and run the following inline diagnostics instead.
+
+Display: "Compound Engineering -- checking your environment (Windows)..."
+
+Run each check and report results:
+
+```powershell
+# Check uv
+Get-Command uv -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+```
+
+```powershell
+# Check gh
+Get-Command gh -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+```
+
+```powershell
+# Check jq
+Get-Command jq -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+```
+
+```powershell
+# Check HKTMemory env vars
+[System.Environment]::GetEnvironmentVariable("HKT_MEMORY_API_KEY"), `
+[System.Environment]::GetEnvironmentVariable("HKT_MEMORY_BASE_URL"), `
+[System.Environment]::GetEnvironmentVariable("HKT_MEMORY_MODEL")
+```
+
+For each missing tool, report it as yellow and provide the Windows install command:
+
+| Tool | Windows install command |
+|------|------------------------|
+| uv | `irm https://astral.sh/uv/install.ps1 \| iex` |
+| gh | `winget install GitHub.cli` |
+| jq | `winget install jqlang.jq` |
+| ffmpeg | `winget install Gyan.FFmpeg` |
+| agent-browser | `npm install -g agent-browser` |
+
+**Important -- uv PATH on Windows:** After installing uv on Windows, add `$env:USERPROFILE\.local\bin` to your system PATH if it is not already there. Without this, `uv` is installed but not discoverable by the Trae sandbox shell. To verify: open a new PowerShell window and run `uv --version`.
+
+**HKTMemory env vars on Windows:** Set these in Windows System Properties -> Environment Variables (not just in the terminal session):
+- `HKT_MEMORY_API_KEY` -- your API key
+- `HKT_MEMORY_BASE_URL` -- `https://open.bigmodel.cn/api/paas/v4/`
+- `HKT_MEMORY_MODEL` -- `embedding-3`
+
+After installing uv and configuring env vars, restart Trae to ensure the sandbox picks up the updated PATH.
+
+Display a summary of the inline diagnostic results (which tools were found, which are missing, env var status). Then proceed to **Phase 1 / Step 3: Evaluate Results** below for the completion check and next steps.
+
+---
+
+## Phase 1: Diagnose (standard path -- macOS/Linux)
 
 ### Step 1: Determine Plugin Version
 
@@ -42,13 +105,19 @@ Display the script's output to the user.
 
 ### Step 3: Evaluate Results
 
-**Platform detection (pre-resolved):** !`[ -n "${CLAUDE_PLUGIN_ROOT}" ] && echo "CLAUDE_CODE" || echo "OTHER"`
+**Platform detection (pre-resolved):**
+- **macOS/Linux:** !`[ -n "${CLAUDE_PLUGIN_ROOT}" ] && echo "CLAUDE_CODE" || echo "OTHER"`
+- **Windows:** !`if ($env:CLAUDE_PLUGIN_ROOT) { "CLAUDE_CODE" } else { "OTHER" }`
 
-If the line above resolved to `CLAUDE_CODE`, this is a Claude Code session and `/gh:update` is available. Otherwise, omit any `/gh:update` references from output.
+If the platform detection resolved to `CLAUDE_CODE`, this is a Claude Code session and `/gh:update` is available. Otherwise, omit any `/gh:update` references from output.
+
+**For Windows users:** The inline diagnostic output from Phase 0 shows tool availability directly. A tool is missing if `Get-Command` returned nothing (blank line). For macOS/Linux users, check the health-check script output as described below.
 
 After the diagnostic report, check whether:
 
-- any dependencies are missing (reported as yellow in the script output)
+- any dependencies are missing:
+  - **macOS/Linux:** reported as yellow in the script output
+  - **Windows:** `Get-Command` returned no result for uv, gh, or jq
 - `compound-engineering.local.md` is present and needs cleanup
 - `.compound-engineering/config.local.yaml` does not exist or is not safely gitignored
 - `.compound-engineering/config.local.example.yaml` is missing or outdated
