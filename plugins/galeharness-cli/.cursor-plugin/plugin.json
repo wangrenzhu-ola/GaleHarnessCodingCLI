@@ -1,0 +1,28 @@
+{
+  "name": "galeharness-cli",
+  "displayName": "Compound Engineering",
+  "version": "1.1.0",
+  "description": "AI-powered development tools for code review, research, design, and workflow automation.",
+  "author": {
+    "name": "wangrenzhu",
+    "email": "wangrenzhu@galeharness.dev",
+    "url": "https://github.com/wangrenzhu-ola"
+  },
+  "homepage": "https://galeharness.dev/source-code/my-ai-had-already-fixed-the-code-before-i-saw-it",
+  "repository": "https://github.com/wangrenzhu-ola/GaleHarnessCLI",
+  "license": "MIT",
+  "keywords": [
+    "cursor",
+    "plugin",
+    "ai-powered",
+    "galeharness-cli",
+    "workflow-automation",
+    "code-review",
+    "rails",
+    "ruby",
+    "python",
+    "typescript",
+    "knowledge-management",
+    "image-generation"
+  ]
+}

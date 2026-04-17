@@ -1,0 +1,184 @@
+{
+  "version": "5.1.0",
+  "name": "HKT-Memory",
+  "description": "Production-grade long-term memory system with automatic L2->L1/L0 extraction and layered retrieval",
+  "storage": {
+    "base_dir": "memory",
+    "layers": {
+      "L0": {
+        "path": "L0-Abstract",
+        "max_tokens": 100,
+        "description": "极简摘要层"
+      },
+      "L1": {
+        "path": "L1-Overview",
+        "max_tokens": 500,
+        "description": "中等粒度层"
+      },
+      "L2": {
+        "path": "L2-Full",
+        "max_tokens": 4000,
+        "description": "完整内容层"
+      }
+    },
+    "embedding": {
+      "model": "embedding-3",
+      "dimensions": 2048,
+      "batch_size": 32,
+      "cache_enabled": true
+    },
+    "vector_db": {
+      "type": "sqlite",
+      "path": "memory.db"
+    },
+    "vector_backend": "file"
+  },
+  "extraction": {
+    "enabled": true,
+    "classifier": {
+      "model": "glm-4-flash",
+      "categories": [
+        "fact",
+        "preference",
+        "entity",
+        "decision",
+        "pattern",
+        "constraint"
+      ],
+      "confidence_threshold": 0.7
+    },
+    "deduplication": {
+      "vector_threshold": 0.85,
+      "llm_enabled": true
+    }
+  },
+  "retrieval": {
+    "hybrid": {
+      "vector_weight": 0.7,
+      "bm25_weight": 0.3,
+      "min_similarity": 0.35
+    },
+    "reranker": {
+      "enabled": true,
+      "provider": "jina",
+      "model": "jina-reranker-v3",
+      "blend_ratio": 0.6,
+      "top_k": 10
+    },
+    "mmr": {
+      "enabled": true,
+      "lambda": 0.7
+    }
+  },
+  "lifecycle": {
+    "enabled": true,
+    "effectivenessEventsDays": 90,
+    "maxEntriesPerScope": 3000,
+    "pruneMode": "archive",
+    "defaultForgetMode": "soft",
+    "respectImportance": true,
+    "respectPinned": true,
+    "recencyHalfLifeHours": 72,
+    "model": "weibull",
+    "tiers": {
+      "core": {
+        "beta": 0.8,
+        "floor": 0.9,
+        "half_life_days": 90,
+        "promotion_threshold": 5
+      },
+      "working": {
+        "beta": 1.0,
+        "floor": 0.7,
+        "half_life_days": 30,
+        "promotion_threshold": 3
+      },
+      "peripheral": {
+        "beta": 1.3,
+        "floor": 0.5,
+        "half_life_days": 7,
+        "promotion_threshold": 1
+      }
+    },
+    "composite_score": {
+      "recency": 0.4,
+      "frequency": 0.3,
+      "intrinsic": 0.3
+    }
+  },
+  "graph": {
+    "enabled": true,
+    "temporal": true,
+    "entity_types": [
+      "person",
+      "organization",
+      "project",
+      "technology",
+      "concept"
+    ],
+    "relation_types": [
+      "uses",
+      "depends_on",
+      "created_by",
+      "part_of",
+      "related_to"
+    ]
+  },
+  "automation": {
+    "auto_capture": {
+      "enabled": true,
+      "min_messages": 3,
+      "max_chars": 2000
+    },
+    "auto_recall": {
+      "enabled": true,
+      "top_k": 5,
+      "threshold": 0.3,
+      "max_tokens": 512
+    }
+  },
+  "governance": {
+    "learnings": {
+      "enabled": true,
+      "path": "governance/LEARNINGS.md"
+    },
+    "errors": {
+      "enabled": true,
+      "path": "governance/ERRORS.md"
+    },
+    "improvements": {
+      "enabled": true,
+      "path": "governance/IMPROVEMENTS.md"
+    }
+  },
+  "session": {
+    "hot_context": {
+      "enabled": true,
+      "path": "session-state/CURRENT.md",
+      "max_tokens": 2000
+    },
+    "recent_highlights": {
+      "enabled": true,
+      "path": "session-state/RECENT.md",
+      "max_items": 20
+    }
+  },
+  "mcp": {
+    "enabled": true,
+    "tools": [
+      "memory_recall",
+      "memory_store",
+      "memory_forget",
+      "memory_update",
+      "memory_pin",
+      "memory_importance",
+      "memory_feedback",
+      "memory_rebuild",
+      "memory_stats",
+      "memory_list",
+      "self_improvement_log",
+      "self_improvement_extract_skill",
+      "self_improvement_review"
+    ]
+  }
+}

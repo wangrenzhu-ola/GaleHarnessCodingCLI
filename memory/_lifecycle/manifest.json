@@ -1,0 +1,61 @@
+{
+  "2026-04-16-220158-055": {
+    "memory_id": "2026-04-16-220158-055",
+    "title": "GaleHarnessCLI 初始化：HKTMemory 集成完成",
+    "topic": "workflow",
+    "scope": "topic:workflow",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-16.md",
+    "status": "active",
+    "created_at": "2026-04-16T14:02:00.262372+00:00",
+    "updated_at": "2026-04-17T01:41:18.071170+00:00",
+    "last_accessed": "2026-04-17T01:41:18.071170+00:00",
+    "access_count": 2,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "03a3de009cd2e21bb138ebf97c96d216c4de887b",
+      "pr_id": null,
+      "topic": "workflow",
+      "id": "2026-04-16-220158-055"
+    }
+  },
+  "2026-04-17-094332-597": {
+    "memory_id": "2026-04-17-094332-597",
+    "title": "Trae 支持现状",
+    "topic": "integrations",
+    "scope": "topic:integrations",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-17.md",
+    "status": "active",
+    "created_at": "2026-04-17T01:43:33.577509+00:00",
+    "updated_at": "2026-04-17T01:43:33.600734+00:00",
+    "last_accessed": "2026-04-17T01:43:33.577509+00:00",
+    "access_count": 0,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "00d3ff001b04e18fcb8ffa02bb83bb48e85018f3",
+      "pr_id": null,
+      "topic": "integrations",
+      "id": "2026-04-17-094332-597",
+      "valid_until": "2026-04-17"
+    }
+  }
+}

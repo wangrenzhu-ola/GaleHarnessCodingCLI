@@ -1,0 +1,460 @@
+# GaleHarnessCLI
+
+巨风科技研发团队提效工具 —— 基于 Compound Engineering 工作流与 HKTMemory 向量知识库的 AI 驱动开发套件。
+
+## 核心理念
+
+**每一次工程实践都应该让后续工作变得更简单，而不是更复杂。**
+
+传统开发累积技术债务，每个功能增加复杂度。HarnessCLI 反转这一模式：
+- 80% 精力投入规划与审查
+- 20% 精力投入执行
+- 通过知识沉淀实现复利效应
+
+---
+
+## 工作流
+
+```
+Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
+    ^
+  Ideate (可选 -- 用于发现改进点)
+```
+
+| 命令 | 用途 |
+|------|------|
+| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力项目改进点 |
+| `/gh:brainstorm` | 在规划前探索需求和方案，通过交互式问答细化想法 |
+| `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 |
+| `/gh:work` | 系统化执行工作项，使用 worktree 和任务追踪 |
+| `/gh:review` | 多代理代码审查，分层角色和置信度门控 |
+| `/gh:compound` | 记录已解决问题，沉淀团队知识到 HKTMemory |
+| `/gh:debug` | 系统性查找根本原因并修复缺陷 |
+| `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 |
+
+`/gh:brainstorm` 是主要入口 —— 它通过交互式问答将想法细化为需求文档，并在不需要时自动跳过。`/gh:plan` 接收 brainstorming 输出的需求文档或详细想法，转化为技术实施方案。
+
+`/gh:ideate` 使用较少但效果显著 —— 它基于代码库主动发现改进建议，支持你的方向引导。
+
+每个周期都会复利累积：brainstorms 优化 plans，plans 为未来的 plans 提供参考，reviews 捕获更多问题，模式被记录沉淀。
+
+---
+
+## 系统架构
+
+```mermaid
+flowchart TB
+    subgraph Layer["三层架构"]
+        WF[工作流层 Workflow] --> SK[技能层 Skills]
+        SK --> AG[代理层 Agents]
+    end
+
+    subgraph Memory["知识底座"]
+        HKT[HKTMemory 向量知识库 存储/检索/复用]
+    end
+
+    subgraph Converter["多平台转换层"]
+        CC[Claude Code] --- OC[OpenCode]
+        OC --- CD[Codex]
+        CD --- GM[Gemini]
+        GM --- CP[Copilot]
+        CP --- Others[...]
+    end
+
+    WF --> HKT
+    SK --> HKT
+    AG --> HKT
+
+    SK --> Converter
+```
+
+---
+
+## 核心工作流时序图
+
+### 1. 完整开发周期
+
+```mermaid
+sequenceDiagram
+    actor User as 开发者
+    participant BS as Brainstorm 需求探索
+    participant PL as Plan 规划
+    participant WK as Work 执行
+    participant RV as Review 审查
+    participant CP as Compound 知识沉淀
+    participant HKT as HKTMemory
+
+    User->>BS: /gh:brainstorm
+    BS-->>User: 交互式需求澄清
+    BS-->>User: 输出需求文档
+
+    User->>PL: /gh:plan
+    PL->>HKT: 查询相似方案
+    HKT-->>PL: 返回相关案例
+    PL-->>User: 输出技术规划
+
+    User->>WK: /gh:work
+    Note over WK: 创建 worktree 并行执行任务 自动提交 PR
+    WK-->>User: 输出代码实现
+
+    User->>RV: /gh:review
+    Note over RV: 多代理并行审查 安全/性能/可维护性
+    RV-->>User: 输出审查报告
+
+    User->>CP: /gh:compound
+    CP->>HKT: 存储到知识库
+    HKT-->>CP: 知识沉淀完成
+    CP-->>User: 知识复利完成
+```
+
+### 2. HKTMemory 知识检索流程
+
+```mermaid
+sequenceDiagram
+    participant Skill as Skill 调用方
+    participant Client as HKTMemory Client
+    participant Vector as Vector DB embedding-3
+    participant KB as 知识库 解决方案
+
+    Skill->>Client: 1. 发起查询 query + context
+    Client->>Vector: 2. 生成 embedding
+    Vector->>KB: 3. 向量相似度搜索
+    KB-->>Vector: 4. 返回相似文档
+    Vector-->>Client: 返回向量结果
+    Client-->>Skill: 5. 返回结构化知识
+```
+
+### 3. 代码审查流水线
+
+```mermaid
+flowchart LR
+    Entry[gh:review 入口] --> Reviewers
+
+    subgraph Reviewers[审查代理集群]
+        direction TB
+        SR[Security Reviewer]
+        PR[Performance Reviewer]
+        CR[Correctness Reviewer]
+        MR[Maintainability Reviewer]
+    end
+
+    Reviewers --> Confidence[置信度汇总 Confidence]
+
+    Confidence --> Decision{审查决策}
+
+    Decision -->|高置信度| Pass[通过 Pass]
+    Decision -->|中置信度| Revise[需修改 Revise]
+    Decision -->|低置信度| Block[阻塞 Block]
+
+    Pass --> Merge[合并代码]
+    Revise --> ReReview[修复后重审]
+    Block --> MustFix[必须解决]
+```
+
+---
+
+## 核心功能
+
+### 工作流命令 (Workflow Commands)
+
+| 命令 | 功能描述 |
+|------|----------|
+| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力项目改进点 |
+| `/gh:brainstorm` | 在规划前探索需求和方案 |
+| `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 |
+| `/gh:work` | 系统化执行工作项 |
+| `/gh:review` | 多代理代码审查，分层角色和置信度门控 |
+| `/gh:compound` | 记录已解决问题，沉淀团队知识 |
+| `/gh:debug` | 系统性查找根本原因并修复缺陷 |
+| `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 |
+
+### 研究代理 (Research Agents)
+
+| 代理 | 功能描述 |
+|------|----------|
+| `learnings-researcher` | 搜索机构知识库寻找相关过往解决方案 |
+| `session-historian` | 搜索 Claude Code、Codex、Cursor 历史会话 |
+| `slack-researcher` | 搜索 Slack 获取组织上下文 |
+| `issue-intelligence-analyst` | 分析 GitHub Issues 发现重复主题和痛点 |
+
+### 审查代理 (Review Agents)
+
+| 代理 | 功能描述 |
+|------|----------|
+| `security-reviewer` | 安全漏洞检测，带置信度校准 |
+| `performance-reviewer` | 运行时性能分析 |
+| `correctness-reviewer` | 逻辑错误、边界情况、状态缺陷 |
+| `maintainability-reviewer` | 耦合度、复杂度、命名、死代码 |
+| `testing-reviewer` | 测试覆盖缺口、弱断言 |
+
+---
+
+## 安装方式
+
+### 前置要求
+
+- [Bun](https://bun.sh/) >= 1.0.0
+- Node.js >= 18 (可选，用于部分工具)
+- Git
+
+### 方式一：从源码安装
+
+```bash
+# 克隆仓库
+git clone https://github.com/wangrenzhu-ola/GaleHarnessCLI.git
+cd GaleHarnessCLI
+
+# 安装依赖
+bun install
+
+# 配置 HKTMemory (可选但推荐)
+bash vendor/hkt-memory/install.sh
+
+# 配置环境变量
+export HKT_MEMORY_API_KEY=<your_key>
+export HKT_MEMORY_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
+export HKT_MEMORY_MODEL=embedding-3
+
+# 验证安装
+bun test
+bun run release:validate
+```
+
+### 方式二：本地开发模式
+
+**Claude Code** —— 添加 shell alias 让本地副本与正常插件一起加载：
+
+```bash
+alias ghc='claude --plugin-dir ~/code/GaleHarnessCLI/plugins/galeharness-cli'
+```
+
+运行 `ghc` 而不是 `claude` 来测试更改。你的生产安装保持不变。
+
+**Codex 和其他目标** —— 使用本地 CLI：
+
+```bash
+# 从仓库根目录
+bun run src/index.ts install ./plugins/galeharness-cli --to codex
+bun run src/index.ts install ./plugins/galeharness-cli --to opencode
+bun run src/index.ts install ./plugins/galeharness-cli --to gemini
+```
+
+### 方式三：安装到目标平台
+
+#### Claude Code
+
+```bash
+# 本地开发模式
+alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
+
+# 或使用 CLI 安装
+bun run src/index.ts install ./plugins/galeharness-cli --to claude
+```
+
+#### OpenCode / Codex / Gemini / 其他平台
+
+```bash
+# OpenCode
+bunx @gale/harness-cli install galeharness-cli --to opencode
+
+# Codex
+bunx @gale/harness-cli install galeharness-cli --to codex
+
+# Gemini CLI
+bunx @gale/harness-cli install galeharness-cli --to gemini
+
+# GitHub Copilot
+bunx @gale/harness-cli install galeharness-cli --to copilot
+
+# 支持的平台: opencode, codex, droid, pi, gemini, copilot, kiro, windsurf, openclaw, qwen
+bunx @gale/harness-cli install galeharness-cli --to <platform>
+
+# 安装到所有检测到的平台
+bunx @gale/harness-cli install galeharness-cli --to all
+```
+
+<details>
+<summary>各平台输出详情</summary>
+
+| 平台 | 输出路径 | 说明 |
+|------|----------|------|
+| `opencode` | `~/.config/opencode/` | 命令作为 `.md` 文件；`opencode.json` MCP 配置深度合并；覆盖前备份 |
+| `codex` | `~/.codex/prompts` + `~/.codex/skills` | 命令成为 prompt + skill 对 |
+| `droid` | `~/.factory/` | 工具名称映射 (`Bash`->`Execute`, `Write`->`Create`) |
+| `pi` | `~/.pi/agent/` | Prompts, skills, extensions 和 `mcporter.json` |
+| `gemini` | `.gemini/` | Skills 来自 agents；命令作为 `.toml` |
+| `copilot` | `.github/` | Agents 作为 `.agent.md` 带 Copilot frontmatter |
+| `kiro` | `.kiro/` | Agents 作为 JSON configs + prompt `.md` 文件 |
+| `openclaw` | `~/.openclaw/extensions/<plugin>/` | 入口 TypeScript skill 文件 |
+| `windsurf` | `~/.codeium/windsurf/` (global) 或 `.windsurf/` (workspace) | Agents 成为 skills；命令成为 flat workflows |
+| `qwen` | `~/.qwen/extensions/<plugin>/` | Agents 作为 `.yaml` |
+
+所有平台都是实验性的，可能随格式演进变化。
+
+</details>
+
+### 项目初始化
+
+安装完成后，在项目目录运行：
+
+```bash
+/gh:setup
+```
+
+这将：
+- 诊断环境配置
+- 安装缺失工具 (agent-browser, gh, jq, vhs, silicon, ffmpeg)
+- 引导项目配置
+
+---
+
+## 同步个人配置
+
+将个人 Claude Code 配置 (`~/.claude/`) 同步到其他 AI 编码工具。省略 `--target` 自动同步到所有检测到的支持工具：
+
+```bash
+# 同步到所有检测到的工具 (默认)
+bunx @gale/harness-cli sync
+
+# 同步到特定平台
+bunx @gale/harness-cli sync --target opencode
+bunx @gale/harness-cli sync --target codex
+bunx @gale/harness-cli sync --target gemini
+bunx @gale/harness-cli sync --target copilot
+bunx @gale/harness-cli sync --target windsurf
+bunx @gale/harness-cli sync --target kiro
+bunx @gale/harness-cli sync --target qwen
+
+# 同步到所有检测到的平台
+bunx @gale/harness-cli sync --target all
+```
+
+这将同步：
+- 个人 skills 从 `~/.claude/skills/` (作为符号链接)
+- 个人斜杠命令从 `~/.claude/commands/`
+- MCP servers 从 `~/.claude/settings.json`
+
+---
+
+## 快速开始
+
+### 典型工作流示例
+
+```bash
+# 1. 探索需求
+/gh:brainstorm "我们需要一个用户认证系统"
+
+# 2. 生成技术规划
+/gh:plan docs/brainstorms/auth-system-requirements.md
+
+# 3. 执行开发
+/gh:work docs/plans/auth-system-plan.md
+
+# 4. 代码审查
+/gh:review
+
+# 5. 沉淀知识
+/gh:compound "用户认证系统的最佳实践"
+```
+
+---
+
+## 目录结构
+
+```
+GaleHarnessCLI/
+├── src/                      # CLI 入口、解析器、转换器
+│   ├── index.ts             # 主入口
+│   ├── converters/          # 平台转换逻辑
+│   └── targets/             # 目标平台写入器
+├── plugins/
+│   ├── galeharness-cli/     # 核心工作流插件 (gh: prefix)
+│   └── coding-tutor/        # 编程导师插件
+├── vendor/
+│   └── hkt-memory/          # HKTMemory v5.0 向量知识库
+├── scripts/                 # 发布工具
+├── tests/                   # 转换器、写入器和 CLI 测试
+├── docs/                    # 需求、规划、解决方案、规范
+│   ├── brainstorms/         # 需求探索
+│   ├── plans/               # 实施规划
+│   ├── solutions/           # 已记录解决方案
+│   └── specs/               # 目标平台规范
+└── .claude-plugin/          # Claude 市场目录元数据
+```
+
+---
+
+## 开发指南
+
+### Shell 别名
+
+添加到 `~/.zshrc` 或 `~/.bashrc`：
+
+```bash
+GHC_REPO=~/code/GaleHarnessCLI
+
+ghc-cli() { bun run "$GHC_REPO/src/index.ts" "$@"; }
+
+# --- 本地副本 (活跃开发) ---
+alias ghc='claude --plugin-dir $GHC_REPO/plugins/galeharness-cli'
+
+ghc-codex() {
+  ghc-cli install "$GHC_REPO/plugins/galeharness-cli" --to codex "$@"
+}
+
+# --- 推送分支 (测试 PRs, worktree workflows) ---
+ghcb() {
+  claude --plugin-dir "$(ghc-cli plugin-path galeharness-cli --branch "$1")" "${@:2}"
+}
+
+ghc-codexb() {
+  ghc-cli install galeharness-cli --to codex --branch "$1" "${@:2}"
+}
+```
+
+使用方式：
+
+```bash
+ghc                              # 本地副本 + Claude Code
+ghc-codex                        # 安装本地副本到 Codex
+ghcb feat/new-agents             # 测试推送分支 + Claude Code
+ghcb feat/new-agents --verbose   # 额外标志转发到 claude
+ghc-codexb feat/new-agents       # 安装推送分支到 Codex
+```
+
+### 常用命令
+
+```bash
+# 列出所有可用插件
+bun run src/index.ts list
+
+# 转换插件到指定格式
+bun run src/index.ts convert ./plugins/galeharness-cli --to opencode
+
+# 同步个人配置到其他工具
+bunx @gale/harness-cli sync --target all
+```
+
+---
+
+## 环境变量
+
+| 变量 | 说明 | 必需 |
+|------|------|------|
+| `HKT_MEMORY_API_KEY` | HKTMemory API 密钥 | 否 |
+| `HKT_MEMORY_BASE_URL` | HKTMemory 服务端点 | 否 |
+| `HKT_MEMORY_MODEL` | Embedding 模型 | 否 |
+
+---
+
+## 贡献指南
+
+1. **测试**: 任何影响解析、转换或输出的更改后运行 `bun test`
+2. **验证**: 运行 `bun run release:validate` 验证插件一致性
+3. **提交**: 使用 conventional commits (`feat:`, `fix:`, `docs:` 等)
+
+---
+
+## 许可证
+
+MIT License - 巨风科技研发团队

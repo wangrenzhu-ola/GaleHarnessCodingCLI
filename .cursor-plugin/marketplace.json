@@ -1,0 +1,25 @@
+{
+  "name": "galeharness-cli",
+  "owner": {
+    "name": "wangrenzhu",
+    "email": "wangrenzhu@galeharness.dev",
+    "url": "https://github.com/wangrenzhu-ola"
+  },
+  "metadata": {
+    "description": "Cursor plugin marketplace for Gale Inc plugins",
+    "version": "0.0.0",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "galeharness-cli",
+      "source": "galeharness-cli",
+      "description": "AI-powered development tools that get smarter with every use. Make each unit of engineering work easier than the last."
+    },
+    {
+      "name": "coding-tutor",
+      "source": "coding-tutor",
+      "description": "Personalized coding tutorials with spaced repetition quizzes using your real codebase."
+    }
+  ]
+}

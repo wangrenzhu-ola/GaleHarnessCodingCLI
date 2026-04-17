@@ -1,0 +1,6 @@
+schema: spec-driven
+
+context: |
+  语言：中文（简体）
+  所有产出物（包括 proposal、design、specs、tasks 等）必须使用简体中文撰写。
+  保持专业术语（如 API, REST, Token 等）为英文，代码和路径保持英文。

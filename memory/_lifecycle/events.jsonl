@@ -1,0 +1,14 @@
+{"timestamp": "2026-04-16T13:58:49.436262+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-16T13:58:49.437401+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-16T14:01:58.029344+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-16T14:02:00.262628+00:00", "type": "capture", "memory_id": "2026-04-16-220158-055", "scope": "topic:workflow", "data": {"status": "active"}}
+{"timestamp": "2026-04-16T14:02:16.977192+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-16T14:02:17.699894+00:00", "type": "recall", "memory_id": "2026-04-16-220158-055", "scope": "topic:workflow", "data": {}}
+{"timestamp": "2026-04-16T14:02:52.201414+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-16T14:03:14.975370+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-16T14:03:14.976969+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-17T01:41:16.742457+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-17T01:41:18.071674+00:00", "type": "recall", "memory_id": "2026-04-16-220158-055", "scope": "topic:workflow", "data": {}}
+{"timestamp": "2026-04-17T01:43:32.573317+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-17T01:43:33.577862+00:00", "type": "capture", "memory_id": "2026-04-17-094332-597", "scope": "topic:integrations", "data": {"status": "active"}}
+{"timestamp": "2026-04-17T01:43:33.601022+00:00", "type": "capture", "memory_id": "2026-04-17-094332-597", "scope": "topic:integrations", "data": {"status": "active"}}

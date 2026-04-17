@@ -1,0 +1,30 @@
+{
+  "name": "galeharness-cli",
+  "version": "2.27.0",
+  "description": "Fixture aligned with the Compound Engineering plugin",
+  "author": {
+    "name": "wangrenzhu",
+    "email": "wangrenzhu@galeharness.dev",
+    "url": "https://github.com/wangrenzhu-ola"
+  },
+  "homepage": "https://galeharness.dev/source-code/my-ai-had-already-fixed-the-code-before-i-saw-it",
+  "repository": "https://github.com/wangrenzhu-ola/GaleHarnessCLI",
+  "license": "MIT",
+  "keywords": [
+    "galeharness-cli",
+    "workflow-automation",
+    "code-review",
+    "agents"
+  ],
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "local-tooling": {
+      "type": "stdio",
+      "command": "echo",
+      "args": ["fixture"]
+    }
+  }
+}

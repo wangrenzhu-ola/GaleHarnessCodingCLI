@@ -1,0 +1,23 @@
+# GaleHarnessCLI -- local config
+# Copy to .galeharness-cli/config.local.yaml in your project root.
+# All settings are optional. Invalid values fall through to defaults.
+
+# --- HKTMemory (vector knowledge base) ---
+
+# HKTMemory stores solutions to a vector database for future retrieval.
+# If not configured, GaleHarnessCLI falls back to file-based storage only.
+
+# hkt_memory_enabled: true        # true | false (default: true if env vars set)
+# hkt_memory_auto_store: true     # true | false (default: true)
+#                                   # Automatically store solutions after /gh:compound
+# hkt_memory_auto_retrieve: true  # true | false (default: true)
+#                                   # Query memories before research in /gh:compound
+
+# --- Work delegation (Codex) ---
+
+# work_delegate: codex           # codex | false (default: false)
+# work_delegate_consent: true    # true | false (default: false)
+# work_delegate_sandbox: yolo    # yolo | full-auto (default: yolo)
+# work_delegate_decision: auto   # auto | ask (default: auto)
+# work_delegate_model: gpt-5.4  # any valid codex model (default: gpt-5.4)
+# work_delegate_effort: high     # minimal | low | medium | high | xhigh (default: high)

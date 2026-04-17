@@ -1,0 +1,21 @@
+{
+  "name": "coding-tutor",
+  "displayName": "Coding Tutor",
+  "version": "1.2.1",
+  "description": "Personalized coding tutorials that use your actual codebase for examples with spaced repetition quizzes",
+  "author": {
+    "name": "GaleHarnessCLI Team"
+  },
+  "homepage": "https://github.com/wangrenzhu-ola/GaleHarnessCLI",
+  "repository": "https://github.com/wangrenzhu-ola/GaleHarnessCLI",
+  "license": "MIT",
+  "keywords": [
+    "cursor",
+    "plugin",
+    "coding",
+    "programming",
+    "tutorial",
+    "learning",
+    "spaced-repetition"
+  ]
+}

@@ -1,0 +1,276 @@
+{
+  "graph_name": "三省六部架构白皮书v2.0知识谱图",
+  "version": "2.0.0",
+  "created_at": "2026-03-30",
+  "updated_at": "2026-03-30",
+  "nodes": [
+    {
+      "id": "openclaw",
+      "type": "platform",
+      "name": "OpenClaw",
+      "description": "Agent运行时平台，11个Agent独立运行",
+      "attributes": {
+        "mode": "decentralized",
+        "agent_count": 11,
+        "communication": "native"
+      }
+    },
+    {
+      "id": "zhubiao",
+      "type": "agent",
+      "name": "太子朱标",
+      "description": "OpenClaw中心节点，流程编排者",
+      "role": "orchestrator",
+      "parent": "openclaw"
+    },
+    {
+      "id": "zhongshu",
+      "type": "agent",
+      "name": "中书省李善长",
+      "description": "决策中枢，起草诏令",
+      "role": "decision_maker",
+      "parent": "openclaw"
+    },
+    {
+      "id": "menxia",
+      "type": "agent",
+      "name": "门下省刘伯温",
+      "description": "审议机构，审核封驳",
+      "role": "reviewer",
+      "parent": "openclaw"
+    },
+    {
+      "id": "shangshu",
+      "type": "agent",
+      "name": "尚书省徐达",
+      "description": "执行统筹，派发六部",
+      "role": "executor",
+      "parent": "openclaw"
+    },
+    {
+      "id": "six_departments",
+      "type": "agent_group",
+      "name": "六部",
+      "description": "户部、礼部、兵部、刑部、工部、吏部",
+      "members": ["hubu", "libu", "bingbu", "xingbu", "gongbu", "libu_hr"],
+      "parent": "openclaw"
+    },
+    {
+      "id": "clawteam",
+      "type": "tool",
+      "name": "ClawTeam",
+      "description": "PMO Manager底层实现工具，负责任务调度",
+      "role": "infrastructure",
+      "parent": "pmo_manager"
+    },
+    {
+      "id": "pmo_manager",
+      "type": "system",
+      "name": "PMO Manager",
+      "description": "项目管理办公室，专注管理职能",
+      "functions": ["story_tracking", "okr_management", "agent_performance"]
+    },
+    {
+      "id": "langgraph_skill",
+      "type": "skill",
+      "name": "LangGraph Orchestrator Skill",
+      "description": "流程编排Skill，供朱标调用",
+      "interfaces": ["python_api", "cli", "json_rpc"],
+      "access_control": {
+        "zhubiao": "full_access",
+        "liubowen": "limited_view",
+        "others": "require_approval"
+      }
+    },
+    {
+      "id": "short_term_memory",
+      "type": "memory",
+      "name": "lossless-claw-enhanced",
+      "description": "短期记忆，上下文管理",
+      "features": ["cjk_aware", "5_layer_compression", "dynamic_calibration"]
+    },
+    {
+      "id": "long_term_memory",
+      "type": "memory",
+      "name": "memory-lancedb-pro-skill",
+      "description": "长期记忆，向量存储",
+      "features": ["lancedb_pro", "hybrid_retrieval", "weibull_decay", "smart_extraction"]
+    },
+    {
+      "id": "sessions_send",
+      "type": "protocol",
+      "name": "sessions_send",
+      "description": "实时协作通信（打电话模式）",
+      "use_case": "中书省起草→门下省审核",
+      "parent": "openclaw"
+    },
+    {
+      "id": "sessions_spawn",
+      "type": "protocol",
+      "name": "sessions_spawn",
+      "description": "独立子任务（派快递模式）",
+      "use_case": "尚书省派发六部执行",
+      "parent": "openclaw"
+    },
+    {
+      "id": "whitepaper_v2",
+      "type": "document",
+      "name": "三省六部架构白皮书v2.0",
+      "path": "/Users/wangrenzhu/work/MetaClaw/research/三省六部架构白皮书_v2.0.md",
+      "version": "2.0.0",
+      "lines": 2523,
+      "size_kb": 82
+    }
+  ],
+  "edges": [
+    {
+      "source": "zhubiao",
+      "target": "langgraph_skill",
+      "relation": "uses",
+      "description": "朱标调用LangGraph Skill进行流程编排"
+    },
+    {
+      "source": "zhubiao",
+      "target": "pmo_manager",
+      "relation": "manages",
+      "description": "朱标通过PMO Manager管理项目"
+    },
+    {
+      "source": "pmo_manager",
+      "target": "clawteam",
+      "relation": "uses_as_backend",
+      "description": "PMO使用ClawTeam作为底层工具"
+    },
+    {
+      "source": "clawteam",
+      "target": "zhongshu",
+      "relation": "dispatches_to",
+      "description": "ClawTeam向中书省分发任务"
+    },
+    {
+      "source": "clawteam",
+      "target": "menxia",
+      "relation": "dispatches_to",
+      "description": "ClawTeam向门下省分发任务"
+    },
+    {
+      "source": "clawteam",
+      "target": "shangshu",
+      "relation": "dispatches_to",
+      "description": "ClawTeam向尚书省分发任务"
+    },
+    {
+      "source": "clawteam",
+      "target": "six_departments",
+      "relation": "dispatches_to",
+      "description": "ClawTeam向六部分发任务"
+    },
+    {
+      "source": "zhongshu",
+      "target": "menxia",
+      "relation": "sends_for_review",
+      "protocol": "sessions_send",
+      "description": "中书省起草后送门下省审核"
+    },
+    {
+      "source": "menxia",
+      "target": "shangshu",
+      "relation": "approves_to",
+      "description": "门下省审核通过后送尚书省"
+    },
+    {
+      "source": "menxia",
+      "target": "zhongshu",
+      "relation": "rejects_to",
+      "description": "门下省封驳退回中书省"
+    },
+    {
+      "source": "shangshu",
+      "target": "six_departments",
+      "relation": "dispatches",
+      "protocol": "sessions_spawn",
+      "description": "尚书省派发六部执行"
+    },
+    {
+      "source": "openclaw",
+      "target": "short_term_memory",
+      "relation": "uses",
+      "description": "OpenClaw使用lossless-claw-enhanced管理短期记忆"
+    },
+    {
+      "source": "openclaw",
+      "target": "long_term_memory",
+      "relation": "uses",
+      "description": "OpenClaw使用memory-lancedb-pro-skill存储长期记忆"
+    },
+    {
+      "source": "short_term_memory",
+      "target": "long_term_memory",
+      "relation": "consolidates_to",
+      "description": "短期记忆经Weibull Decay升级后进入长期记忆"
+    },
+    {
+      "source": "zhubiao",
+      "target": "short_term_memory",
+      "relation": "uses",
+      "description": "朱标使用短期记忆管理上下文"
+    },
+    {
+      "source": "zhubiao",
+      "target": "long_term_memory",
+      "relation": "uses",
+      "description": "朱标使用长期记忆存储跨会话知识"
+    },
+    {
+      "source": "whitepaper_v2",
+      "target": "openclaw",
+      "relation": "documents",
+      "description": "白皮书v2.0文档化OpenClaw架构"
+    },
+    {
+      "source": "whitepaper_v2",
+      "target": "langgraph_skill",
+      "relation": "documents",
+      "description": "白皮书v2.0文档化LangGraph Skill"
+    },
+    {
+      "source": "whitepaper_v2",
+      "target": "pmo_manager",
+      "relation": "documents",
+      "description": "白皮书v2.0文档化PMO Manager重构"
+    },
+    {
+      "source": "sessions_send",
+      "target": "sessions_spawn",
+      "relation": "complements",
+      "description": "send用于实时协作，spawn用于独立任务，互为补充"
+    }
+  ],
+  "clusters": [
+    {
+      "name": "治理层",
+      "nodes": ["zhubiao", "pmo_manager", "langgraph_skill"]
+    },
+    {
+      "name": "执行层",
+      "nodes": ["clawteam", "openclaw"]
+    },
+    {
+      "name": "业务层",
+      "nodes": ["zhongshu", "menxia", "shangshu", "six_departments"]
+    },
+    {
+      "name": "记忆层",
+      "nodes": ["short_term_memory", "long_term_memory"]
+    }
+  ],
+  "evolution": {
+    "v1.0_to_v2.0": {
+      "agent_engine": "Kimi CLI → OpenClaw",
+      "orchestration": "PMO内置LangGraph → LangGraph Skill",
+      "clawteam_role": "独立调度层 → PMO底层工具",
+      "memory": "HKT-Memory → lossless-claw + lancedb-pro",
+      "communication": "文件/DB → sessions_send/spawn"
+    }
+  }
+}

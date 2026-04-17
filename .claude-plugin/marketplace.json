@@ -1,0 +1,50 @@
+{
+  "name": "gale-harness-cli",
+  "owner": {
+    "name": "wangrenzhu-ola",
+    "url": "https://github.com/wangrenzhu-ola"
+  },
+  "metadata": {
+    "description": "GaleHarnessCLI plugin marketplace — galeharness-cli workflows with HKTMemory vector knowledge base",
+    "version": "0.0.0"
+  },
+  "plugins": [
+    {
+      "name": "galeharness-cli",
+      "description": "AI-powered development tools that get smarter with every use. Make each unit of engineering work easier than the last.",
+      "author": {
+        "name": "wangrenzhu-ola",
+        "url": "https://github.com/wangrenzhu-ola"
+      },
+      "homepage": "https://github.com/wangrenzhu-ola/GaleHarnessCLI",
+      "tags": [
+        "ai-powered",
+        "galeharness-cli",
+        "workflow-automation",
+        "code-review",
+        "quality",
+        "knowledge-management",
+        "hkt-memory",
+        "vector-db"
+      ],
+      "source": "./plugins/galeharness-cli"
+    },
+    {
+      "name": "coding-tutor",
+      "description": "Personalized coding tutorials that build on your existing knowledge and use your actual codebase for examples. Includes spaced repetition quizzes to reinforce learning. Includes 3 commands and 1 skill.",
+      "author": {
+        "name": "GaleHarnessCLI Team"
+      },
+      "homepage": "https://github.com/wangrenzhu-ola/GaleHarnessCLI",
+      "tags": [
+        "coding",
+        "programming",
+        "tutorial",
+        "learning",
+        "spaced-repetition",
+        "education"
+      ],
+      "source": "./plugins/coding-tutor"
+    }
+  ]
+}
