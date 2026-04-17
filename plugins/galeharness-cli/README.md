@@ -4,7 +4,7 @@ AI-powered development tools that get smarter with every use. Make each unit of 
 
 ## Getting Started
 
-After installing, run `/ce-setup` in any project. It diagnoses your environment, installs missing tools, and bootstraps project config in one interactive flow.
+After installing, run `/gh:setup` in any project. It diagnoses your environment, installs missing tools, and bootstraps project config in one interactive flow.
 
 ## Components
 
@@ -26,28 +26,28 @@ The primary entry points for engineering work, invoked as slash commands:
 | `/gh:plan` | Create structured plans for any multi-step task -- software features, research workflows, events, study plans -- with automatic confidence checking |
 | `/gh:review` | Structured code review with tiered persona agents, confidence gating, and dedup pipeline |
 | `/gh:work` | Execute work items systematically |
-| `/ce-debug` | Systematically find root causes and fix bugs -- traces causal chains, forms testable hypotheses, and implements test-first fixes |
+| `/gh:debug` | Systematically find root causes and fix bugs -- traces causal chains, forms testable hypotheses, and implements test-first fixes |
 | `/gh:compound` | Document solved problems to compound team knowledge |
 | `/gh:compound-refresh` | Refresh stale or drifting learnings and decide whether to keep, update, replace, or archive them |
-| `/ce-optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring |
+| `/gh:optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring |
 
-For `/ce-optimize`, see [`skills/ce-optimize/README.md`](./skills/ce-optimize/README.md) for usage guidance, example specs, and links to the schema and workflow docs.
+For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/README.md) for usage guidance, example specs, and links to the schema and workflow docs.
 
 ### Research & Context
 
 | Skill | Description |
 |-------|-------------|
-| `/ce-sessions` | Ask questions about session history across Claude Code, Codex, and Cursor |
-| `/ce-slack-research` | Search Slack for interpreted organizational context -- decisions, constraints, and discussion arcs |
+| `/gh:sessions` | Ask questions about session history across Claude Code, Codex, and Cursor |
+| `/gh:slack-research` | Search Slack for interpreted organizational context -- decisions, constraints, and discussion arcs |
 
 ### Git Workflow
 
 | Skill | Description |
 |-------|-------------|
-| `ce-pr-description` | Write or regenerate a value-first PR title and body from the current branch or a specified PR; used directly or by other skills |
+| `gh:pr-description` | Write or regenerate a value-first PR title and body from the current branch or a specified PR; used directly or by other skills |
 | `git-clean-gone-branches` | Clean up local branches whose remote tracking branch is gone |
 | `git-commit` | Create a git commit with a value-communicating message |
-| `git-commit-push-pr` | Commit, push, and open a PR with an adaptive description; also update an existing PR description (delegates title/body generation to `ce-pr-description`) |
+| `git-commit-push-pr` | Commit, push, and open a PR with an adaptive description; also update an existing PR description (delegates title/body generation to `gh:pr-description`) |
 | `git-worktree` | Manage Git worktrees for parallel development |
 
 ### Workflow Utilities
@@ -62,8 +62,8 @@ For `/ce-optimize`, see [`skills/ce-optimize/README.md`](./skills/ce-optimize/RE
 | `/test-browser` | Run browser tests on PR-affected pages |
 | `/test-xcode` | Build and test iOS apps on simulator using XcodeBuildMCP |
 | `/onboarding` | Generate `ONBOARDING.md` to help new contributors understand the codebase |
-| `/ce-setup` | Diagnose environment, install missing tools, and bootstrap project config |
-| `/ce-update` | Check compound-engineering plugin version and fix stale cache (Claude Code only) |
+| `/gh:setup` | Diagnose environment, install missing tools, and bootstrap project config |
+| `/gh:update` | Check compound-engineering plugin version and fix stale cache (Claude Code only) |
 | `/todo-resolve` | Resolve todos in parallel |
 | `/todo-triage` | Triage and prioritize pending todos |
 
@@ -192,7 +192,7 @@ Agents are specialized subagents invoked by skills — you typically don't call 
 claude /plugin install compound-engineering
 ```
 
-Then run `/ce-setup` to check your environment and install recommended tools.
+Then run `/gh:setup` to check your environment and install recommended tools.
 
 ## Version History
 

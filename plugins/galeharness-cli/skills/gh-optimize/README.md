@@ -1,10 +1,10 @@
-# `ce-optimize`
+# `gh:optimize`
 
 Run iterative optimization loops for problems where you can try multiple variants and score them with the same measurement setup.
 
 ## When To Use It
 
-Use `/ce-optimize` when:
+Use `/gh:optimize` when:
 
 - The right change is not obvious up front
 - You can generate several plausible variants

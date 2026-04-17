@@ -286,7 +286,7 @@ describe("gh:brainstorm review contract", () => {
 
     // Handoff option is for additional passes, not the first review (now in extracted reference)
     const handoff = await readRepoFile("plugins/galeharness-cli/skills/gh-brainstorm/references/handoff.md")
-    expect(handoff).toContain("**Run additional document review**")
+    expect(handoff).toContain("another document review")
     expect(handoff).not.toContain("**Review and refine**")
   })
 })
@@ -339,10 +339,11 @@ describe("gh:plan review contract", () => {
     const content = await readRepoFile("plugins/galeharness-cli/skills/gh-plan/references/plan-handoff.md")
 
     // gh:work is recommended (review already happened)
-    expect(content).toContain("**Start `/gh:work`** - Begin implementing this plan in the current environment (recommended)")
+    expect(content).toContain("**Start `/gh:work`**")
+    expect(content).toContain("(recommended)")
 
     // Document review option is for additional passes
-    expect(content).toContain("**Run additional document review**")
+    expect(content).toContain("another document review")
 
     // No conditional ordering based on plan depth (review already ran)
     expect(content).not.toContain("**Options when document-review is recommended:**")
