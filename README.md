@@ -21,22 +21,24 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
   Ideate (可选 -- 用于发现改进点)
 ```
 
-| 命令 | 用途 |
-|------|------|
-| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力项目改进点 |
-| `/gh:brainstorm` | 在规划前探索需求和方案，通过交互式问答细化想法 |
-| `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 |
-| `/gh:work` | 系统化执行工作项，使用 worktree 和任务追踪 |
-| `/gh:review` | 多代理代码审查，分层角色和置信度门控 |
-| `/gh:compound` | 记录已解决问题，沉淀团队知识到 HKTMemory |
-| `/gh:debug` | 系统性查找根本原因并修复缺陷 |
-| `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 |
+**每个阶段都与 HKTMemory 向量知识库双向交互**：阶段开始前检索相关记忆，阶段完成后存储新产生的知识。
+
+| 命令 | 用途 | HKTMemory 交互 |
+|------|------|----------------|
+| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力项目改进点 | 检索历史改进建议，存储新发现 |
+| `/gh:brainstorm` | 在规划前探索需求和方案，通过交互式问答细化想法 | 检索相关需求，存储需求文档 |
+| `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 | 检索相似方案，存储技术规划 |
+| `/gh:work` | 系统化执行工作项，使用 worktree 和任务追踪 | 检索实现模式，存储实现总结 |
+| `/gh:review` | 多代理代码审查，分层角色和置信度门控 | 检索审查模式，存储审查发现 |
+| `/gh:compound` | 记录已解决问题，沉淀团队知识 | 检索相关解决方案，存储完整知识 |
+| `/gh:debug` | 系统性查找根本原因并修复缺陷 | 检索类似问题，存储调试经验 |
+| `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 | 检索优化策略，存储优化结果 |
 
 `/gh:brainstorm` 是主要入口 —— 它通过交互式问答将想法细化为需求文档，并在不需要时自动跳过。`/gh:plan` 接收 brainstorming 输出的需求文档或详细想法，转化为技术实施方案。
 
 `/gh:ideate` 使用较少但效果显著 —— 它基于代码库主动发现改进建议，支持你的方向引导。
 
-每个周期都会复利累积：brainstorms 优化 plans，plans 为未来的 plans 提供参考，reviews 捕获更多问题，模式被记录沉淀。
+**记忆驱动的复利效应**：每个阶段自动读取历史记忆辅助决策，执行完毕后自动写入新产生的知识。Brainstorms 优化 Plans，Plans 参考历史实现，Reviews 捕获模式，所有经验沉淀到 HKTMemory 供未来循环复用。
 
 ---
 
@@ -72,7 +74,7 @@ flowchart TB
 
 ## 核心工作流时序图
 
-### 1. 完整开发周期
+### 1. 完整开发周期（记忆驱动）
 
 ```mermaid
 sequenceDiagram
@@ -85,24 +87,36 @@ sequenceDiagram
     participant HKT as HKTMemory
 
     User->>BS: /gh:brainstorm
+    BS->>HKT: 检索相关需求记忆
+    HKT-->>BS: 返回历史需求案例
     BS-->>User: 交互式需求澄清
+    BS->>HKT: 存储需求文档
     BS-->>User: 输出需求文档
 
     User->>PL: /gh:plan
-    PL->>HKT: 查询相似方案
-    HKT-->>PL: 返回相关案例
+    PL->>HKT: 检索相似方案记忆
+    HKT-->>PL: 返回相关技术方案
     PL-->>User: 输出技术规划
+    PL->>HKT: 存储技术规划
 
     User->>WK: /gh:work
-    Note over WK: 创建 worktree 并行执行任务 自动提交 PR
+    WK->>HKT: 检索实现模式
+    HKT-->>WK: 返回相关代码模式
+    Note over WK: 创建 worktree 并行执行任务
     WK-->>User: 输出代码实现
+    WK->>HKT: 存储实现总结
 
     User->>RV: /gh:review
-    Note over RV: 多代理并行审查 安全/性能/可维护性
+    RV->>HKT: 检索审查模式
+    HKT-->>RV: 返回历史审查经验
+    Note over RV: 多代理并行审查
     RV-->>User: 输出审查报告
+    RV->>HKT: 存储审查发现
 
     User->>CP: /gh:compound
-    CP->>HKT: 存储到知识库
+    CP->>HKT: 检索相关解决方案
+    HKT-->>CP: 返回已有知识
+    CP->>HKT: 存储完整解决方案
     HKT-->>CP: 知识沉淀完成
     CP-->>User: 知识复利完成
 ```
@@ -157,16 +171,18 @@ flowchart LR
 
 ### 工作流命令 (Workflow Commands)
 
-| 命令 | 功能描述 |
-|------|----------|
-| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力项目改进点 |
-| `/gh:brainstorm` | 在规划前探索需求和方案 |
-| `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 |
-| `/gh:work` | 系统化执行工作项 |
-| `/gh:review` | 多代理代码审查，分层角色和置信度门控 |
-| `/gh:compound` | 记录已解决问题，沉淀团队知识 |
-| `/gh:debug` | 系统性查找根本原因并修复缺陷 |
-| `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 |
+每个命令在执行前后都与 HKTMemory 交互，实现记忆驱动的开发：
+
+| 命令 | 功能描述 | 记忆读取 | 记忆写入 |
+|------|----------|----------|----------|
+| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力项目改进点 | 历史改进建议 | 新发现的机会 |
+| `/gh:brainstorm` | 在规划前探索需求和方案 | 相关需求案例 | 需求文档 |
+| `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 | 相似技术方案 | 技术规划 |
+| `/gh:work` | 系统化执行工作项 | 实现模式与代码示例 | 实现总结 |
+| `/gh:review` | 多代理代码审查，分层角色和置信度门控 | 审查模式与常见问题 | 审查发现与模式 |
+| `/gh:compound` | 记录已解决问题，沉淀团队知识 | 相关解决方案 | 完整知识条目 |
+| `/gh:debug` | 系统性查找根本原因并修复缺陷 | 类似问题与修复方案 | 调试经验 |
+| `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 | 优化策略与实验结果 | 优化结果 |
 
 ### 研究代理 (Research Agents)
 
@@ -196,6 +212,7 @@ flowchart LR
 - [Bun](https://bun.sh/) >= 1.0.0
 - Node.js >= 18 (可选，用于部分工具)
 - Git
+- Python >= 3.9 (用于 HKTMemory)
 
 ### 方式一：从源码安装
 
@@ -207,13 +224,16 @@ cd GaleHarnessCLI
 # 安装依赖
 bun install
 
-# 配置 HKTMemory (可选但推荐)
+# 安装 HKTMemory (必需)
 bash vendor/hkt-memory/install.sh
 
-# 配置环境变量
+# 配置 HKTMemory 环境变量
 export HKT_MEMORY_API_KEY=<your_key>
 export HKT_MEMORY_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
 export HKT_MEMORY_MODEL=embedding-3
+
+# 或使用文件模式（无需 API）
+export HKT_MEMORY_FILE_MODE=true
 
 # 验证安装
 bun test
@@ -303,8 +323,11 @@ bunx @gale/harness-cli install galeharness-cli --to all
 
 这将：
 - 诊断环境配置
+- **强制安装 HKTMemory 向量知识库**
+- 交互式配置 HKTMemory API 凭证（支持文件模式回退）
 - 安装缺失工具 (agent-browser, gh, jq, vhs, silicon, ffmpeg)
 - 引导项目配置
+- 验证 HKTMemory 连接状态
 
 ---
 
@@ -338,23 +361,26 @@ bunx @gale/harness-cli sync --target all
 
 ## 快速开始
 
-### 典型工作流示例
+### 典型工作流示例（记忆驱动）
 
 ```bash
-# 1. 探索需求
+# 1. 探索需求（自动读取历史需求，存储新需求文档）
 /gh:brainstorm "我们需要一个用户认证系统"
 
-# 2. 生成技术规划
+# 2. 生成技术规划（自动检索相似方案，存储技术规划）
 /gh:plan docs/brainstorms/auth-system-requirements.md
 
-# 3. 执行开发
+# 3. 执行开发（自动检索实现模式，存储实现总结）
 /gh:work docs/plans/auth-system-plan.md
 
-# 4. 代码审查
+# 4. 代码审查（自动检索审查模式，存储审查发现）
 /gh:review
 
-# 5. 沉淀知识
+# 5. 沉淀知识（自动检索相关方案，存储完整知识）
 /gh:compound "用户认证系统的最佳实践"
+
+# 所有阶段自动与 HKTMemory 交互，无需手动操作
+# 跨环境使用时，memory/ 目录已提交到 git，可同步记忆数据
 ```
 
 ---
@@ -441,9 +467,12 @@ bunx @gale/harness-cli sync --target all
 
 | 变量 | 说明 | 必需 |
 |------|------|------|
-| `HKT_MEMORY_API_KEY` | HKTMemory API 密钥 | 否 |
-| `HKT_MEMORY_BASE_URL` | HKTMemory 服务端点 | 否 |
-| `HKT_MEMORY_MODEL` | Embedding 模型 | 否 |
+| `HKT_MEMORY_API_KEY` | HKTMemory API 密钥 | 否（可用文件模式） |
+| `HKT_MEMORY_BASE_URL` | HKTMemory 服务端点 | 否（可用文件模式） |
+| `HKT_MEMORY_MODEL` | Embedding 模型 | 否（可用文件模式） |
+| `HKT_MEMORY_FILE_MODE` | 启用纯文件模式（无需 API） | 否 |
+
+**文件模式**：设置 `HKT_MEMORY_FILE_MODE=true` 可在无 API 密钥的情况下使用 HKTMemory，仅使用本地文件存储（L0/L1/L2 层 + 本地索引）。
 
 ---
 

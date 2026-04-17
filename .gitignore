@@ -10,7 +10,10 @@ todos/
 # Local-only scripts (not committed — contain upstream sync tooling)
 .local/
 .upstream-ref
+.upstream-repo
+.compound-upstream
 .galeharness-cli/*.local.yaml
 
 # Sync temp files
 .compound-sync.diff
+.compound-sync.raw.diff

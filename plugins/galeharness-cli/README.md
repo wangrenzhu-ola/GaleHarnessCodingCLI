@@ -1,10 +1,28 @@
-# Compounding Engineering Plugin
+# GaleHarnessCLI Plugin
 
-AI-powered development tools that get smarter with every use. Make each unit of engineering work easier than the last.
+AI-powered development tools with **HKTMemory vector knowledge base** — every phase of the workflow reads from and writes to memory, creating a compounding knowledge system that gets smarter with every use.
+
+## Workflow
+
+```
+Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
+    ^
+  Ideate (可选)
+```
+
+**Each phase automatically interacts with HKTMemory:**
+- **Before execution**: Retrieve relevant memories from previous cycles
+- **After completion**: Store new knowledge for future cycles
 
 ## Getting Started
 
-After installing, run `/gh-setup` in any project. It diagnoses your environment, installs HKTMemory vector knowledge base, configures API credentials, installs missing tools, and bootstraps project config in one interactive flow.
+After installing, run `/gh-setup` in any project. It:
+- Diagnoses your environment
+- **Installs HKTMemory vector knowledge base (required)**
+- **Interactively configures HKTMemory API credentials** (with file-mode fallback)
+- Installs missing tools
+- Bootstraps project config
+- Verifies HKTMemory connection
 
 ## Components
 
@@ -15,21 +33,23 @@ After installing, run `/gh-setup` in any project. It diagnoses your environment,
 
 ## Skills
 
-### Core Workflow
+### Core Workflow (Memory-Enabled)
 
-The primary entry points for engineering work, invoked as slash commands:
+The primary entry points for engineering work, invoked as slash commands. **Every skill automatically retrieves memories before execution and stores new knowledge after completion.**
 
-| Skill | Description |
-|-------|-------------|
-| `/gh:ideate` | Discover high-impact project improvements through divergent ideation and adversarial filtering |
-| `/gh:brainstorm` | Explore requirements and approaches before planning |
-| `/gh:plan` | Create structured plans for any multi-step task -- software features, research workflows, events, study plans -- with automatic confidence checking |
-| `/gh:review` | Structured code review with tiered persona agents, confidence gating, and dedup pipeline |
-| `/gh:work` | Execute work items systematically |
-| `/gh:debug` | Systematically find root causes and fix bugs -- traces causal chains, forms testable hypotheses, and implements test-first fixes |
-| `/gh:compound` | Document solved problems to compound team knowledge |
-| `/gh:compound-refresh` | Refresh stale or drifting learnings and decide whether to keep, update, replace, or archive them |
-| `/gh:optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring |
+| Skill | Description | Memory Read | Memory Write |
+|-------|-------------|-------------|--------------|
+| `/gh:ideate` | Discover high-impact project improvements through divergent ideation and adversarial filtering | Past improvements | New opportunities |
+| `/gh:brainstorm` | Explore requirements and approaches before planning | Related requirements | Requirements doc |
+| `/gh:plan` | Create structured plans for any multi-step task with automatic confidence checking | Similar solutions | Technical plan |
+| `/gh:work` | Execute work items systematically | Implementation patterns | Implementation summary |
+| `/gh:review` | Structured code review with tiered persona agents, confidence gating, and dedup pipeline | Review patterns | Review findings |
+| `/gh:compound` | Document solved problems to compound team knowledge | Related solutions | Complete knowledge |
+| `/gh:compound-refresh` | Refresh stale or drifting learnings and decide whether to keep, update, replace, or archive them | Existing learnings | Updated learnings |
+| `/gh:debug` | Systematically find root causes and fix bugs | Similar issues | Debug experience |
+| `/gh:optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring | Optimization strategies | Optimization results |
+
+**Cross-environment sync**: The `memory/` directory is committed to git, allowing knowledge to sync across environments.
 
 For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/README.md) for usage guidance, example specs, and links to the schema and workflow docs.
 
@@ -192,7 +212,20 @@ Agents are specialized subagents invoked by skills — you typically don't call 
 claude /plugin install galeharness-cli
 ```
 
-Then run `/ce-setup` to check your environment and install recommended tools.
+Then run `/gh-setup` to:
+- Check your environment
+- **Install HKTMemory (required)**
+- **Configure HKTMemory credentials interactively**
+- Install recommended tools
+
+### HKTMemory Configuration
+
+During setup, you'll be prompted for:
+- `HKT_MEMORY_API_KEY` - Your API key (or skip for file-only mode)
+- `HKT_MEMORY_BASE_URL` - API endpoint (default: https://open.bigmodel.cn/api/paas/v4/)
+- `HKT_MEMORY_MODEL` - Embedding model (default: embedding-3)
+
+**File-only mode**: If you don't have an API key, HKTMemory will work in file-only mode using local storage (`memory/` directory).
 
 ## Version History
 
