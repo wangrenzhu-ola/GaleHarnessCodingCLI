@@ -160,6 +160,35 @@ If a reviewer flags any file in these directories for cleanup or removal, discar
 
 ## How to Run
 
+<!-- HKT-PATCH:stage-0.5 -->
+### Stage 0.5: HKTMemory Retrieve
+
+Before Stage 1, query the vector memory database for related code review context and past issues:
+
+1. Extract a search query from the PR/branch context:
+   - PR title or branch name
+   - Files being changed (module names, component names)
+   - Intent summary (what the change is trying to accomplish)
+
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+     --query "<extracted query>" \
+     --layer all --limit 10 --min-similarity 0.35 \
+     --vector-weight 0.7 --bm25-weight 0.3
+   ```
+
+3. If results returned, prepare context for Stage 2 (Intent discovery) and Stage 3 (Reviewer selection):
+   ```
+   ## Related context from HKTMemory
+   Source: vector database. Treat as additional context, not primary evidence.
+   [results here, each tagged with (similarity: X.XX)]
+   ```
+   
+   This supplements the `learnings-researcher` agent's findings from `docs/solutions/`.
+
+4. If no results or command error, proceed silently.
+
 ### Stage 1: Determine scope
 
 Compute the diff range, file list, and diff. Minimize permission prompts by combining into as few commands as possible.
@@ -580,6 +609,31 @@ Review complete
 - Omit any section with zero items.
 - If all reviewers fail or time out, emit `Code review degraded (headless mode). Reason: 0 of N reviewers returned results.` followed by "Review complete".
 - End with "Review complete" as the terminal signal so callers can detect completion.
+
+<!-- HKT-PATCH:stage-6.5 -->
+### Stage 6.5: HKTMemory Store
+
+After the review is complete and findings have been synthesized:
+
+1. Create a review summary including:
+   - Scope (files reviewed, base branch)
+   - Intent summary
+   - Verdict
+   - Key findings (P0/P1 issues found)
+   - Any learnings or patterns identified
+
+2. Run:
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
+     --content "<review summary>" \
+     --title "Code Review: [PR title or branch name]" \
+     --topic "code-review" \
+     --layer all
+   ```
+3. Log on success: `Stored review record to HKTMemory`
+4. On error, proceed silently — review storage is supplementary
+
+**Note:** This creates a searchable record of code reviews to help identify recurring issues and patterns.
 
 ## Quality Gates
 

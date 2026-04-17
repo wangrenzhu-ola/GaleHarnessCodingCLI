@@ -178,6 +178,35 @@ Classify the work into one of these plan depths:
 
 If depth is unclear, ask one targeted question and then continue.
 
+<!-- HKT-PATCH:phase-0.7 -->
+#### 0.7 HKTMemory Retrieve
+
+Before Phase 1, query the vector memory database for related plans and requirements:
+
+1. Extract a 1-2 sentence search query from:
+   - The feature description or origin document title
+   - Key components, modules, or technologies involved
+   - The problem being solved
+
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+     --query "<extracted query>" \
+     --layer all --limit 10 --min-similarity 0.35 \
+     --vector-weight 0.7 --bm25-weight 0.3
+   ```
+
+3. If results returned, prepare a context block for Phase 1.1 research agents:
+   ```
+   ## Related historical plans from HKTMemory
+   Source: vector database. Treat as additional context, not primary evidence.
+   [results here, each tagged with (similarity: X.XX)]
+   ```
+
+4. If no results or command error, proceed silently without blocking Phase 1.
+
+**Integration with Phase 1.1:** When HKTMemory returns relevant plans or requirements, the `learnings-researcher` and `repo-research-analyst` should cross-reference them alongside `docs/solutions/` and `docs/plans/`.
+
 ### Phase 1: Gather Context
 
 #### 1.1 Local Research (Always Runs)
@@ -746,6 +775,26 @@ When deepening is warranted, read `references/deepening-workflow.md` for confide
 ##### 5.3.8–5.4 Document Review, Final Checks, and Post-Generation Options
 
 When reaching this phase, read `references/plan-handoff.md` for document review instructions (5.3.8), final checks and cleanup (5.3.9), post-generation options menu (5.4), and issue creation. Do not load this file earlier. Document review is mandatory — do not skip it even if the confidence check already ran.
+
+<!-- HKT-PATCH:phase-5.4b -->
+##### 5.4b HKTMemory Store
+
+After the plan file is finalized and document review has run:
+
+1. Read back the full content of the written plan file
+2. Extract `title` and `type` values from its YAML frontmatter
+3. Run:
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
+     --content "<full plan file content>" \
+     --title "<frontmatter title>" \
+     --topic "<frontmatter type or 'plan'>" \
+     --layer all
+   ```
+4. Log on success: `Stored to HKTMemory: [title]`
+5. On error, note it briefly but do not fail the plan workflow — memory storage is supplementary, not critical path
+
+**Note:** This enables future plans and brainstorms to discover and build upon this work through their Phase 0 retrieve steps.
 
 NEVER CODE! Research, decide, and write the plan.
 

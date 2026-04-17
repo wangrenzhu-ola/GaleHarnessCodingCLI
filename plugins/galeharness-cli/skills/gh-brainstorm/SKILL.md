@@ -103,6 +103,38 @@ Use the feature description plus a light repo scan to classify the work:
 
 If the scope is unclear, ask one targeted question to disambiguate and then proceed.
 
+<!-- HKT-PATCH:phase-0.4 -->
+#### 0.4 HKTMemory Retrieve
+
+Before Phase 1, query the vector memory database for related brainstorms and requirements:
+
+1. Extract a 1-2 sentence search query from the feature description, including:
+   - Core problem or feature being explored
+   - Key component names or domain terms
+   - User goals or outcomes mentioned
+
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+     --query "<extracted query>" \
+     --layer all --limit 10 --min-similarity 0.35 \
+     --vector-weight 0.7 --bm25-weight 0.3
+   ```
+
+3. If results returned, prepare a context block and use it to inform Phase 1.1 (Existing Context Scan):
+   ```
+   ## Related historical brainstorms from HKTMemory
+   Source: vector database. Treat as additional context, not primary evidence.
+   [results here, each tagged with (similarity: X.XX)]
+   ```
+
+4. If no results or command error, proceed silently without blocking Phase 1.
+
+**Integration with Phase 1.1:** When HKTMemory returns relevant results, cross-reference them during the "Topic Scan" step. Look for:
+- Similar problems already explored
+- Related requirements documents that might inform scope
+- Past decisions or constraints that still apply
+
 ### Phase 1: Understand the Idea
 
 #### 1.1 Existing Context Scan
@@ -205,6 +237,26 @@ When a requirements document was created or updated, run the `document-review` s
 If document-review returns findings that were auto-applied, note them briefly when presenting handoff options. If residual P0/P1 findings were surfaced, mention them so the user can decide whether to address them before proceeding.
 
 When document-review returns "Review complete", proceed to Phase 4.
+
+<!-- HKT-PATCH:phase-3.3 -->
+### Phase 3.3: HKTMemory Store
+
+After successfully writing or updating the requirements document:
+
+1. Read back the full content of the written file
+2. Extract `title` and `category` values from its YAML frontmatter (if present)
+3. Run:
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
+     --content "<full file content>" \
+     --title "<frontmatter title or filename>" \
+     --topic "<frontmatter category or 'brainstorm'>" \
+     --layer all
+   ```
+4. Log on success: `Stored to HKTMemory: [title]`
+5. On error, note it briefly but do not fail the brainstorm workflow — memory storage is supplementary, not critical path
+
+**Note:** This enables future brainstorms to discover and build upon this work through Phase 0.4's retrieve step.
 
 ### Phase 4: Handoff
 
