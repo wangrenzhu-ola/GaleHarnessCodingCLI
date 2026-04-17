@@ -68,6 +68,9 @@ export default defineCommand({
       }
 
       for (const name of activeTargets) {
+        if (!isSyncTargetName(name)) {
+          continue
+        }
         const target = getSyncTarget(name as SyncTargetName)
         const outputRoot = target.resolveOutputRoot(home, cwd)
         await target.sync(config, outputRoot)

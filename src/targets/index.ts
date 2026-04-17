@@ -9,6 +9,8 @@ import { convertClaudeToKiro } from "../converters/claude-to-kiro"
 import { convertClaudeToWindsurf } from "../converters/claude-to-windsurf"
 import { convertClaudeToOpenClaw } from "../converters/claude-to-openclaw"
 import { convertClaudeToQwen } from "../converters/claude-to-qwen"
+import { convertClaudeToClaude } from "../converters/claude-to-claude"
+import { convertClaudeToKimi } from "../converters/claude-to-kimi"
 import { convertClaudeToQoder } from "../converters/claude-to-qoder"
 import { convertClaudeToTrae } from "../converters/claude-to-trae"
 import { convertClaudeToCursor } from "../converters/claude-to-cursor"
@@ -22,6 +24,8 @@ import { writeKiroBundle } from "./kiro"
 import { writeWindsurfBundle } from "./windsurf"
 import { writeOpenClawBundle } from "./openclaw"
 import { writeQwenBundle } from "./qwen"
+import { writeClaudeBundle } from "./claude"
+import { writeKimiBundle } from "./kimi"
 import { writeQoderBundle } from "./qoder"
 import { writeTraeBundle } from "./trae"
 import { writeCursorBundle } from "./cursor"
@@ -64,6 +68,12 @@ export type TargetHandler<TBundle = unknown> = {
 }
 
 export const targets: Record<string, TargetHandler> = {
+  claude: {
+    name: "claude",
+    implemented: true,
+    convert: convertClaudeToClaude as TargetHandler["convert"],
+    write: writeClaudeBundle as TargetHandler["write"],
+  },
   opencode: {
     name: "opencode",
     implemented: true,
@@ -125,6 +135,12 @@ export const targets: Record<string, TargetHandler> = {
     implemented: true,
     convert: convertClaudeToQwen as TargetHandler["convert"],
     write: writeQwenBundle as TargetHandler["write"],
+  },
+  kimi: {
+    name: "kimi",
+    implemented: true,
+    convert: convertClaudeToKimi as TargetHandler["convert"],
+    write: writeKimiBundle as TargetHandler["write"],
   },
   qoder: {
     name: "qoder",
