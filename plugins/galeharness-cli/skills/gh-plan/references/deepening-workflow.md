@@ -164,7 +164,7 @@ Signals that justify artifact-backed mode:
 
 If artifact-backed mode is not clearly warranted, stay in direct mode.
 
-Artifact-backed mode uses a per-run scratch directory under `.context/galeharness-cli/ce-plan/deepen/`.
+Artifact-backed mode uses a per-run scratch directory under `.context/galeharness-cli/gh-plan/deepen/`.
 
 ## 5.3.6 Run Targeted Research
 

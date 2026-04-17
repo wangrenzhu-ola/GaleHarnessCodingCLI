@@ -3,24 +3,24 @@ name: gh:slack-research
 description: "Search Slack for interpreted organizational context -- decisions, constraints, and discussion arcs that shape the current task. Produces a research digest with cross-cutting analysis and research-value assessment, not raw message lists. Use when searching Slack for context during planning, brainstorming, or any task where organizational knowledge matters. Trigger phrases: 'search slack for', 'what did we discuss about', 'slack context for', 'organizational context about', 'what does the team think about', 'any slack discussions on'. Differs from slack:find-discussions which returns individual message results without synthesis."
 ---
 
-# /ce-slack-research
+# /gh:slack-research
 
 Search Slack for organizational context and receive an interpreted research digest.
 
 ## Usage
 
 ```
-/ce-slack-research [topic or question]
-/ce-slack-research
+/gh:slack-research [topic or question]
+/gh:slack-research
 ```
 
 ## Examples
 
 ```
-/ce-slack-research free trial
-/ce-slack-research What did we say about free trial recently?
-/ce-slack-research free trial in #proj-reverse-trial
-/ce-slack-research onboarding flow after:2026-03-01
+/gh:slack-research free trial
+/gh:slack-research What did we say about free trial recently?
+/gh:slack-research free trial in #proj-reverse-trial
+/gh:slack-research onboarding flow after:2026-03-01
 ```
 
 The input can be a keyword, a natural language question, or include Slack search modifiers like channel hints (`in:#channel`) and date filters (`after:YYYY-MM-DD`). The agent extracts the topic and formulates searches from whatever form the input takes.
