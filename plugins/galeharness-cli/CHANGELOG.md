@@ -9,6 +9,27 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.6.0...galeharness-cli-v1.7.0) (2026-04-17)
+
+
+### Features
+
+* **galeharness-cli:** add language config for Chinese document output ([f717e97](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/f717e97c955580bc5bf69fb352af78fb156bd855))
+* **gh-setup:** add Windows Trae IDE compatibility path ([a0c3f7a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a0c3f7ad32a4a02c4c9d0206cb898319c1b37964))
+* **proof, gh-brainstorm, gh-plan, gh-ideate:** sync upstream HITL review mode and body_file changes ([b8af025](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/b8af0256f408808ae069b8387cc00410fd6aa1c1))
+* **proof, gh-brainstorm, gh-plan, gh-ideate:** sync upstream HITL review mode and body_file changes ([c4156fc](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c4156fcf4954dbf8e7a0ed7d81bdc946e421253d))
+* unify skill naming to gh: prefix and galeharness-cli namespace ([3ae834c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/3ae834c0eed3d5dce33a6cc666ad7fa4449c2685))
+* unify skill naming to gh: prefix and galeharness-cli namespace ([e8f19f0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e8f19f0596e77e5c903bb28808190503cfd0a628))
+
+
+### Bug Fixes
+
+* complete gh:* naming migration, remove residual /ce-* references ([aa562b4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/aa562b4246fb22987d32a708991b5f7c0b72bee4))
+* complete gh:* naming migration, remove residual /ce-* references ([52ef946](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/52ef9465647344fc97e16c3a6f8b3191b1cbf61d))
+* **kimi:** fix cmd.body, broken ce-compound ref, ce-sessions rename, help text ([4c5177f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4c5177fcd9794e070296053ebf4e6e88f1e87f0c))
+* **kimi:** fix cmd.body, broken ce-compound ref, ce-sessions rename, help text ([7a90d7e](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/7a90d7ec3c7d08aa99eed2f84a07e40e2d87d8ab))
+* **review,cli:** restore gale-* agent namespace and fix converter types ([1ed456c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1ed456c4144d9c7986bf6645091f9b8683020c10))
+
 ## [1.6.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.5.0...galeharness-cli-v1.6.0) (2026-04-17)
 
 
