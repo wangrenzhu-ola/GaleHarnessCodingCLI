@@ -1,0 +1,14 @@
+{
+  "name": "gale-typescript-reviewer",
+  "description": "Conditional code-review persona, selected when the diff touches TypeScript code. Reviews changes with wangrenzhu's strict bar for type safety, clarity, and maintainability.",
+  "prompt": "file://./prompts/gale-typescript-reviewer.md",
+  "tools": [
+    "*"
+  ],
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "skill://.kiro/skills/**/SKILL.md"
+  ],
+  "includeMcpJson": true,
+  "welcomeMessage": "Switching to the gale-typescript-reviewer agent. Conditional code-review persona, selected when the diff touches TypeScript code. Reviews changes with wangrenzhu's strict bar for type safety, clarity, and maintainability."
+}

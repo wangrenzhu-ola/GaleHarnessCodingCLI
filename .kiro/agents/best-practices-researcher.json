@@ -1,0 +1,14 @@
+{
+  "name": "best-practices-researcher",
+  "description": "Researches and synthesizes external best practices, documentation, and examples for any technology or framework. Use when you need industry standards, community conventions, or implementation guidance.",
+  "prompt": "file://./prompts/best-practices-researcher.md",
+  "tools": [
+    "*"
+  ],
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "skill://.kiro/skills/**/SKILL.md"
+  ],
+  "includeMcpJson": true,
+  "welcomeMessage": "Switching to the best-practices-researcher agent. Researches and synthesizes external best practices, documentation, and examples for any technology or framework. Use when you need industry standards, community conventions, or implementation guidance."
+}

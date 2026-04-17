@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.4.0...cli-v1.5.0) (2026-04-17)
+
+
+### Features
+
+* **targets:** add Trae and Cursor platform support ([c0a1cbb](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c0a1cbb503724d301a7ad423bb5c0c920244e70b))
+
+
+### Bug Fixes
+
+* **cli:** remove npm publish, mark package private ([9bcde1a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9bcde1a8a5398d5d648f8dcab0e67e55979bf70d))
+
 ## [1.4.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.3.0...cli-v1.4.0) (2026-04-17)
 
 

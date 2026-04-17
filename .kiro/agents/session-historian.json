@@ -1,0 +1,14 @@
+{
+  "name": "session-historian",
+  "description": "Searches Claude Code, Codex, and Cursor session history for related prior sessions about the same problem or topic. Use to surface investigation context, failed approaches, and learnings from previous sessions that the current session cannot see. Supports time-based queries for conversational use.",
+  "prompt": "file://./prompts/session-historian.md",
+  "tools": [
+    "*"
+  ],
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "skill://.kiro/skills/**/SKILL.md"
+  ],
+  "includeMcpJson": true,
+  "welcomeMessage": "Switching to the session-historian agent. Searches Claude Code, Codex, and Cursor session history for related prior sessions about the same problem or topic. Use to surface investigation context, failed approaches, and learnings from previous sessions that the current session cannot see. Supports time-based queries for conversational use."
+}

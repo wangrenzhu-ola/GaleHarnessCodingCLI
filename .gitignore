@@ -17,3 +17,4 @@ todos/
 # Sync temp files
 .compound-sync.diff
 .compound-sync.raw.diff
+.compound-engineering/*.local.yaml

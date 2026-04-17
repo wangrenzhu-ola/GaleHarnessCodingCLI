@@ -1,0 +1,14 @@
+{
+  "name": "data-migrations-reviewer",
+  "description": "Conditional code-review persona, selected when the diff touches migration files, schema changes, data transformations, or backfill scripts. Reviews code for data integrity and migration safety.",
+  "prompt": "file://./prompts/data-migrations-reviewer.md",
+  "tools": [
+    "*"
+  ],
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "skill://.kiro/skills/**/SKILL.md"
+  ],
+  "includeMcpJson": true,
+  "welcomeMessage": "Switching to the data-migrations-reviewer agent. Conditional code-review persona, selected when the diff touches migration files, schema changes, data transformations, or backfill scripts. Reviews code for data integrity and migration safety."
+}

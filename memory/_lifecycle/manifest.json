@@ -8,9 +8,9 @@
     "source_path": "memory/L2-Full/daily/2026-04-16.md",
     "status": "active",
     "created_at": "2026-04-16T14:02:00.262372+00:00",
-    "updated_at": "2026-04-17T01:41:18.071170+00:00",
-    "last_accessed": "2026-04-17T01:41:18.071170+00:00",
-    "access_count": 2,
+    "updated_at": "2026-04-17T07:18:57.897235+00:00",
+    "last_accessed": "2026-04-17T07:18:57.897235+00:00",
+    "access_count": 3,
     "helpful_count": 0,
     "feedback_stats": {
       "useful": 0,
@@ -56,6 +56,35 @@
       "topic": "integrations",
       "id": "2026-04-17-094332-597",
       "valid_until": "2026-04-17"
+    }
+  },
+  "2026-04-17-151846-228": {
+    "memory_id": "2026-04-17-151846-228",
+    "title": "测试: Brainstorm HKTMemory",
+    "topic": "test-brainstorm",
+    "scope": "topic:test-brainstorm",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-17.md",
+    "status": "active",
+    "created_at": "2026-04-17T07:18:48.033591+00:00",
+    "updated_at": "2026-04-17T07:18:57.897235+00:00",
+    "last_accessed": "2026-04-17T07:18:57.897235+00:00",
+    "access_count": 1,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "9f47d87b2cbbc0b7228a38fbb8eaa54f5eb1c3ac",
+      "pr_id": null,
+      "topic": "test-brainstorm",
+      "id": "2026-04-17-151846-228"
     }
   }
 }
