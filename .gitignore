@@ -1,6 +1,9 @@
 .DS_Store
 *.log
 node_modules/
+
+# Compiled binaries (root level only)
+/gale-task
 .codex/
 todos/
 .worktrees
