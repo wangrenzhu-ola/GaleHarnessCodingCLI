@@ -3,13 +3,10 @@
   "version": "1.4.0",
   "description": "GaleHarnessCLI - Compound Engineering workflow enhanced with HKTMemory vector knowledge base",
   "type": "module",
-  "private": false,
+  "private": true,
   "bin": {
     "gale-harness": "src/index.ts",
     "compound-plugin": "src/index.ts"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "scripts": {
     "dev": "bun run src/index.ts",

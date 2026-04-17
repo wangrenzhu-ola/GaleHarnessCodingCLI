@@ -214,7 +214,7 @@ flowchart LR
 - Git
 - Python >= 3.9 (用于 HKTMemory)
 
-### 方式一：从源码安装
+### 方式一：克隆源码（所有安装方式的前提）
 
 ```bash
 # 克隆仓库
@@ -237,24 +237,26 @@ export HKT_MEMORY_FILE_MODE=true
 
 # 验证安装
 bun test
-bun run release:validate
 ```
 
-### 方式二：本地开发模式（推荐）
+> 本项目不发布到 npm。所有安装方式均基于源码克隆。
 
-**添加 shell alias** 方便全局使用：
+### 方式二：全局安装（推荐，随处可用）
+
+克隆后通过 `bun link` 将 CLI 链接到全局，无需每次指定路径：
 
 ```bash
-# 添加到 ~/.zshrc 或 ~/.bashrc
-alias gale-harness='bun run /path/to/GaleHarnessCLI/src/index.ts'
+# 在仓库根目录执行
+bun link
 
-# 然后可以在任何目录使用
-gale-harness install /path/to/GaleHarnessCLI/plugins/galeharness-cli --to qoder
+# 之后在任何目录直接使用
+gale-harness install ./plugins/galeharness-cli --to qoder
 ```
 
 **Claude Code** —— 本地插件模式：
 
 ```bash
+# 添加到 ~/.zshrc 或 ~/.bashrc
 alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
 ```
 
@@ -265,10 +267,10 @@ alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
 #### Claude Code
 
 ```bash
-# 本地开发模式
+# 加载本地插件（在 ~/.zshrc 或 ~/.bashrc 中设置 alias 后随处使用）
 alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
 
-# 或使用 CLI 安装
+# 或用 CLI 安装（一次性写入配置）
 bun run src/index.ts install ./plugins/galeharness-cli --to claude
 ```
 
