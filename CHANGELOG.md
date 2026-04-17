@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.3.0...cli-v1.4.0) (2026-04-17)
+
+
+### Features
+
+* **cli:** add Qoder platform support and fix resolve-base tests ([79f5418](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/79f54187b0f0b46701c3ac5b3cefb6cf67848703))
+* GaleHarnessCLI 初始发布 ([912b5ce](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/912b5ce6904e6a2871d0bf56e69ac0059e6ba8eb))
+* **qa:** establish comprehensive QA testing infrastructure ([decf412](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/decf412bcc8f2adaee5846c48d0979cb04df34b6))
+* **skills:** add polish-beta, style-editor, and kieran reviewers ([7535afc](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/7535afce84a6706012b6c8ccd1c916dcedc82811))
+* **skills:** add polish-beta, style-editor, and kieran reviewers ([eb2982e](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/eb2982e55710a6e37478a1da9ae879c055d6f593))
+
 ## [1.3.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.2.0...cli-v1.3.0) (2026-04-17)
 
 
