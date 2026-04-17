@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.5.0...cli-v1.6.0) (2026-04-17)
+
+
+### Features
+
+* **gale-task:** add writer CLI binary for task lifecycle event logging ([163d268](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/163d2687322bc7929720db916b7a5b4962e17e42))
+* **sync,install:** add claude, kimi, qoder to install/sync targets ([605baba](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/605babadc67a48e909e643e3797517631dcf314b))
+* **sync:** add kimi as a sync target ([6452aa9](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/6452aa9a5e1826cd9df97c5cd70fe4b429c27373))
+
 ## [1.5.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.4.0...cli-v1.5.0) (2026-04-17)
 
 

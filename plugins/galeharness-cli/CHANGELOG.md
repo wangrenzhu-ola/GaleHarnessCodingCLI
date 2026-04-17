@@ -9,6 +9,14 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.5.0...galeharness-cli-v1.6.0) (2026-04-17)
+
+
+### Features
+
+* **instrumentation:** add gale-task lifecycle hooks to gh:brainstorm/plan/work/compound ([fbd5154](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/fbd5154b1cb5c359e866ed544d3789aed1403d81))
+* **skills:** add HKTMemory integration to core workflow skills ([2d294b4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/2d294b44ac95d96f543c80a63c903310ad9903a5))
+
 ## [1.5.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.4.0...galeharness-cli-v1.5.0) (2026-04-17)
 
 
