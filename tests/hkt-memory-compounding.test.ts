@@ -54,7 +54,8 @@ function parseHktPatches(content: string): HktPatch[] {
 // Retrieve patches: phase-0.X or stage-0.X
 const RETRIEVE_PATTERNS = [/^phase-0\.\d+$/, /^stage-0\.\d+$/]
 // Store patches: phase-X.X or phase-X.Xb (where X >= 2) or stage-X.X
-const STORE_PATTERNS = [/^phase-[2-9]\.\d+b?$/, /^stage-[2-9]\.\d+b?$/]
+// Covers 1-digit (phase-2.x) and 2-digit (phase-10.x, stage-11.x) phase numbers
+const STORE_PATTERNS = [/^phase-1[0-9]\.\d+b?$/, /^phase-[2-9]\.\d+b?$/, /^stage-1[0-9]\.\d+b?$/, /^stage-[2-9]\.\d+b?$/]
 
 function isRetrievePatch(name: string): boolean {
   return RETRIEVE_PATTERNS.some((p) => p.test(name))
