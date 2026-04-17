@@ -32,6 +32,17 @@ When spawning subagents, pass the relevant file contents into the task prompt so
 
 ## Execution Strategy
 
+<!-- HKT-PATCH:gale-task-start -->
+Before presenting mode options to the user, log the skill start event so this execution appears on the task board:
+
+```bash
+gale-task log skill_started --skill gh:compound --title "${ARGUMENTS:-compound}" 2>/dev/null || true
+```
+
+If `gale-task` is not on PATH, skip silently — this must never block the skill.
+
+<!-- /HKT-PATCH:gale-task-start -->
+
 Present the user with two options before proceeding, using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, present the options and wait for the user's reply.
 
 ```
@@ -263,6 +274,13 @@ After successfully writing the solution doc to `docs/solutions/`:
      --layer all
    ```
 4. Log: `Stored to HKTMemory: [title]` on success, or note the error (non-blocking — do not fail the compound workflow if HKTMemory is unavailable).
+
+<!-- HKT-PATCH:gale-task-memory -->
+5. After a successful HKTMemory store, log the memory_linked event (use the same `<frontmatter title>` as the `--memory-title` value):
+   ```bash
+   gale-task log memory_linked --memory-title "<frontmatter title>" 2>/dev/null || true
+   ```
+<!-- /HKT-PATCH:gale-task-memory -->
 
 ### Phase 2.5: Selective Refresh Check
 
@@ -568,3 +586,15 @@ Based on problem type, these agents can enhance documentation:
 
 - `/research [topic]` - Deep investigation (searches docs/solutions/ for patterns)
 - `/gh:plan` - Planning workflow (references documented solutions)
+
+<!-- HKT-PATCH:gale-task-end -->
+## Task Lifecycle End
+
+After the compound workflow is fully complete (documentation written, discoverability check done), log the completion event:
+
+```bash
+gale-task log skill_completed 2>/dev/null || true
+```
+
+If `gale-task` is not on PATH, skip silently — this must never block the skill.
+<!-- /HKT-PATCH:gale-task-end -->

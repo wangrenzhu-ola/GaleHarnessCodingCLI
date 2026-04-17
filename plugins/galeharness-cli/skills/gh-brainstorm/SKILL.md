@@ -47,6 +47,19 @@ Do not proceed until you have a feature description from the user.
 
 ## Execution Flow
 
+<!-- HKT-PATCH:gale-task-start -->
+### Phase -1: Task Lifecycle Start
+
+Before any other action, log the skill start event so this execution appears on the task board:
+
+```bash
+gale-task log skill_started --skill gh:brainstorm --title "${ARGUMENTS:-brainstorm}" 2>/dev/null || true
+```
+
+If `gale-task` is not on PATH, skip silently — this must never block the skill.
+
+<!-- /HKT-PATCH:gale-task-start -->
+
 ### Phase 0: Resume, Assess, and Route
 
 #### 0.1 Resume Existing Work When Appropriate
@@ -196,3 +209,11 @@ When document-review returns "Review complete", proceed to Phase 4.
 ### Phase 4: Handoff
 
 Present next-step options and execute the user's selection. Read `references/handoff.md` for the option logic, dispatch instructions, and closing summary format.
+
+<!-- HKT-PATCH:gale-task-end -->
+After presenting handoff options and completing this skill, log the completion event:
+
+```bash
+gale-task log skill_completed 2>/dev/null || true
+```
+<!-- /HKT-PATCH:gale-task-end -->

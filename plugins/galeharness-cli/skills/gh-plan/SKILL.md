@@ -56,6 +56,19 @@ A plan is ready when an implementer can start confidently without needing the pl
 
 ## Workflow
 
+<!-- HKT-PATCH:gale-task-start -->
+### Phase -1: Task Lifecycle Start
+
+Before any other action, log the skill start event so this execution appears on the task board:
+
+```bash
+gale-task log skill_started --skill gh:plan --title "${ARGUMENTS:-plan}" 2>/dev/null || true
+```
+
+If `gale-task` is not on PATH, skip silently — this must never block the skill.
+
+<!-- /HKT-PATCH:gale-task-start -->
+
 ### Phase 0: Resume, Source, and Scope
 
 #### 0.1 Resume Existing Plan Work When Appropriate
@@ -735,3 +748,11 @@ When deepening is warranted, read `references/deepening-workflow.md` for confide
 When reaching this phase, read `references/plan-handoff.md` for document review instructions (5.3.8), final checks and cleanup (5.3.9), post-generation options menu (5.4), and issue creation. Do not load this file earlier. Document review is mandatory — do not skip it even if the confidence check already ran.
 
 NEVER CODE! Research, decide, and write the plan.
+
+<!-- HKT-PATCH:gale-task-end -->
+After the plan document is written and all phases are complete, log the completion event:
+
+```bash
+gale-task log skill_completed 2>/dev/null || true
+```
+<!-- /HKT-PATCH:gale-task-end -->

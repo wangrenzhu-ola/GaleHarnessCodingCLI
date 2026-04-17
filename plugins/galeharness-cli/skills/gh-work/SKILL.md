@@ -42,6 +42,19 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 ---
 
+<!-- HKT-PATCH:gale-task-start -->
+### Phase 0.5: Task Lifecycle Start
+
+Before Phase 1, log the skill start event so this execution appears on the task board:
+
+```bash
+gale-task log skill_started --skill gh:work --title "${ARGUMENTS:-work}" 2>/dev/null || true
+```
+
+If `gale-task` is not on PATH, skip silently — this must never block the skill.
+
+<!-- /HKT-PATCH:gale-task-start -->
+
 ### Phase 1: Quick Start
 
 1. **Read Plan and Clarify** _(skip if arriving from Phase 0 with a bare prompt)_

@@ -82,6 +82,22 @@ This file contains the shipping workflow (Phase 3-4). Load it only when all Phas
    - Note any follow-up work needed
    - Suggest next steps if applicable
 
+<!-- HKT-PATCH:gale-task-end -->
+5. **Log Task Completion**
+
+   After the PR is created (or commits are made if no PR), log the completion event. If a PR URL is available from `git-commit-push-pr`, also log `pr_linked`:
+
+   ```bash
+   # If a PR was created, extract the URL from git-commit-push-pr output and log it:
+   # PR_URL="<url returned by git-commit-push-pr>"
+   # gale-task log pr_linked --pr-url "$PR_URL" 2>/dev/null || true
+
+   gale-task log skill_completed 2>/dev/null || true
+   ```
+
+   If `gale-task` is not on PATH, skip silently — this must never block the skill.
+<!-- /HKT-PATCH:gale-task-end -->
+
 ## Quality Checklist
 
 Before creating PR, verify:
