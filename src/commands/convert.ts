@@ -25,7 +25,7 @@ export default defineCommand({
     to: {
       type: "string",
       default: "opencode",
-      description: "Target format (opencode | codex | droid | cursor | pi | copilot | gemini | kiro | windsurf | openclaw | qwen | all)",
+      description: "Target format (claude | opencode | codex | droid | cursor | pi | copilot | gemini | kiro | windsurf | openclaw | qwen | all)",
     },
     output: {
       type: "string",
@@ -41,6 +41,11 @@ export default defineCommand({
       type: "string",
       alias: "pi-home",
       description: "Write Pi output to this Pi root (ex: ~/.pi/agent or ./.pi)",
+    },
+    claudeHome: {
+      type: "string",
+      alias: "claude-home",
+      description: "Write Claude output to this Claude root (ex: ~/.claude)",
     },
     openclawHome: {
       type: "string",
@@ -89,8 +94,10 @@ export default defineCommand({
     const hasExplicitOutput = Boolean(args.output && String(args.output).trim())
     const codexHome = resolveTargetHome(args.codexHome, path.join(os.homedir(), ".codex"))
     const piHome = resolveTargetHome(args.piHome, path.join(os.homedir(), ".pi", "agent"))
+    const claudeHome = resolveTargetHome(args.claudeHome, path.join(os.homedir(), ".claude"))
     const openclawHome = resolveTargetHome(args.openclawHome, path.join(os.homedir(), ".openclaw", "extensions"))
     const qwenHome = resolveTargetHome(args.qwenHome, path.join(os.homedir(), ".qwen", "extensions"))
+    const qoderHome = resolveTargetHome(args.qoderHome, path.join(os.homedir(), ".qoder"))
 
     const options: ClaudeToOpenCodeOptions = {
       agentMode: String(args.agentMode) === "primary" ? "primary" : "subagent",
@@ -128,9 +135,12 @@ export default defineCommand({
           outputRoot,
           codexHome,
           piHome,
+          claudeHome,
           openclawHome,
           qwenHome,
+          qoderHome,
           pluginName: plugin.manifest.name,
+          plugin,
           hasExplicitOutput,
         })
         await handler.write(root, bundle)
@@ -159,9 +169,12 @@ export default defineCommand({
       outputRoot,
       codexHome,
       piHome,
+      claudeHome,
       openclawHome,
       qwenHome,
+      qoderHome,
       pluginName: plugin.manifest.name,
+      plugin,
       hasExplicitOutput,
       scope: resolvedScope,
     })
@@ -195,9 +208,12 @@ export default defineCommand({
         outputRoot: path.join(outputRoot, extra),
         codexHome,
         piHome,
+        claudeHome,
         openclawHome,
         qwenHome,
+        qoderHome,
         pluginName: plugin.manifest.name,
+        plugin,
         hasExplicitOutput,
         scope: handler.defaultScope,
       })

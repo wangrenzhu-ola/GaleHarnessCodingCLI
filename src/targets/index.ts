@@ -9,6 +9,8 @@ import { convertClaudeToKiro } from "../converters/claude-to-kiro"
 import { convertClaudeToWindsurf } from "../converters/claude-to-windsurf"
 import { convertClaudeToOpenClaw } from "../converters/claude-to-openclaw"
 import { convertClaudeToQwen } from "../converters/claude-to-qwen"
+import { convertClaudeToQoder } from "../converters/claude-to-qoder"
+import { convertClaudeToClaude, writeClaudeBundle } from "./claude"
 import { writeOpenCodeBundle } from "./opencode"
 import { writeCodexBundle } from "./codex"
 import { writeDroidBundle } from "./droid"
@@ -19,6 +21,7 @@ import { writeKiroBundle } from "./kiro"
 import { writeWindsurfBundle } from "./windsurf"
 import { writeOpenClawBundle } from "./openclaw"
 import { writeQwenBundle } from "./qwen"
+import { writeQoderBundle } from "./qoder"
 
 export type TargetScope = "global" | "workspace"
 
@@ -58,6 +61,12 @@ export type TargetHandler<TBundle = unknown> = {
 }
 
 export const targets: Record<string, TargetHandler> = {
+  claude: {
+    name: "claude",
+    implemented: true,
+    convert: convertClaudeToClaude as TargetHandler["convert"],
+    write: writeClaudeBundle as TargetHandler["write"],
+  },
   opencode: {
     name: "opencode",
     implemented: true,
@@ -119,5 +128,11 @@ export const targets: Record<string, TargetHandler> = {
     implemented: true,
     convert: convertClaudeToQwen as TargetHandler["convert"],
     write: writeQwenBundle as TargetHandler["write"],
+  },
+  qoder: {
+    name: "qoder",
+    implemented: true,
+    convert: convertClaudeToQoder as TargetHandler["convert"],
+    write: writeQoderBundle as TargetHandler["write"],
   },
 }

@@ -1,19 +1,33 @@
 import os from "os"
 import path from "path"
 import type { TargetScope } from "../targets"
+import type { ClaudePlugin } from "../types/claude"
 
 export function resolveTargetOutputRoot(options: {
   targetName: string
   outputRoot: string
   codexHome: string
   piHome: string
+  claudeHome?: string
   openclawHome?: string
   qwenHome?: string
+  qoderHome?: string
   pluginName?: string
+  plugin?: ClaudePlugin
   hasExplicitOutput: boolean
   scope?: TargetScope
 }): string {
-  const { targetName, outputRoot, codexHome, piHome, openclawHome, qwenHome, pluginName, hasExplicitOutput, scope } = options
+  const { targetName, outputRoot, codexHome, piHome, claudeHome, openclawHome, qwenHome, qoderHome, pluginName, plugin, hasExplicitOutput, scope } = options
+  if (targetName === "claude") {
+    const home = claudeHome ?? path.join(os.homedir(), ".claude")
+    const publisher =
+      plugin?.manifest.author?.name ??
+      ((plugin?.manifest.repository || plugin?.manifest.homepage || "") as string).match(/github\.com\/([^/]+)/)?.[1] ??
+      "local"
+    const name = pluginName ?? plugin?.manifest.name ?? "plugin"
+    const version = plugin?.manifest.version ?? "0.0.0"
+    return path.join(home, "plugins", "cache", publisher, name, version)
+  }
   if (targetName === "codex") return codexHome
   if (targetName === "pi") return piHome
   if (targetName === "droid") return path.join(os.homedir(), ".factory")
@@ -45,6 +59,9 @@ export function resolveTargetOutputRoot(options: {
   if (targetName === "qwen") {
     const home = qwenHome ?? path.join(os.homedir(), ".qwen", "extensions")
     return path.join(home, pluginName ?? "plugin")
+  }
+  if (targetName === "qoder") {
+    return qoderHome ?? path.join(os.homedir(), ".qoder")
   }
   return outputRoot
 }

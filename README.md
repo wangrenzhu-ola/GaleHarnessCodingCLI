@@ -240,24 +240,25 @@ bun test
 bun run release:validate
 ```
 
-### 方式二：本地开发模式
+### 方式二：本地开发模式（推荐）
 
-**Claude Code** —— 添加 shell alias 让本地副本与正常插件一起加载：
-
-```bash
-alias ghc='claude --plugin-dir ~/code/GaleHarnessCLI/plugins/galeharness-cli'
-```
-
-运行 `ghc` 而不是 `claude` 来测试更改。你的生产安装保持不变。
-
-**Codex 和其他目标** —— 使用本地 CLI：
+**添加 shell alias** 方便全局使用：
 
 ```bash
-# 从仓库根目录
-bun run src/index.ts install ./plugins/galeharness-cli --to codex
-bun run src/index.ts install ./plugins/galeharness-cli --to opencode
-bun run src/index.ts install ./plugins/galeharness-cli --to gemini
+# 添加到 ~/.zshrc 或 ~/.bashrc
+alias gale-harness='bun run /path/to/GaleHarnessCLI/src/index.ts'
+
+# 然后可以在任何目录使用
+gale-harness install /path/to/GaleHarnessCLI/plugins/galeharness-cli --to qoder
 ```
+
+**Claude Code** —— 本地插件模式：
+
+```bash
+alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
+```
+
+运行 `ghc` 而不是 `claude` 来加载本地插件。
 
 ### 方式三：安装到目标平台
 
@@ -271,26 +272,31 @@ alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
 bun run src/index.ts install ./plugins/galeharness-cli --to claude
 ```
 
-#### OpenCode / Codex / Gemini / 其他平台
+#### OpenCode / Codex / Gemini / Qoder / 其他平台
 
 ```bash
+# 在仓库根目录执行
+
 # OpenCode
-bunx @gale/harness-cli install galeharness-cli --to opencode
+bun run src/index.ts install ./plugins/galeharness-cli --to opencode
 
 # Codex
-bunx @gale/harness-cli install galeharness-cli --to codex
+bun run src/index.ts install ./plugins/galeharness-cli --to codex
 
 # Gemini CLI
-bunx @gale/harness-cli install galeharness-cli --to gemini
+bun run src/index.ts install ./plugins/galeharness-cli --to gemini
 
 # GitHub Copilot
-bunx @gale/harness-cli install galeharness-cli --to copilot
+bun run src/index.ts install ./plugins/galeharness-cli --to copilot
 
-# 支持的平台: opencode, codex, droid, pi, gemini, copilot, kiro, windsurf, openclaw, qwen
-bunx @gale/harness-cli install galeharness-cli --to <platform>
+# Qoder
+bun run src/index.ts install ./plugins/galeharness-cli --to qoder
+
+# 支持的平台: opencode, codex, droid, pi, gemini, copilot, kiro, windsurf, openclaw, qwen, qoder
+bun run src/index.ts install ./plugins/galeharness-cli --to <platform>
 
 # 安装到所有检测到的平台
-bunx @gale/harness-cli install galeharness-cli --to all
+bun run src/index.ts install ./plugins/galeharness-cli --to all
 ```
 
 <details>
@@ -308,6 +314,7 @@ bunx @gale/harness-cli install galeharness-cli --to all
 | `openclaw` | `~/.openclaw/extensions/<plugin>/` | 入口 TypeScript skill 文件 |
 | `windsurf` | `~/.codeium/windsurf/` (global) 或 `.windsurf/` (workspace) | Agents 成为 skills；命令成为 flat workflows |
 | `qwen` | `~/.qwen/extensions/<plugin>/` | Agents 作为 `.yaml` |
+| `qoder` | `~/.qoder/` | Skills, agents, commands 作为 `.md` 文件 |
 
 所有平台都是实验性的，可能随格式演进变化。
 
@@ -336,20 +343,22 @@ bunx @gale/harness-cli install galeharness-cli --to all
 将个人 Claude Code 配置 (`~/.claude/`) 同步到其他 AI 编码工具。省略 `--target` 自动同步到所有检测到的支持工具：
 
 ```bash
+# 在仓库根目录执行
+
 # 同步到所有检测到的工具 (默认)
-bunx @gale/harness-cli sync
+bun run src/index.ts sync
 
 # 同步到特定平台
-bunx @gale/harness-cli sync --target opencode
-bunx @gale/harness-cli sync --target codex
-bunx @gale/harness-cli sync --target gemini
-bunx @gale/harness-cli sync --target copilot
-bunx @gale/harness-cli sync --target windsurf
-bunx @gale/harness-cli sync --target kiro
-bunx @gale/harness-cli sync --target qwen
+bun run src/index.ts sync --target opencode
+bun run src/index.ts sync --target codex
+bun run src/index.ts sync --target gemini
+bun run src/index.ts sync --target copilot
+bun run src/index.ts sync --target windsurf
+bun run src/index.ts sync --target kiro
+bun run src/index.ts sync --target qwen
 
 # 同步到所有检测到的平台
-bunx @gale/harness-cli sync --target all
+bun run src/index.ts sync --target all
 ```
 
 这将同步：
@@ -458,7 +467,7 @@ bun run src/index.ts list
 bun run src/index.ts convert ./plugins/galeharness-cli --to opencode
 
 # 同步个人配置到其他工具
-bunx @gale/harness-cli sync --target all
+bun run src/index.ts sync --target all
 ```
 
 ---

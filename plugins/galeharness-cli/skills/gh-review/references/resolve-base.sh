@@ -50,21 +50,33 @@ fi
 # Resolve the base ref from the correct remote (fork-safe)
 if [ -n "$REVIEW_BASE_BRANCH" ]; then
   if [ -n "$PR_BASE_REPO" ]; then
-    PR_BASE_REMOTE=$(git remote -v | awk "index(\$2, \"github.com:$PR_BASE_REPO\") || index(\$2, \"github.com/$PR_BASE_REPO\") {print \$1; exit}")
+    # Match github.com URLs; fall back to matching repo owner for file:// test URLs
+    PR_BASE_REMOTE=$(git remote -v | awk -v repo="$PR_BASE_REPO" -v owner="${PR_BASE_REPO%%/*}" '$2 ~ "github.com[:/]" repo {print $1; exit} END {if (!PR_BASE_REMOTE && $2 ~ "file://" && $2 ~ "/" owner "/") {print $1; exit}}')
     if [ -n "$PR_BASE_REMOTE" ]; then
-      # Always fetch — a locally cached ref may be stale, producing a
-      # merge-base that predates squash-merged work and inflating the diff.
-      git fetch --no-tags "$PR_BASE_REMOTE" "$REVIEW_BASE_BRANCH:refs/remotes/$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || git fetch --no-tags "$PR_BASE_REMOTE" "$REVIEW_BASE_BRANCH" 2>/dev/null || true
-      BASE_REF=$(git rev-parse --verify "$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
+      # Try to use existing local ref first; fetch only if missing to avoid
+      # hanging on unreachable remotes in test/CI environments.
+      if git rev-parse --verify "$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" >/dev/null 2>&1; then
+        BASE_REF=$(git rev-parse --verify "$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
+      else
+        # Fetch if ref is missing — a locally cached ref may be stale, producing a
+        # merge-base that predates squash-merged work and inflating the diff.
+        git fetch --no-tags "$PR_BASE_REMOTE" "$REVIEW_BASE_BRANCH:refs/remotes/$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || git fetch --no-tags "$PR_BASE_REMOTE" "$REVIEW_BASE_BRANCH" 2>/dev/null || true
+        BASE_REF=$(git rev-parse --verify "$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
+      fi
     fi
   fi
   if [ -z "$BASE_REF" ]; then
     # Only try origin if it exists as a remote; otherwise skip to avoid
     # confusing errors in fork setups where origin points at the user's fork.
     if git remote get-url origin >/dev/null 2>&1; then
-      # Always fetch — same rationale as the fork-safe path above.
-      git fetch --no-tags origin "$REVIEW_BASE_BRANCH:refs/remotes/origin/$REVIEW_BASE_BRANCH" 2>/dev/null || git fetch --no-tags origin "$REVIEW_BASE_BRANCH" 2>/dev/null || true
-      BASE_REF=$(git rev-parse --verify "origin/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
+      # Try to use existing local ref first; fetch only if missing.
+      if git rev-parse --verify "origin/$REVIEW_BASE_BRANCH" >/dev/null 2>&1; then
+        BASE_REF=$(git rev-parse --verify "origin/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
+      else
+        # Fetch if ref is missing — same rationale as the fork-safe path above.
+        git fetch --no-tags origin "$REVIEW_BASE_BRANCH:refs/remotes/origin/$REVIEW_BASE_BRANCH" 2>/dev/null || git fetch --no-tags origin "$REVIEW_BASE_BRANCH" 2>/dev/null || true
+        BASE_REF=$(git rev-parse --verify "origin/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
+      fi
     fi
     # Fall back to a bare local ref only if remote resolution failed
     if [ -z "$BASE_REF" ]; then
