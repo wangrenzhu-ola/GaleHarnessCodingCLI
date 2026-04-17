@@ -8,6 +8,12 @@ disable-model-invocation: true
 
 Maintain the quality of `docs/solutions/` over time. This workflow reviews existing learnings against the current codebase, then refreshes any derived pattern docs that depend on them.
 
+**Config (pre-resolved):**
+!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+
+If the block above contains `language: en`, write documents in English.
+If `__NO_CONFIG__` or `language: zh-CN` or no language key, write documents in Chinese (default).
+
 ## Mode Detection
 
 Check if `$ARGUMENTS` contains `mode:autofix`. If present, strip it from arguments (use the remainder as a scope hint) and run in **autofix mode**.
@@ -457,6 +463,8 @@ If the user asked for a sweeping refresh, keep the interaction incremental:
 Do not front-load the user with a full maintenance queue.
 
 ## Phase 4: Execute the Chosen Action
+
+**Document Language**: When `language: zh-CN` (or default), write all prose content in Chinese. Keep section headers (`## Problem`, `## Solution`, etc.) and YAML frontmatter keys in English. Translate paragraphs, list items, and table content. Do NOT translate code blocks, inline code, file paths, or URLs.
 
 ### Keep Flow
 

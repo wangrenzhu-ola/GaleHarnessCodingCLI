@@ -41,6 +41,12 @@ If no argument is provided, proceed with open-ended ideation.
 2. **Generate many -> critique all -> explain survivors only** - The quality mechanism is explicit rejection with reasons, not optimistic ranking. Do not let extra process obscure this pattern.
 3. **Route action into brainstorming** - Ideation identifies promising directions; `gh:brainstorm` defines the selected one precisely enough for planning. Do not skip to planning from ideation output.
 
+**Config (pre-resolved):**
+!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+
+If the block above contains `language: en`, write documents in English.
+If `__NO_CONFIG__` or `language: zh-CN` or no language key, write documents in Chinese (default).
+
 ## Execution Flow
 
 ### Phase 0: Resume and Scope
@@ -166,6 +172,8 @@ Do **not** do external research in v1.
 ### Phase 2: Divergent Ideation
 
 Generate the full candidate list before critiquing any idea.
+
+**Document Language**: When `language: zh-CN` (or default), write all prose content in Chinese. Keep section headers (`## Survivors`, `## Rejected Ideas`, etc.) and YAML frontmatter keys in English. Translate paragraphs, list items, and table content. Do NOT translate code blocks, inline code, file paths, or URLs.
 
 Dispatch 3-4 parallel ideation sub-agents on the inherited model (do not tier down -- creative ideation needs the orchestrator's reasoning level). Omit the `mode` parameter so the user's configured permission settings apply. Each targets ~8-10 ideas (yielding ~30 raw ideas, ~20-25 after dedupe). Adjust per-agent targets when volume overrides apply (e.g., "100 ideas" raises it, "top 3" may lower the survivor count instead).
 

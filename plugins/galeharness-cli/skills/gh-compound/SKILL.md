@@ -43,6 +43,12 @@ If `gale-task` is not on PATH, skip silently — this must never block the skill
 
 <!-- /HKT-PATCH:gale-task-start -->
 
+**Config (pre-resolved):**
+!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+
+If the block above contains `language: en`, write documents in English.
+If `__NO_CONFIG__` or `language: zh-CN` or no language key, write documents in Chinese (default).
+
 Present the user with two options before proceeding, using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, present the options and wait for the user's reply.
 
 ```
@@ -227,6 +233,8 @@ Launch research subagents. Each returns text data to the orchestrator.
 <sequential_tasks>
 
 **WAIT for all Phase 1 subagents to complete before proceeding.**
+
+**Document Language**: When `language: zh-CN` (or default), write all prose content in Chinese. Keep section headers (`## Problem`, `## Solution`, etc.) and YAML frontmatter keys in English. Translate paragraphs, list items, and table content. Do NOT translate code blocks, inline code, file paths, or URLs.
 
 The orchestrating agent (main conversation) performs these steps:
 

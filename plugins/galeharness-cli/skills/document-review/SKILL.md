@@ -8,6 +8,12 @@ argument-hint: "[mode:headless] [path/to/document.md]"
 
 Review requirements or plan documents through multi-persona analysis. Dispatches specialized reviewer agents in parallel, auto-fixes quality issues, and presents strategic questions for user decision.
 
+**Config (pre-resolved):**
+!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+
+If the block above contains `language: en`, write findings in English.
+If `__NO_CONFIG__` or `language: zh-CN` or no language key, write findings in Chinese (default).
+
 ## Phase 0: Detect Mode
 
 Check the skill arguments for `mode:headless`. Arguments may contain a document path, `mode:headless`, or both. Tokens starting with `mode:` are flags, not file paths -- strip them from the arguments and use the remaining token (if any) as the document path for Phase 1.

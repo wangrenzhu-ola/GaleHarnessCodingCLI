@@ -30,6 +30,12 @@ If the input is present but unclear or underspecified, do not abandon — ask on
 
 **IMPORTANT: All file references in the plan document must use repo-relative paths (e.g., `src/models/user.rb`), never absolute paths (e.g., `/Users/name/Code/project/src/models/user.rb`). This applies everywhere — implementation unit file lists, pattern references, origin document links, and prose mentions. Absolute paths break portability across machines, worktrees, and teammates.**
 
+**Config (pre-resolved):**
+!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+
+If the block above contains `language: en`, write documents in English.
+If `__NO_CONFIG__` or `language: zh-CN` or no language key, write documents in Chinese (default).
+
 ## Core Principles
 
 1. **Use requirements as the source of truth** - If `gh:brainstorm` produced a requirements document, planning should build from it rather than re-inventing behavior.
@@ -451,6 +457,8 @@ Examples:
 ### Phase 4: Write the Plan
 
 Use one planning philosophy across all depths. Change the amount of detail, not the boundary between planning and execution.
+
+**Document Language**: When `language: zh-CN` (or default), write all prose content in Chinese. Keep section headers (`## Overview`, `## Requirements Trace`, etc.) and YAML frontmatter keys in English. Translate paragraphs, list items, and table content. Do NOT translate code blocks, inline code, file paths, or URLs.
 
 #### 4.1 Plan Depth Guidance
 

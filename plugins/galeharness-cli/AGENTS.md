@@ -163,6 +163,31 @@ Plugin config lives at `.compound-engineering/config.local.yaml` in the repo roo
 
 If neither path has the file, fall through to defaults — never fail or block on missing config.
 
+### Document Language Configuration
+
+The `language` setting in `.compound-engineering/config.local.yaml` controls output language for workflow skills:
+
+```yaml
+language: zh-CN  # zh-CN (Chinese, default) or en (English)
+```
+
+**Affected skills:** `gh:brainstorm`, `gh:plan`, `gh:compound`, `gh:compound-refresh`, `gh:ideate`, `document-review`
+
+**What gets translated (zh-CN):**
+- Prose content: paragraphs, list items, table content
+- Finding descriptions in document-review (including headless mode JSON `description` fields)
+
+**What stays in English:**
+- Section headers (`## Problem Frame`, `## Requirements`, etc.)
+- YAML frontmatter keys (`title`, `date`, `category`, etc.)
+- Code blocks, inline code, file paths, URLs
+- JSON field names in headless mode output (`severity`, `category`, `finding`)
+
+**Edge case handling:**
+- Config missing → default to zh-CN
+- Config exists but no `language` key → default to zh-CN
+- Invalid `language` value → default to zh-CN
+
 ### Quick Validation Command
 
 ```bash

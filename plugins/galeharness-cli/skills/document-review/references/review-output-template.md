@@ -2,6 +2,12 @@
 
 Use this **exact format** when presenting synthesized review findings. Findings are grouped by severity, not by reviewer.
 
+**Document Language** — When the skill's config contains `language: zh-CN` (or no language config, defaulting to zh-CN):
+- Write all prose content in Chinese: finding descriptions, concerns, questions
+- Keep field names in English: `Section`, `Issue`, `Reviewer`, `Confidence`, `Status`, `Findings`, `Auto`, `Present`, `Residual`
+- Keep section headers (`## Document Review Results`, `### Auto-fixes Applied`, `### P0 -- Must Fix`, etc.) in English
+- In headless mode, JSON field names stay English; `description` content follows language setting
+
 **IMPORTANT:** Use pipe-delimited markdown tables (`| col | col |`). Do NOT use ASCII box-drawing characters.
 
 ## Example
