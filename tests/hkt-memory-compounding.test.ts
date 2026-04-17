@@ -54,7 +54,7 @@ function parseHktPatches(content: string): HktPatch[] {
 // Retrieve patches: phase-0.X or stage-0.X
 const RETRIEVE_PATTERNS = [/^phase-0\.\d+$/, /^stage-0\.\d+$/]
 // Store patches: phase-X.X or phase-X.Xb (where X >= 2) or stage-X.X
-const STORE_PATTERNS = [/^phase-[2-9]\.\d/, /^stage-[2-9]\.\d/]
+const STORE_PATTERNS = [/^phase-[2-9]\.\d+b?$/, /^stage-[2-9]\.\d+b?$/]
 
 function isRetrievePatch(name: string): boolean {
   return RETRIEVE_PATTERNS.some((p) => p.test(name))
@@ -68,7 +68,7 @@ function extractPhaseContext(content: string, patchName: string): string {
   const lines = content.split("\n")
   const idx = lines.findIndex((l) => l.includes(`HKT-PATCH:${patchName}`))
   if (idx === -1) return ""
-  return lines.slice(idx, idx + 45).join("\n")
+  return lines.slice(idx, idx + 60).join("\n")
 }
 
 function extractBashBlock(content: string, subcommand: "retrieve" | "store"): string | null {
