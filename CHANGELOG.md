@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.2.0...cli-v1.3.0) (2026-04-17)
+
+
+### Features
+
+* GaleHarnessCLI 初始发布 ([912b5ce](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/912b5ce6904e6a2871d0bf56e69ac0059e6ba8eb))
+* **qa:** establish comprehensive QA testing infrastructure ([decf412](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/decf412bcc8f2adaee5846c48d0979cb04df34b6))
+
 ## [1.2.0](https://github.com/wangrenzhu-ola/GaleHarnessCLI/compare/cli-v1.1.0...cli-v1.2.0) (2026-04-17)
 
 
