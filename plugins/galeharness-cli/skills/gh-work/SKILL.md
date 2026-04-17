@@ -55,6 +55,40 @@ If `gale-task` is not on PATH, skip silently — this must never block the skill
 
 <!-- /HKT-PATCH:gale-task-start -->
 
+<!-- HKT-PATCH:phase-0.6 -->
+### Phase 0.6: HKTMemory Retrieve
+
+Before Phase 1, query the vector memory database for related execution context:
+
+1. Extract a search query from the work document or bare prompt:
+   - Plan title or feature description
+   - Key components, modules, or files involved
+   - Problem being solved or functionality being implemented
+
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+     --query "<extracted query>" \
+     --layer all --limit 10 --min-similarity 0.35 \
+     --vector-weight 0.7 --bm25-weight 0.3
+   ```
+
+3. If results returned, prepare context for Phase 1 execution:
+   ```
+   ## Related context from HKTMemory
+   Source: vector database. Treat as additional context, not primary evidence.
+   [results here, each tagged with (similarity: X.XX)]
+   ```
+   
+   Use this to:
+   - Check for similar implementations or patterns already explored
+   - Find related solutions that might inform the current work
+   - Surface constraints or decisions from past work
+
+4. If no results or command error, proceed silently.
+
+<!-- /HKT-PATCH:phase-0.6 -->
+
 ### Phase 1: Quick Start
 
 1. **Read Plan and Clarify** _(skip if arriving from Phase 0 with a bare prompt)_
@@ -311,6 +345,30 @@ If `gale-task` is not on PATH, skip silently — this must never block the skill
 ### Phase 3-4: Quality Check and Ship It
 
 When all Phase 2 tasks are complete and execution transitions to quality check, read `references/shipping-workflow.md` for the full shipping workflow: quality checks, code review, final validation, PR creation, and notification.
+
+<!-- HKT-PATCH:phase-4.5 -->
+### Phase 4.5: HKTMemory Store
+
+After the work is complete and the shipping workflow has finished (PR created or changes committed):
+
+1. Summarize what was accomplished:
+   - Work completed (implementation summary)
+   - Files changed
+   - Key decisions or discoveries made during execution
+   - Any deviations from the original plan and why
+
+2. Run:
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
+     --content "<execution summary with context>" \
+     --title "Work: [plan title or feature description]" \
+     --topic "work-execution" \
+     --layer all
+   ```
+3. Log on success: `Stored execution record to HKTMemory`
+4. On error, proceed silently — execution storage is supplementary
+
+**Note:** This creates a searchable record of completed work for future reference when similar tasks arise.
 
 ## Key Principles
 

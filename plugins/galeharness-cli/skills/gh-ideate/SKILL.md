@@ -91,6 +91,38 @@ Honor clear overrides such as:
 
 Use reasonable interpretation rather than formal parsing.
 
+<!-- HKT-PATCH:phase-0.5 -->
+#### 0.5 HKTMemory Retrieve
+
+Before Phase 1, query the vector memory database for related ideation and improvement ideas:
+
+1. Extract a search query from the focus hint:
+   - Focus area or concept (e.g., "DX improvements", "auth flow")
+   - Project domain or technology
+   - Constraint keywords (e.g., "low-complexity", "quick wins")
+
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+     --query "<extracted query>" \
+     --layer all --limit 10 --min-similarity 0.35 \
+     --vector-weight 0.7 --bm25-weight 0.3
+   ```
+
+3. If results returned, prepare context for Phase 1 and Phase 2:
+   ```
+   ## Related ideation from HKTMemory
+   Source: vector database. Treat as additional context, not primary evidence.
+   [results here, each tagged with (similarity: X.XX)]
+   ```
+   
+   Use this to:
+   - Avoid duplicating previously explored ideas
+   - Build upon or refine past ideation
+   - Identify patterns in improvement opportunities
+
+4. If no results or command error, proceed silently.
+
 ### Phase 1: Codebase Scan
 
 Before generating ideas, gather codebase context.
@@ -154,3 +186,23 @@ After all sub-agents return:
 4. Spread ideas across multiple dimensions when justified: workflow/DX, reliability, extensibility, missing capabilities, docs/knowledge compounding, quality/maintenance, leverage on future work.
 
 After merging and synthesis, read `references/post-ideation-workflow.md` for the adversarial filtering rubric, presentation format, artifact template, handoff options, and quality bar. Do not load this file before Phase 2 agent dispatch completes.
+
+<!-- HKT-PATCH:phase-2.5 -->
+### Phase 2.5: HKTMemory Store
+
+After the ideation artifact is written to `docs/ideation/`:
+
+1. Read back the full content of the ideation document
+2. Extract the title and key themes from the frontmatter/content
+3. Run:
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
+     --content "<full ideation document>" \
+     --title "Ideation: [document title]" \
+     --topic "ideation" \
+     --layer all
+   ```
+4. Log on success: `Stored ideation to HKTMemory`
+5. On error, proceed silently — storage is supplementary
+
+**Note:** This enables future ideation sessions to discover and build upon these ideas through Phase 0.5's retrieve step.
