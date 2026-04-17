@@ -44,9 +44,9 @@ These reviewers keep their original opinionated lens. They are additive with the
 | Persona | Agent | Select when diff touches... |
 |---------|-------|---------------------------|
 | `dhh-rails` | `galeharness-cli:review:dhh-rails-reviewer` | Rails architecture, service objects, authentication/session choices, Hotwire-vs-SPA boundaries, or abstractions that may fight Rails conventions |
-| `kieran-rails` | `galeharness-cli:review:kieran-rails-reviewer` | Rails controllers, models, views, jobs, components, routes, or other application-layer Ruby code where clarity and conventions matter |
-| `kieran-python` | `galeharness-cli:review:kieran-python-reviewer` | Python modules, endpoints, services, scripts, or typed domain code |
-| `kieran-typescript` | `galeharness-cli:review:kieran-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
+| `gale-rails` | `galeharness-cli:review:gale-rails-reviewer` | Rails controllers, models, views, jobs, components, routes, or other application-layer Ruby code where clarity and conventions matter |
+| `gale-python` | `galeharness-cli:review:gale-python-reviewer` | Python modules, endpoints, services, scripts, or typed domain code |
+| `gale-typescript` | `galeharness-cli:review:gale-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
 | `julik-frontend-races` | `galeharness-cli:review:julik-frontend-races-reviewer` | Stimulus/Turbo controllers, DOM event wiring, timers, async UI flows, animations, or frontend state transitions with race potential |
 
 ## CE Conditional Agents (migration-specific)

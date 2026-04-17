@@ -132,9 +132,9 @@ Routing rules:
 | Agent | Select when diff touches... |
 |-------|---------------------------|
 | `galeharness-cli:review:dhh-rails-reviewer` | Rails architecture, service objects, session/auth choices, or Hotwire-vs-SPA boundaries |
-| `galeharness-cli:review:kieran-rails-reviewer` | Rails application code where conventions, naming, and maintainability are in play |
-| `galeharness-cli:review:kieran-python-reviewer` | Python modules, endpoints, scripts, or services |
-| `galeharness-cli:review:kieran-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
+| `galeharness-cli:review:gale-rails-reviewer` | Rails application code where conventions, naming, and maintainability are in play |
+| `galeharness-cli:review:gale-python-reviewer` | Python modules, endpoints, scripts, or services |
+| `galeharness-cli:review:gale-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
 | `galeharness-cli:review:julik-frontend-races-reviewer` | Stimulus/Turbo controllers, DOM events, timers, animations, or async UI flows |
 
 **CE conditional (migration-specific):**

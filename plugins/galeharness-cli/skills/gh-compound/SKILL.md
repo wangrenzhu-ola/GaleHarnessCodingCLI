@@ -376,9 +376,9 @@ Based on problem type, optionally invoke specialized agents to review the docume
 - **security_issue** → `galeharness-cli:review:security-sentinel`
 - **database_issue** → `galeharness-cli:review:data-integrity-guardian`
 - Any code-heavy issue → always run `galeharness-cli:review:code-simplicity-reviewer`, and additionally run the kieran reviewer that matches the repo's primary stack:
-  - Ruby/Rails → also run `galeharness-cli:review:kieran-rails-reviewer`
-  - Python → also run `galeharness-cli:review:kieran-python-reviewer`
-  - TypeScript/JavaScript → also run `galeharness-cli:review:kieran-typescript-reviewer`
+  - Ruby/Rails → also run `galeharness-cli:review:gale-rails-reviewer`
+  - Python → also run `galeharness-cli:review:gale-python-reviewer`
+  - TypeScript/JavaScript → also run `galeharness-cli:review:gale-typescript-reviewer`
   - Other stacks → no kieran reviewer needed
 
 </parallel_tasks>
@@ -497,7 +497,7 @@ Subagent Results:
 
 Specialized Agent Reviews (Auto-Triggered):
   ✓ performance-oracle: Validated query optimization approach
-  ✓ kieran-rails-reviewer: Code examples meet Rails conventions
+  ✓ gale-rails-reviewer: Code examples meet Rails conventions
   ✓ code-simplicity-reviewer: Solution is appropriately minimal
 
 File created:
@@ -563,9 +563,9 @@ Writes the final learning directly into `docs/solutions/`.
 Based on problem type, these agents can enhance documentation:
 
 ### Code Quality & Review
-- **galeharness-cli:review:kieran-rails-reviewer**: Reviews code examples for Rails best practices
-- **galeharness-cli:review:kieran-python-reviewer**: Reviews code examples for Python best practices
-- **galeharness-cli:review:kieran-typescript-reviewer**: Reviews code examples for TypeScript best practices
+- **galeharness-cli:review:gale-rails-reviewer**: Reviews code examples for Rails best practices
+- **galeharness-cli:review:gale-python-reviewer**: Reviews code examples for Python best practices
+- **galeharness-cli:review:gale-typescript-reviewer**: Reviews code examples for TypeScript best practices
 - **galeharness-cli:review:code-simplicity-reviewer**: Ensures solution code is minimal and clear
 - **galeharness-cli:review:pattern-recognition-specialist**: Identifies anti-patterns or repeating issues
 
