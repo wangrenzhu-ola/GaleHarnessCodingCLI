@@ -16,7 +16,9 @@
     "test": "bun test",
     "release:preview": "bun run scripts/release/preview.ts",
     "release:sync-metadata": "bun run scripts/release/sync-metadata.ts --write",
-    "release:validate": "bun run scripts/release/validate.ts"
+    "release:validate": "bun run scripts/release/validate.ts",
+    "build:gale-task": "bun build --compile cmd/gale-task/index.ts --outfile gale-task --target bun",
+    "install-gale-task": "bun run build:gale-task && mv gale-task ~/.local/bin/gale-task && echo 'gale-task installed to ~/.local/bin/gale-task'"
   },
   "dependencies": {
     "citty": "^0.1.6",
