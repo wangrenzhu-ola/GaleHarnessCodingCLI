@@ -249,14 +249,18 @@ bun test
 # 在仓库根目录执行
 bun link
 
-# 之后在任何目录直接使用
+# 确保 ~/.bun/bin 在 PATH 中（添加到 ~/.zshrc 或 ~/.bashrc）
+export PATH="$HOME/.bun/bin:$PATH"
+
+# 之后在仓库根目录或任何指定了绝对/相对路径的目录直接使用
 gale-harness install ./plugins/galeharness-cli --to qoder
 ```
 
-**支持的平台 (13个)：**
+**支持的平台 (15个)：**
 
 | 平台 | 说明 |
 |------|------|
+| `claude` | Claude Code |
 | `opencode` | OpenCode |
 | `codex` | OpenAI Codex |
 | `droid` | Droid |
@@ -270,6 +274,7 @@ gale-harness install ./plugins/galeharness-cli --to qoder
 | `qoder` | Qoder |
 | `trae` | Trae (字节跳动) |
 | `cursor` | Cursor |
+| `kimi` | Kimi Code CLI |
 
 **一键安装到所有平台：**
 
@@ -319,7 +324,7 @@ bun run src/index.ts install ./plugins/galeharness-cli --to copilot
 # Qoder
 bun run src/index.ts install ./plugins/galeharness-cli --to qoder
 
-# 支持的平台: opencode, codex, droid, pi, gemini, copilot, kiro, windsurf, openclaw, qwen, qoder
+# 支持的平台: claude, opencode, codex, droid, pi, gemini, copilot, kiro, windsurf, openclaw, qwen, qoder, trae, cursor, kimi
 bun run src/index.ts install ./plugins/galeharness-cli --to <platform>
 
 # 安装到所有检测到的平台
@@ -331,6 +336,7 @@ bun run src/index.ts install ./plugins/galeharness-cli --to all
 
 | 平台 | 输出路径 | 说明 |
 |------|----------|------|
+| `claude` | `~/.claude/` | 原生格式：skills、agents、commands 直接写入 |
 | `opencode` | `~/.config/opencode/` | 命令作为 `.md` 文件；`opencode.json` MCP 配置深度合并；覆盖前备份 |
 | `codex` | `~/.codex/prompts` + `~/.codex/skills` | 命令成为 prompt + skill 对 |
 | `droid` | `~/.factory/` | 工具名称映射 (`Bash`->`Execute`, `Write`->`Create`) |
@@ -344,6 +350,7 @@ bun run src/index.ts install ./plugins/galeharness-cli --to all
 | `qoder` | `~/.qoder/` | Skills, agents, commands 作为 `.md` 文件 |
 | `trae` | `~/.trae/` | Skills, agents, commands 作为 `.md` 文件 (Agent Skills 标准) |
 | `cursor` | `~/.cursor/rules/` | Skills 作为 `.mdc` 规则文件 |
+| `kimi` | `~/.kimi/` | Skills、agents、commands 统一作为 `~/.kimi/skills/<name>/SKILL.md` |
 
 所有平台都是实验性的，可能随格式演进变化。
 
