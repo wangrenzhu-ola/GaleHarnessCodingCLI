@@ -1,0 +1,9 @@
+windows-compat-review-required:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.sh"
+          - "*.bash"
+          - "scripts/**/*.sh"
+          - "scripts/**/*.bash"
+          - "scripts/windows-compat-scan.ts"
+          - "scripts/windows-compat-scan-config.json"

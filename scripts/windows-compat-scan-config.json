@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "bash-shebang": { "severity": "error" },
+    "rm-rf": { "severity": "warn" },
+    "mkdir-p": { "severity": "warn" }
+  },
+  "exclude": [
+    "scripts/release/**",
+    "vendor/**"
+  ]
+}
