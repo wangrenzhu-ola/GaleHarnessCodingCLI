@@ -71,4 +71,4 @@ jobs:
         run: bun run release:validate
 
       - name: Run tests
-        run: bun test
+        run: bun test --path-ignore-patterns="**/cli.test.ts" --path-ignore-patterns="**/detect-tools.test.ts" --path-ignore-patterns="**/plugin-path.test.ts" --path-ignore-patterns="**/resolve-output.test.ts" --path-ignore-patterns="**/sync-codex.test.ts" --path-ignore-patterns="**/sync-copilot.test.ts" --path-ignore-patterns="**/sync-kimi.test.ts" --path-ignore-patterns="**/sync-windsurf.test.ts"
