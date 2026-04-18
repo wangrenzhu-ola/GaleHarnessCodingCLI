@@ -2,6 +2,12 @@
 
 Choose the template matching the problem_type track (see `references/schema.yaml`).
 
+**Document Language** — When the skill's config contains `language: zh-CN` (or no language config, defaulting to zh-CN):
+- Write all prose content in Chinese: paragraphs, list items, table content
+- Keep section headers (`## Problem`, `## Solution`, etc.) in English
+- Keep YAML frontmatter keys (`title`, `date`, `category`, etc.) in English
+- Do NOT translate code blocks, inline code, file paths, or URLs
+
 ---
 
 ## Bug Track Template

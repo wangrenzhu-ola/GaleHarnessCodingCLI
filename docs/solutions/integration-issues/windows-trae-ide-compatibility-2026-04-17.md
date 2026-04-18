@@ -1,0 +1,201 @@
+---
+title: "Windows Trae IDE compatibility: uv PATH and bash script failures"
+date: "2026-04-17"
+category: integration-issues
+module: gh:setup
+problem_type: integration_issue
+component: tooling
+severity: high
+symptoms:
+  - HKTMemory operations silently fail - uv run vendor/hkt-memory/scripts/hkt_memory_v5.py fails because uv is not in PATH
+  - gh:setup crashes immediately - bash scripts/check-health fails because Trae on Windows uses PowerShell v5.x without bash
+  - All bash scripts (check-health, install.sh, deploy.sh) incompatible with PowerShell
+  - uv installed to %USERPROFILE%\.local\bin which is not in PATH by default on Windows
+  - Trae's AI sandbox does not inherit user-defined terminal profiles or PATH customizations
+root_cause: incomplete_setup
+resolution_type: documentation_update
+related_components:
+  - development_workflow
+  - documentation
+related_docs:
+  - docs/solutions/integrations/colon-namespaced-names-break-windows-paths-2026-03-26.md
+  - docs/solutions/developer-experience/local-dev-shell-aliases-zsh-and-bunx-fixes-2026-03-26.md
+tags:
+  - windows
+  - trae
+  - powershell
+  - uv
+  - path
+  - cross-platform
+  - ide-compatibility
+  - bash
+---
+
+# Windows Trae IDE Compatibility: uv PATH and Bash Script Failures
+
+## Problem
+
+Windows users running GaleHarnessCLI skills in Trae IDE encountered complete failure of all gh: skills. The root causes were twofold: (1) uv was not discoverable in PATH despite being installed, and (2) all bash-based setup scripts crashed immediately in Trae's PowerShell v5.x sandbox.
+
+## Symptoms
+
+- **HKTMemory calls silently fail** — All 6 core skills (`gh:brainstorm`, `gh:plan`, `gh:work`, `gh:review`, `gh:compound`, `gh:ideate`) invoke `uv run vendor/hkt-memory/scripts/hkt_memory_v5.py`. When `uv` is not in PATH, the call fails and skills continue without memory operations. No error is surfaced to the user.
+- **gh:setup crashes immediately** — The setup skill runs `bash scripts/check-health`. Trae on Windows defaults to PowerShell v5.x. `bash` is not available in the sandbox shell. The script never runs, and diagnostic output is empty.
+- **uv not found errors** — Running `uv run vendor/hkt-memory/scripts/hkt_memory_v5.py` produces "uv: command not found" even after uv installation.
+- **PowerShell syntax errors** — Attempting to run bash scripts in PowerShell produces syntax errors due to bash arrays (`deps=(...)`), `command -v`, and process substitution.
+
+## What Didn't Work
+
+### Relying on uv's Default Installer
+
+Running `irm https://astral.sh/uv/install.ps1 | iex` installs uv to `%USERPROFILE%\.local\bin`, but this directory is **not in PATH by default** on Windows. Users assume uv is ready but it's not discoverable.
+
+### Expecting Trae Sandbox Inheritance
+
+Trae's AI sandbox shell does **not** inherit:
+- User-defined terminal profiles (`$PROFILE`)
+- PATH customizations added to PowerShell profile
+- Environment variables set in terminal session only
+
+All environment setup must be at the **system level** via System Properties.
+
+### Running Bash Scripts in PowerShell
+
+The `check-health` script uses:
+- Bash arrays: `deps=(uv gh jq)`
+- `command -v` (no PowerShell equivalent)
+- `brew install` (macOS/Linux package manager)
+- Process substitution and `IFS` splitting
+
+PowerShell v5.x cannot execute any of these constructs.
+
+### Git Bash Detection
+
+Attempting to auto-detect Git Bash installation paths was rejected because:
+- Git install paths vary by version and user preference
+- Adds complexity for a detection that may still fail
+- Simpler to guide users to install uv directly
+
+## Solution
+
+### Phase 0 Platform Detection (gh:setup SKILL.md)
+
+Added early Windows detection before any bash-dependent steps:
+
+```markdown
+## Phase 0: Detect Platform
+
+Run the following detection. On Windows PowerShell, `$env:OS` is set to `Windows_NT`.
+
+**Windows detection:** Try running `$env:OS` in the current shell. If the output 
+is `Windows_NT`, set `IS_WINDOWS=true` and follow the **Windows path** below.
+```
+
+### Windows PowerShell Diagnostics (Inline)
+
+When Windows is detected, skip `bash scripts/check-health` and run inline PowerShell:
+
+```powershell
+# Check uv
+Get-Command uv -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+
+# Check gh
+Get-Command gh -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+
+# Check jq
+Get-Command jq -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+
+# Check HKTMemory env vars
+[System.Environment]::GetEnvironmentVariable("HKT_MEMORY_API_KEY")
+[System.Environment]::GetEnvironmentVariable("HKT_MEMORY_BASE_URL")
+[System.Environment]::GetEnvironmentVariable("HKT_MEMORY_MODEL")
+```
+
+### Windows Install Commands Table
+
+| Tool | Windows install command |
+|------|------------------------|
+| uv | `irm https://astral.sh/uv/install.ps1 \| iex` |
+| gh | `winget install GitHub.cli` |
+| jq | `winget install jqlang.jq` |
+| ffmpeg | `winget install Gyan.FFmpeg` |
+| agent-browser | `npm install -g agent-browser` |
+
+### Critical PATH Documentation
+
+> **Important — uv PATH on Windows:** After installing uv on Windows, add 
+> `%USERPROFILE%\.local\bin` to your system PATH if it is not already there. 
+> Without this, `uv` is installed but not discoverable by the Trae sandbox shell.
+> 
+> To verify: open a new PowerShell window and run `uv --version`.
+
+### HKTMemory Environment Variables
+
+Set these as **system-level** environment variables (not session-only):
+
+| Variable | Value |
+|----------|-------|
+| `HKT_MEMORY_API_KEY` | Your API key |
+| `HKT_MEMORY_BASE_URL` | `https://open.bigmodel.cn/api/paas/v4/` |
+| `HKT_MEMORY_MODEL` | `embedding-3` |
+
+Set via: System Properties → Environment Variables → New (under User variables)
+
+### Step 3 Platform-Specific Evaluation
+
+Split the completion check into platform branches:
+
+**macOS/Linux:**
+- Uses bash health-check script with `command -v` checks
+- Reports dependencies as yellow in script output
+
+**Windows:**
+- Uses inline PowerShell `Get-Command` results
+- A tool is missing if `Get-Command` returned nothing (blank line)
+- No bash script output to parse
+
+## Why This Works
+
+1. **uv PATH Issue Resolved:** The fix documents that uv installs to a non-standard location (`%USERPROFILE%\.local\bin`) and Trae's sandbox doesn't inherit terminal customizations. Users must add this to system PATH and restart Trae.
+
+2. **Bash Incompatibility Bypassed:** By detecting Windows via `$env:OS` early, the skill uses native PowerShell commands instead of failing bash scripts. `Get-Command` is the PowerShell equivalent of `command -v`.
+
+3. **Environment Variable Persistence:** Documenting system-level configuration ensures Trae's sandbox can see HKTMemory credentials. Terminal-session-only exports are invisible to the sandbox.
+
+4. **Inline Diagnostics:** Rather than requiring a separate `check-health.ps1` script (future work), inline PowerShell probes provide immediate feedback without external dependencies.
+
+## Prevention
+
+1. **Always include platform detection in setup skills** — Detect Windows/PowerShell early and branch to platform-appropriate diagnostics before invoking bash-specific commands.
+
+2. **Document PATH requirements explicitly** — Any tool installed outside standard PATH locations needs clear documentation with verification steps.
+
+3. **Provide inline alternatives to bash scripts** — For Windows compatibility, include PowerShell equivalents or inline commands rather than relying solely on external bash scripts.
+
+4. **Test in sandboxed environments** — Trae's sandbox doesn't inherit user profiles, so test setup flows in clean sandbox conditions, not just developer terminals.
+
+5. **Consider PowerShell companion scripts** — For complex diagnostics, a `check-health.ps1` script can maintain parity with bash versions (see Future Work).
+
+6. **Use environment variable probes for IDE detection** — The pattern from `gh:polish-beta` (`CLAUDE_CODE`, `CURSOR_TRACE_ID`, `TERM_PROGRAM`) works cross-platform without APIs.
+
+## Related Issues
+
+- PR #13 — Windows Trae IDE compatibility implementation
+- [Colon namespaced names break Windows paths](colon-namespaced-names-break-windows-paths-2026-03-26.md) — Related Windows integration issue (filesystem constraints)
+- [Local dev shell aliases](local-dev-shell-aliases-zsh-and-bunx-fixes-2026-03-26.md) — Shell environment setup patterns (conceptually related)
+
+## Future Work
+
+From `docs/ideation/2026-04-17-windows-trae-compatibility-ideation.md`:
+
+| Approach | Complexity | Confidence | Status |
+|----------|------------|------------|--------|
+| check-health.ps1 companion | Medium | 82% | Queued |
+| TypeScript HKTMemory client | Medium-High | 70% | Future |
+| MCP server wrapper | High | 65% | Future |
+
+## Session History Notes
+
+- Prior Windows fix: Colon sanitization for skill names (2026-03-26) — filesystem-level, not runtime
+- Trae added as convert target (2026-04-17) — format conversion works, runtime execution was the gap
+- HKTMemory integration (2026-04-16) — v5.0 vendored, requires env vars for all 6 core skills

@@ -10,3 +10,11 @@
 # work_delegate_decision: auto   # auto | ask (default: auto)
 # work_delegate_model: gpt-5.4  # any valid codex model (default: gpt-5.4)
 # work_delegate_effort: high     # minimal | low | medium | high | xhigh (default: high)
+
+# --- Document language ---
+
+# language: zh-CN                 # zh-CN | en (default: zh-CN)
+                                 # Controls output language for workflow skills (gh:brainstorm, gh:plan,
+                                 # gh:compound, gh:compound-refresh, gh:ideate, document-review).
+                                 # When zh-CN: prose content in Chinese, headers/YAML keys remain English.
+                                 # When en: all output in English.

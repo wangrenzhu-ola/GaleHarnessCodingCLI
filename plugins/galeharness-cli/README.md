@@ -6,6 +6,27 @@ AI-powered development tools that get smarter with every use. Make each unit of 
 
 After installing, run `/gh:setup` in any project. It diagnoses your environment, installs missing tools, and bootstraps project config in one interactive flow.
 
+## Document Language
+
+Control the output language for workflow skills via `.compound-engineering/config.local.yaml`:
+
+```yaml
+language: zh-CN  # zh-CN (Chinese, default) or en (English)
+```
+
+**Affected skills:** `gh:brainstorm`, `gh:plan`, `gh:compound`, `gh:compound-refresh`, `gh:ideate`, `document-review`
+
+**What gets translated:**
+- Prose content: paragraphs, list items, table content
+- Finding descriptions in document-review (including headless mode JSON)
+
+**What stays in English:**
+- Section headers (`## Problem Frame`, `## Requirements`, etc.)
+- YAML frontmatter keys (`title`, `date`, `category`, etc.)
+- Code blocks, inline code, file paths, URLs
+
+**Default:** `zh-CN` when not configured. To opt out, set `language: en`.
+
 ## Components
 
 | Component | Count |
@@ -125,9 +146,9 @@ Agents are specialized subagents invoked by skills — you typically don't call 
 | `deployment-verification-agent` | Create Go/No-Go deployment checklists for risky data changes |
 | `dhh-rails-reviewer` | Rails review from DHH's perspective |
 | `julik-frontend-races-reviewer` | Review JavaScript/Stimulus code for race conditions |
-| `kieran-rails-reviewer` | Rails code review with strict conventions |
-| `kieran-python-reviewer` | Python code review with strict conventions |
-| `kieran-typescript-reviewer` | TypeScript code review with strict conventions |
+| `gale-rails-reviewer` | Rails code review with strict conventions |
+| `gale-python-reviewer` | Python code review with strict conventions |
+| `gale-typescript-reviewer` | TypeScript code review with strict conventions |
 | `maintainability-reviewer` | Coupling, complexity, naming, dead code |
 | `pattern-recognition-specialist` | Analyze code for patterns and anti-patterns |
 | `performance-oracle` | Performance analysis and optimization |

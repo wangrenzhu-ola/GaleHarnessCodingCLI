@@ -43,6 +43,12 @@ If `gale-task` is not on PATH, skip silently — this must never block the skill
 
 <!-- /HKT-PATCH:gale-task-start -->
 
+**Config (pre-resolved):**
+!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+
+If the block above contains `language: en`, write documents in English.
+If `__NO_CONFIG__` or `language: zh-CN` or no language key, write documents in Chinese (default).
+
 Present the user with two options before proceeding, using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, present the options and wait for the user's reply.
 
 ```
@@ -228,6 +234,8 @@ Launch research subagents. Each returns text data to the orchestrator.
 
 **WAIT for all Phase 1 subagents to complete before proceeding.**
 
+**Document Language**: When `language: zh-CN` (or default), write all prose content in Chinese. Keep section headers (`## Problem`, `## Solution`, etc.) and YAML frontmatter keys in English. Translate paragraphs, list items, and table content. Do NOT translate code blocks, inline code, file paths, or URLs.
+
 The orchestrating agent (main conversation) performs these steps:
 
 1. Collect all text results from Phase 1 subagents
@@ -375,11 +383,11 @@ Based on problem type, optionally invoke specialized agents to review the docume
 - **performance_issue** → `galeharness-cli:review:performance-oracle`
 - **security_issue** → `galeharness-cli:review:security-sentinel`
 - **database_issue** → `galeharness-cli:review:data-integrity-guardian`
-- Any code-heavy issue → always run `galeharness-cli:review:code-simplicity-reviewer`, and additionally run the kieran reviewer that matches the repo's primary stack:
-  - Ruby/Rails → also run `galeharness-cli:review:kieran-rails-reviewer`
-  - Python → also run `galeharness-cli:review:kieran-python-reviewer`
-  - TypeScript/JavaScript → also run `galeharness-cli:review:kieran-typescript-reviewer`
-  - Other stacks → no kieran reviewer needed
+- Any code-heavy issue → always run `galeharness-cli:review:code-simplicity-reviewer`, and additionally run the gale reviewer that matches the repo's primary stack:
+  - Ruby/Rails → also run `galeharness-cli:review:gale-rails-reviewer`
+  - Python → also run `galeharness-cli:review:gale-python-reviewer`
+  - TypeScript/JavaScript → also run `galeharness-cli:review:gale-typescript-reviewer`
+  - Other stacks → no gale reviewer needed
 
 </parallel_tasks>
 
@@ -497,7 +505,7 @@ Subagent Results:
 
 Specialized Agent Reviews (Auto-Triggered):
   ✓ performance-oracle: Validated query optimization approach
-  ✓ kieran-rails-reviewer: Code examples meet Rails conventions
+  ✓ gale-rails-reviewer: Code examples meet Rails conventions
   ✓ code-simplicity-reviewer: Solution is appropriately minimal
 
 File created:
@@ -563,9 +571,9 @@ Writes the final learning directly into `docs/solutions/`.
 Based on problem type, these agents can enhance documentation:
 
 ### Code Quality & Review
-- **galeharness-cli:review:kieran-rails-reviewer**: Reviews code examples for Rails best practices
-- **galeharness-cli:review:kieran-python-reviewer**: Reviews code examples for Python best practices
-- **galeharness-cli:review:kieran-typescript-reviewer**: Reviews code examples for TypeScript best practices
+- **galeharness-cli:review:gale-rails-reviewer**: Reviews code examples for Rails best practices
+- **galeharness-cli:review:gale-python-reviewer**: Reviews code examples for Python best practices
+- **galeharness-cli:review:gale-typescript-reviewer**: Reviews code examples for TypeScript best practices
 - **galeharness-cli:review:code-simplicity-reviewer**: Ensures solution code is minimal and clear
 - **galeharness-cli:review:pattern-recognition-specialist**: Identifies anti-patterns or repeating issues
 

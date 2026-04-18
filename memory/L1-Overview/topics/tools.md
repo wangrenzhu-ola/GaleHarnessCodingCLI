@@ -37,3 +37,21 @@
 **有效期至**: 2026-04-17
 
 ---
+### Windows Trae IDE compatibility: uv PATH and bash script failures
+
+- **时间**: 2026-04-17
+- **摘要**: --- title: "Windows Trae IDE compatibility: uv PATH and bash script failures" da...
+- **重要性**: medium
+- **来源**: [2026-04-17-211245-144](../L2-Full/daily/)
+
+**关键要点**:
+
+- title: "Windows Trae IDE compatibility: uv PATH and bash script failures"
+- date: "2026-04-17"
+- category: integration-issues
+- module: gh:setup
+- problem_type: integration_issue
+
+**标签**: 技术方案
+
+---

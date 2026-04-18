@@ -37,9 +37,9 @@
     "source_path": "memory/L2-Full/daily/2026-04-17.md",
     "status": "active",
     "created_at": "2026-04-17T01:43:33.577509+00:00",
-    "updated_at": "2026-04-17T01:43:33.600734+00:00",
-    "last_accessed": "2026-04-17T01:43:33.577509+00:00",
-    "access_count": 0,
+    "updated_at": "2026-04-17T13:09:34.970896+00:00",
+    "last_accessed": "2026-04-17T13:09:34.970896+00:00",
+    "access_count": 1,
     "helpful_count": 0,
     "feedback_stats": {
       "useful": 0,
@@ -56,6 +56,35 @@
       "topic": "integrations",
       "id": "2026-04-17-094332-597",
       "valid_until": "2026-04-17"
+    }
+  },
+  "2026-04-17-211245-144": {
+    "memory_id": "2026-04-17-211245-144",
+    "title": "Windows Trae IDE compatibility: uv PATH and bash script failures",
+    "topic": "integration-issues",
+    "scope": "topic:integration-issues",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-17.md",
+    "status": "active",
+    "created_at": "2026-04-17T13:12:46.189973+00:00",
+    "updated_at": "2026-04-17T13:12:46.189973+00:00",
+    "last_accessed": "2026-04-17T13:12:46.189973+00:00",
+    "access_count": 0,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "1ed456c4144d9c7986bf6645091f9b8683020c10",
+      "pr_id": null,
+      "topic": "integration-issues",
+      "id": "2026-04-17-211245-144"
     }
   }
 }

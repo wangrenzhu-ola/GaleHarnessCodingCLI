@@ -17,7 +17,7 @@
 
 import { spawn } from "node:child_process"
 import path from "path"
-import { appendEvent, type TaskEvent } from "../../src/utils/task-writer.js"
+import { appendEvent, type TaskEvent } from "../../src/utils/sqlite-writer.js"
 import { readCurrentTask, writeCurrentTask, CONTEXT_FILE } from "./context.js"
 
 // ---------------------------------------------------------------------------

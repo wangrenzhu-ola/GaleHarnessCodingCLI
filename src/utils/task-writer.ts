@@ -2,6 +2,15 @@ import { appendFile, mkdir } from "node:fs/promises"
 import path from "path"
 import os from "os"
 
+/**
+ * @deprecated Use sqlite-writer.ts instead.
+ * This module writes to JSONL format which is no longer read by the Board.
+ * Kept for backward compatibility and historical archive purposes.
+ *
+ * Migration guide: Replace imports from task-writer.js with sqlite-writer.js
+ * The API (appendEvent, TaskEvent type) is compatible.
+ */
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -13,49 +22,25 @@ export type EventType =
   | "memory_linked"
   | "pr_linked"
 
-export interface TaskEventBase {
+/**
+ * Task event structure.
+ * Compatible with Board schema (no `id` column, all fields optional except task_id, event_type, timestamp).
+ */
+export interface TaskEvent {
   task_id: string
   event_type: EventType
   timestamp: string
-  project: string
-  project_path: string
-  skill: string
-}
-
-export interface SkillStartedEvent extends TaskEventBase {
-  event_type: "skill_started"
+  project?: string
+  project_path?: string
+  skill?: string
   title?: string
   parent_task_id?: string
-}
-
-export interface SkillCompletedEvent extends TaskEventBase {
-  event_type: "skill_completed"
-  title?: string
-}
-
-export interface SkillFailedEvent extends TaskEventBase {
-  event_type: "skill_failed"
   error?: string
-}
-
-export interface MemoryLinkedEvent extends TaskEventBase {
-  event_type: "memory_linked"
+  pr_url?: string
+  pr_number?: string | number
   memory_id?: string
   memory_title?: string
 }
-
-export interface PrLinkedEvent extends TaskEventBase {
-  event_type: "pr_linked"
-  pr_url?: string
-  pr_number?: string | number
-}
-
-export type TaskEvent =
-  | SkillStartedEvent
-  | SkillCompletedEvent
-  | SkillFailedEvent
-  | MemoryLinkedEvent
-  | PrLinkedEvent
 
 // ---------------------------------------------------------------------------
 // Path resolution

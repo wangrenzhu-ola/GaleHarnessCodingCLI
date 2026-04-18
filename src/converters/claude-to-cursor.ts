@@ -80,7 +80,7 @@ function convertAgentToRule(agent: ClaudeAgent) {
   frontmatterLines.push("alwaysApply: false")
   frontmatterLines.push("---")
 
-  const content = frontmatterLines.join("\n") + "\n\n" + agent.content
+  const content = frontmatterLines.join("\n") + "\n\n" + agent.body
 
   return {
     name: `agent-${agent.name}`,
@@ -95,7 +95,7 @@ function convertCommandToRule(cmd: ClaudeCommand) {
   frontmatterLines.push("alwaysApply: false")
   frontmatterLines.push("---")
 
-  const content = frontmatterLines.join("\n") + "\n\n" + cmd.content
+  const content = frontmatterLines.join("\n") + "\n\n" + cmd.body
 
   return {
     name: `cmd-${cmd.name}`,

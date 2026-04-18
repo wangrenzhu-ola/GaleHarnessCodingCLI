@@ -69,6 +69,12 @@ topic: <kebab-case-topic>
 [If `Resolve Before Planning` is not empty: `-> Resume /gh:brainstorm` to resolve blocking questions before planning]
 ```
 
+**Document Language** — When the skill's config contains `language: zh-CN` (or no language config, defaulting to zh-CN):
+- Write all prose content in Chinese: paragraphs, list items, table content
+- Keep section headers (`## Problem Frame`, `## Requirements`, etc.) in English
+- Keep YAML frontmatter keys (`date`, `topic`, etc.) in English
+- Do NOT translate code blocks, inline code, file paths, or URLs
+
 **Visual communication** — Include a visual aid when the requirements would be significantly easier to understand with one. Read `references/visual-communication.md` for the decision criteria, format selection, and placement rules.
 
 For **Standard** and **Deep** brainstorms, a requirements document is usually warranted.

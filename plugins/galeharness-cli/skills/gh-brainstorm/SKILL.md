@@ -45,6 +45,12 @@ This skill does not implement code. It explores, clarifies, and documents decisi
 
 Do not proceed until you have a feature description from the user.
 
+**Config (pre-resolved):**
+!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+
+If the block above contains `language: en`, write documents in English.
+If `__NO_CONFIG__` or `language: zh-CN` or no language key, write documents in Chinese (default).
+
 ## Execution Flow
 
 <!-- HKT-PATCH:gale-task-start -->
@@ -227,6 +233,8 @@ If relevant, call out whether the choice is:
 ### Phase 3: Capture the Requirements
 
 Write or update a requirements document only when the conversation produced durable decisions worth preserving. Read `references/requirements-capture.md` for the document template, formatting rules, visual aid guidance, and completeness checks.
+
+**Document Language**: When `language: zh-CN` (or default), write all prose content in Chinese. Keep section headers (`## Problem Frame`, `## Requirements`, etc.) and YAML frontmatter keys in English. Translate paragraphs, list items, and table content. Do NOT translate code blocks, inline code, file paths, or URLs.
 
 For **Lightweight** brainstorms, keep the document compact. Skip document creation when the user only needs brief alignment and no durable decisions need to be preserved.
 

@@ -12,3 +12,7 @@
 {"timestamp": "2026-04-17T01:43:32.573317+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-17T01:43:33.577862+00:00", "type": "capture", "memory_id": "2026-04-17-094332-597", "scope": "topic:integrations", "data": {"status": "active"}}
 {"timestamp": "2026-04-17T01:43:33.601022+00:00", "type": "capture", "memory_id": "2026-04-17-094332-597", "scope": "topic:integrations", "data": {"status": "active"}}
+{"timestamp": "2026-04-17T13:09:33.525541+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-17T13:09:34.971347+00:00", "type": "recall", "memory_id": "2026-04-17-094332-597", "scope": "topic:integrations", "data": {}}
+{"timestamp": "2026-04-17T13:12:45.126924+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-17T13:12:46.190465+00:00", "type": "capture", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {"status": "active"}}

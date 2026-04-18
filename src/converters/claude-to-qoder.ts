@@ -45,12 +45,9 @@ function convertAgent(agent: ClaudeAgent) {
   if (agent.model) {
     frontmatterLines.push(`model: ${agent.model}`)
   }
-  if (agent.temperature !== undefined) {
-    frontmatterLines.push(`temperature: ${agent.temperature}`)
-  }
   frontmatterLines.push("---")
 
-  const content = frontmatterLines.join("\n") + "\n\n" + agent.content
+  const content = frontmatterLines.join("\n") + "\n\n" + agent.body
 
   return {
     name: agent.name,
@@ -69,7 +66,7 @@ function convertCommands(commands: ClaudeCommand[]) {
     }
     frontmatterLines.push("---")
 
-    const content = frontmatterLines.join("\n") + "\n\n" + cmd.content
+    const content = frontmatterLines.join("\n") + "\n\n" + cmd.body
 
     return {
       name: cmd.name,

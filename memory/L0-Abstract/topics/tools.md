@@ -12,3 +12,9 @@
 - **核心**: 截至 2026-04-17，…
 - **来源**: 2026-04-17-094332-597
 
+### Windows Trae IDE compatibility: uv PATH and bash script failures
+- **时间**: 2026-04-17
+- **关键词**: uv, trae, windows, bash, compatibility
+- **核心**: --- title: "Wi…
+- **来源**: 2026-04-17-211245-144
+

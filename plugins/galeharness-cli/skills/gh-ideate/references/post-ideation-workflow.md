@@ -54,6 +54,12 @@ Do not write the ideation doc yet unless:
 
 Write the ideation artifact after the candidate set has been reviewed enough to preserve.
 
+**Document Language** — When the skill's config contains `language: zh-CN` (or no language config, defaulting to zh-CN):
+- Write all prose content in Chinese: paragraphs, list items, table content
+- Keep section headers (`## Ranked Ideas`, `## Rejection Summary`, etc.) in English
+- Keep YAML frontmatter keys (`date`, `topic`, `focus`, etc.) in English
+- Do NOT translate code blocks, inline code, file paths, or URLs
+
 Always write or update the artifact before:
 - handing off to `gh:brainstorm`
 - sharing to Proof
