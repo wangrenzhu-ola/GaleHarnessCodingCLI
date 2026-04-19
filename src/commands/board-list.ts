@@ -30,6 +30,11 @@ export default defineCommand({
       description: "Maximum number of tasks to display",
       default: "20",
     },
+    offset: {
+      type: "string",
+      description: "Number of tasks to skip",
+      default: "0",
+    },
     format: {
       type: "string",
       description: "Output format: table, json, or quiet",
@@ -49,10 +54,17 @@ export default defineCommand({
       process.exit(1)
     }
 
-    // Bug 4: Validate --limit is not negative
-    const parsedLimit = parseInt(args.limit, 10)
-    if (isNaN(parsedLimit) || parsedLimit < 0) {
+    // Bug 4: Validate --limit is not negative and is integer
+    const parsedLimit = Number(args.limit)
+    if (!Number.isInteger(parsedLimit) || parsedLimit < 0) {
       console.error("Error: --limit must be a non-negative integer")
+      process.exit(1)
+    }
+
+    // Validate --offset is not negative and is integer
+    const parsedOffset = Number(args.offset)
+    if (!Number.isInteger(parsedOffset) || parsedOffset < 0) {
+      console.error("Error: --offset must be a non-negative integer")
       process.exit(1)
     }
 
@@ -77,6 +89,7 @@ export default defineCommand({
     const formatOptions: FormatOptions = {
       format: args.format as "table" | "json" | "quiet",
       limit: parsedLimit,
+      offset: parsedOffset,
       noColor: process.env.NO_COLOR === "1" || !process.stdout.isTTY,
     }
 
