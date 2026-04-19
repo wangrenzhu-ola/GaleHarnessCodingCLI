@@ -54,8 +54,24 @@ export default defineCommand({
     },
   },
   async run({ args }) {
-    const requestedPort = parseInt(args.port, 10) || 4321
-    const taskboardRoot = process.env.TASKBOARD_ROOT ?? join(homedir(), ".galeharness", "boards", "taskboard")
+    const requestedPort = parseInt(args.port, 10)
+
+    // Bug 5: Validate --port range
+    if (isNaN(requestedPort) || requestedPort < 0 || requestedPort >= 65536) {
+      console.error("Error: --port must be between 0 and 65535")
+      process.exit(1)
+    }
+
+    const defaultTaskboardRoot = join(homedir(), ".galeharness", "boards", "taskboard")
+    const fallbackTaskboardRoot = "/tmp/taskboard"
+
+    // Determine TaskBoard root: env var > default path > fallback path
+    let taskboardRoot = process.env.TASKBOARD_ROOT ?? defaultTaskboardRoot
+
+    // If default path doesn't exist, try fallback path for testing/development
+    if (!process.env.TASKBOARD_ROOT && !existsSync(taskboardRoot) && existsSync(fallbackTaskboardRoot)) {
+      taskboardRoot = fallbackTaskboardRoot
+    }
 
     if (!existsSync(taskboardRoot)) {
       console.error(`Error: TaskBoard not found at ${taskboardRoot}`)
@@ -63,6 +79,8 @@ export default defineCommand({
       console.error("To install TaskBoard:")
       console.error("  1. Clone the TaskBoard repository")
       console.error("  2. Set TASKBOARD_ROOT environment variable, or install to ~/.galeharness/boards/taskboard/")
+      console.error("")
+      console.error(`You can also place TaskBoard at ${fallbackTaskboardRoot} for testing.`)
       process.exit(1)
     }
 
