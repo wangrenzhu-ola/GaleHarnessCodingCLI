@@ -61,7 +61,7 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
     lines.push(row)
   }
 
-  if (tasks.length > options.limit) {
+  if (options.limit > 0 && tasks.length > options.limit) {
     lines.push(`\n... and ${tasks.length - options.limit} more tasks`)
   }
 
