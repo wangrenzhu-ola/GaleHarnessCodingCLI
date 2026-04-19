@@ -107,7 +107,7 @@ export default defineCommand({
     console.log(`Starting TaskBoard server on port ${port}...`)
 
     const child = spawn("bun", ["run", serverScript], {
-      env: { ...process.env, PORT: String(port) },
+      env: { ...process.env, BOARD_PORT: String(port) },
       stdio: "inherit",
     })
 
