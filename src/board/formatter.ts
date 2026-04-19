@@ -35,6 +35,11 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
     return "No tasks found."
   }
 
+  // Bug 5: limit=0 should show message instead of empty table header
+  if (options.limit === 0) {
+    return "No tasks found."
+  }
+
   const { noColor } = options
 
   const headers = ["Task ID", "Title", "Project", "Skill", "Status", "Started"]
@@ -48,7 +53,7 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
   lines.push(headerRow)
   lines.push("-".repeat(headerRow.length))
 
-  for (const task of tasks.slice(0, options.limit)) {
+  for (const task of tasks.slice(options.offset, options.offset + options.limit)) {
     const statusText = task.status
     const row = [
       truncate(task.task_id, colWidths[0]).padEnd(colWidths[0]),
@@ -61,21 +66,22 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
     lines.push(row)
   }
 
-  if (options.limit > 0 && tasks.length > options.limit) {
-    lines.push(`\n... and ${tasks.length - options.limit} more tasks`)
+  const remaining = tasks.length - (options.offset + options.limit)
+  if (remaining > 0) {
+    lines.push(`\n... and ${remaining} more tasks`)
   }
 
   return lines.join("\n")
 }
 
 export function formatJson(tasks: DerivedTask[], options: FormatOptions): string {
-  const limited = tasks.slice(0, options.limit)
+  const limited = tasks.slice(options.offset, options.offset + options.limit)
   return JSON.stringify(limited, null, 2)
 }
 
 export function formatQuiet(tasks: DerivedTask[], options: FormatOptions): string {
   const ids = tasks
-    .slice(0, options.limit)
+    .slice(options.offset, options.offset + options.limit)
     .map(t => t.task_id)
   return ids.length > 0 ? ids.join("\n") + "\n" : ""
 }
