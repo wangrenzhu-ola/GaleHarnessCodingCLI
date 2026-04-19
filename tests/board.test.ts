@@ -3,8 +3,10 @@ import { Database } from "bun:sqlite"
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { createServer } from "node:net"
 import { mergeEvents, readAndMergeTasks } from "../src/board/reader"
 import { formatTable, formatJson, formatQuiet, formatStats, formatTaskDetail } from "../src/board/formatter"
+import { checkPortAvailable, findAvailablePort } from "../src/commands/board-serve"
 import type { TaskEvent, DerivedTask } from "../src/board/types"
 
 describe("board reader", () => {
@@ -286,6 +288,16 @@ describe("board formatter", () => {
       expect(lines).toContain("a1b2c3d4")
       expect(lines).toContain("d4c3b2a1")
     })
+
+    it("should end with a trailing newline", () => {
+      const output = formatQuiet(mockTasks, { format: "quiet", limit: 20, noColor: true })
+      expect(output.endsWith("\n")).toBe(true)
+    })
+
+    it("should return empty string for empty tasks", () => {
+      const output = formatQuiet([], { format: "quiet", limit: 20, noColor: true })
+      expect(output).toBe("")
+    })
   })
 
   describe("formatStats", () => {
@@ -355,6 +367,151 @@ describe("board formatter", () => {
       const output = formatTaskDetail(task, true)
       expect(output).toContain("Memory Entries:")
       expect(output).toContain("Learning")
+    })
+  })
+})
+
+describe("board integration tests", () => {
+  const sampleTasks: DerivedTask[] = [
+    {
+      task_id: "a1b2c3d4",
+      project: "my-app",
+      skill: "gh:work",
+      title: "Add dark mode",
+      status: "completed",
+      started_at: "2026-04-19T14:30:00Z",
+      completed_at: "2026-04-19T15:30:00Z",
+      memories: [],
+    },
+    {
+      task_id: "d4c3b2a1",
+      project: "api",
+      skill: "gh:debug",
+      title: "Fix auth bug",
+      status: "in_progress",
+      started_at: "2026-04-19T15:00:00Z",
+      memories: [],
+    },
+  ]
+
+  describe("NO_COLOR=1", () => {
+    it("should produce output without ANSI escape codes when noColor is true", () => {
+      const output = formatTable(sampleTasks, { format: "table", limit: 20, noColor: true })
+      expect(output).not.toContain("\x1b[")
+    })
+
+    it("should produce output with ANSI escape codes when noColor is false", () => {
+      const output = formatTable(sampleTasks, { format: "table", limit: 20, noColor: false })
+      expect(output).toContain("\x1b[")
+    })
+
+    it("should strip color from formatStats when noColor is true", () => {
+      const output = formatStats(sampleTasks, true)
+      expect(output).not.toContain("\x1b[")
+    })
+
+    it("should include color in formatStats when noColor is false", () => {
+      const output = formatStats(sampleTasks, false)
+      expect(output).toContain("\x1b[")
+    })
+
+    it("should strip color from formatTaskDetail when noColor is true", () => {
+      const task: DerivedTask = {
+        ...sampleTasks[0],
+        status: "failed",
+        error: "Something went wrong",
+      }
+      const output = formatTaskDetail(task, true)
+      expect(output).not.toContain("\x1b[")
+    })
+
+    it("should include color in formatTaskDetail when noColor is false", () => {
+      const output = formatTaskDetail(sampleTasks[0], false)
+      expect(output).toContain("\x1b[")
+    })
+  })
+
+  describe("subprocess crash exit code", () => {
+    it("should propagate non-zero exit code from child process", async () => {
+      // Test by running the CLI with an invalid board serve config that causes
+      // the child process to fail. We verify the exit code is non-zero.
+      const proc = Bun.spawn([
+        "bun", "run", join(import.meta.dir, "..", "src", "index.ts"),
+        "board", "serve",
+      ], {
+        env: { ...process.env, TASKBOARD_ROOT: "/nonexistent/path" },
+        stdout: "pipe",
+        stderr: "pipe",
+      })
+      const exitCode = await proc.exited
+      expect(exitCode).not.toBe(0)
+    })
+  })
+
+  describe("port conflict in serve", () => {
+    it("should detect an occupied port", async () => {
+      const port = 14321
+      // Occupy the port
+      const blocker = createServer()
+      await new Promise<void>((resolve) => {
+        blocker.listen(port, () => resolve())
+      })
+
+      try {
+        const available = await checkPortAvailable(port)
+        expect(available).toBe(false)
+      } finally {
+        await new Promise<void>((resolve) => blocker.close(() => resolve()))
+      }
+    })
+
+    it("should detect a free port", async () => {
+      // Use a port that's very likely free (high-numbered, non-standard)
+      const port = 15321
+      const available = await checkPortAvailable(port)
+      expect(available).toBe(true)
+    })
+
+    it("should find the next available port when starting port is occupied", async () => {
+      const startPort = 15322
+      // Occupy the starting port
+      const blocker = createServer()
+      await new Promise<void>((resolve) => {
+        blocker.listen(startPort, () => resolve())
+      })
+
+      try {
+        const found = await findAvailablePort(startPort, 10)
+        expect(found).not.toBeNull()
+        expect(found).not.toBe(startPort)
+        expect(found!).toBeGreaterThan(startPort)
+      } finally {
+        await new Promise<void>((resolve) => blocker.close(() => resolve()))
+      }
+    })
+
+    it("should return null when all ports in range are occupied", async () => {
+      const startPort = 15330
+      const maxAttempts = 3
+      const blockers: ReturnType<typeof createServer>[] = []
+
+      // Occupy all ports in the range
+      for (let i = 0; i < maxAttempts; i++) {
+        const blocker = createServer()
+        await new Promise<void>((resolve) => {
+          blocker.listen(startPort + i, () => resolve())
+        })
+        blockers.push(blocker)
+      }
+
+      try {
+        const found = await findAvailablePort(startPort, maxAttempts)
+        expect(found).toBeNull()
+      } finally {
+        for (const blocker of blockers) {
+          await new Promise<void>((resolve) => blocker.close(() => resolve()))
+        }
+      }
     })
   })
 })

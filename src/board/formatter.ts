@@ -74,10 +74,10 @@ export function formatJson(tasks: DerivedTask[], options: FormatOptions): string
 }
 
 export function formatQuiet(tasks: DerivedTask[], options: FormatOptions): string {
-  return tasks
+  const ids = tasks
     .slice(0, options.limit)
     .map(t => t.task_id)
-    .join("\n")
+  return ids.length > 0 ? ids.join("\n") + "\n" : ""
 }
 
 export function formatStats(tasks: DerivedTask[], noColor: boolean): string {

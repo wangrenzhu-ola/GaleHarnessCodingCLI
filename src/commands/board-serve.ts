@@ -5,7 +5,7 @@ import { homedir } from "node:os"
 import { join } from "node:path"
 import { createServer } from "node:net"
 
-function checkPortAvailable(port: number): Promise<boolean> {
+export function checkPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
     const server = createServer()
     server.once("error", () => resolve(false))
@@ -17,7 +17,7 @@ function checkPortAvailable(port: number): Promise<boolean> {
   })
 }
 
-function findAvailablePort(startPort: number, maxAttempts = 10): Promise<number | null> {
+export function findAvailablePort(startPort: number, maxAttempts = 10): Promise<number | null> {
   return new Promise(async (resolve) => {
     for (let i = 0; i < maxAttempts; i++) {
       const port = startPort + i
