@@ -54,11 +54,10 @@ export default defineCommand({
     },
   },
   async run({ args }) {
-    const requestedPort = parseInt(args.port, 10)
-
-    // Bug 5: Validate --port range
-    if (isNaN(requestedPort) || requestedPort < 0 || requestedPort >= 65536) {
-      console.error("Error: --port must be between 0 and 65535")
+    // Bug 6: Validate --port is integer and in valid range
+    const requestedPort = Number(args.port)
+    if (!Number.isInteger(requestedPort) || requestedPort < 0 || requestedPort >= 65536) {
+      console.error("Error: --port must be an integer between 0 and 65535")
       process.exit(1)
     }
 
