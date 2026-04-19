@@ -6,6 +6,7 @@ import install from "./commands/install"
 import listCommand from "./commands/list"
 import pluginPath from "./commands/plugin-path"
 import sync from "./commands/sync"
+import board from "./commands/board"
 
 const main = defineCommand({
   meta: {
@@ -19,6 +20,7 @@ const main = defineCommand({
     list: () => listCommand,
     "plugin-path": () => pluginPath,
     sync: () => sync,
+    board: () => board,
   },
 })
 
