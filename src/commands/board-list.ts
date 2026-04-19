@@ -77,11 +77,13 @@ export default defineCommand({
       filtered = filtered.filter(t => t.status === status)
     }
 
-    if (args.project) {
+    // Bug 7: --project "" should be treated as no filter, not as empty string filter
+    if (args.project && args.project.trim() !== "") {
       filtered = filtered.filter(t => t.project === args.project)
     }
 
-    if (args.skill) {
+    // Bug 7: --skill "" should be treated as no filter
+    if (args.skill && args.skill.trim() !== "") {
       filtered = filtered.filter(t => t.skill === args.skill)
     }
 
