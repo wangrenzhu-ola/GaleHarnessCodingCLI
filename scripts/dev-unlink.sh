@@ -17,9 +17,10 @@ for bin in gale-harness compound-plugin gale-knowledge; do
   # Prefer saved backup target
   if [ -f "$BACKUP" ]; then
     saved_target="$(cat "$BACKUP")"
-    rm -f "$BACKUP"
     ln -sf "$saved_target" "$LINK"
     echo "Restored $bin -> $saved_target (from backup)"
+    # Clean up backup file after restore
+    rm -f "$BACKUP"
   # Fall back to the global install path
   elif [ -f "$GLOBAL_PKG" ]; then
     ln -sf "../install/global/node_modules/@gale/harness-cli/src/index.ts" "$LINK"

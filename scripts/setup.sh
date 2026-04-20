@@ -173,7 +173,12 @@ if command -v bun >/dev/null 2>&1; then
   # ── 全局知识仓库初始化 ──
   header "初始化全局知识仓库..."
   if command -v gale-knowledge &>/dev/null; then
-    gale-knowledge init 2>/dev/null && ok "全局知识仓库已初始化 (~/.galeharness/knowledge/)" || warn "知识仓库初始化失败，可稍后手动运行 gale-knowledge init"
+    gale-knowledge init 2>/dev/null
+    if [ -d "$HOME/.galeharness/knowledge/.git" ]; then
+      ok "全局知识仓库已初始化 (~/.galeharness/knowledge/)"
+    else
+      warn "知识仓库初始化失败，可稍后手动运行 gale-knowledge init"
+    fi
   else
     warn "gale-knowledge 不在 PATH 中，请先确保 bun link 成功后重试"
   fi
