@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.9.0...cli-v1.9.1) (2026-04-20)
+
+### Features
+
+* **setup:** add one-click environment setup scripts for macOS and Windows ([#19](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/pull/19))
+  * `scripts/setup.sh` — macOS 一键安装：自动检测并安装 Git、Bun、Python、uv
+  * `scripts/setup.ps1` — Windows 一键安装：自动检测并安装 Git、Bun、Python、uv（含 winget 路径）
+  * 交互式 HKT_MEMORY_API_KEY 输入，自动配置环境变量
+  * 安装完成后输出自检清单（6 步验证）
+  * 自动执行 `bun link` 实现全局 `gale-harness` 命令
+* **readme:** rewrite installation guide to use one-click setup scripts instead of manual steps
+
 ## [1.9.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.8.0...cli-v1.9.0) (2026-04-18)
 
 
