@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.10.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.9.1...cli-v1.10.0) (2026-04-20)
+
+
+### Features
+
+* **board:** implement gale-harness board subcommand ([c116c9b](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c116c9b0aae65d42a0d3506198d5a803c0f263e9))
+* **board:** vendor taskboard UI and add integration docs ([324d57c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/324d57c89f79242ffe2f29f39b4d2479b88e3b47))
+
+
+### Bug Fixes
+
+* add --offset pagination parameter (BUG-003), fix limit=0 message (BUG-005), fix float limit validation (BUG-004) ([a0a7b89](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a0a7b89e92ba98b7a81da2999831a3e0906ed73a))
+* board serve --port integer validation (BUG-006) ([c180ece](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c180ece68fb45e9c807d4a7930c6f498046d0906))
+* **board:** --limit 0 should show empty table without 'more tasks' hint ([1b10505](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1b1050508ae2b4840e21ce4f27735cbd041287d5))
+* board.ts passes explicit limit default to boardList (BUG-002) ([29e80da](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/29e80daad89622b6bda1873cf95314dc0aa83db1))
+* **board:** add input validation for --status/--format/--limit/--port ([869e81c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/869e81c195abf29fbed29871ff8d6e7c0796a5a3))
+* **board:** add trailing newline to formatQuiet and CLI integration tests ([5611f8d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/5611f8d1dc7535b48a15fbbbd9520d29918d3734))
+* **board:** fix time-dependent stale test and missing offset default ([6074481](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/607448110c29d525cdbc569233592cc616c3bddd))
+* **board:** fix time-dependent stale test in vendor/taskboard ([5b40dfb](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/5b40dfbedef3c8b84465fd925e8019fe69e2c471))
+* **bootstrap,readme:** correct repo name from GaleHarnessCLI to GaleHarnessCodingCLI ([76715ae](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/76715ae5dbd47fdb0e54fd6e5918f68215da7f6c))
+* **bootstrap,readme:** correct repo name from GaleHarnessCLI to GaleHarnessCodingCLI ([4ee7929](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4ee7929fa2f8e7e78dd36dde9c78fc0439d60362))
+* **docs:** fix broken install instructions ([580350f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/580350f0fe3d7c2738dabcad7ab1661bc31fd0ac))
+* handle empty string for --project and --skill filters (BUG-007) ([04ad1f7](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/04ad1f7f241035eea467aa64356abde1743f9f2b))
+* PORT -&gt; BOARD_PORT environment variable (BUG-001) ([82a6afc](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/82a6afc01a17e25da97e5d8e9dc02bb1c3e6f83d))
+
 ## [1.9.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.9.0...cli-v1.9.1) (2026-04-20)
 
 ### Features
