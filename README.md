@@ -493,6 +493,8 @@ bash scripts/setup.sh
 
 #### Windows
 
+**方式 A：已有 Git**
+
 ```powershell
 # 1. 克隆仓库
 git clone https://github.com/wangrenzhu-ola/GaleHarnessCLI.git
@@ -502,7 +504,18 @@ cd GaleHarnessCLI
 .\scripts\setup.ps1
 ```
 
-脚本会自动安装 Git（如未安装）、Bun、Python、uv，交互式提示输入 **API Key** 并写入系统环境变量。
+**方式 B：全新 Windows（未安装 Git）**
+
+复制以下整行命令到 PowerShell 直接执行，无需预先安装任何工具：
+
+```powershell
+irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCLI/main/scripts/bootstrap.ps1 | iex
+```
+
+`bootstrap.ps1` 会自动：
+- 下载并安装 Git（支持 winget 或离线安装包）
+- 克隆本仓库到 `~/GaleHarnessCLI`
+- 自动运行 `setup.ps1` 完成后续所有环境配置
 
 > **PowerShell 执行策略：** 如果脚本无法运行，先执行：
 > ```powershell
