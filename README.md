@@ -509,6 +509,10 @@ cd GaleHarnessCLI
 复制以下整行命令到 PowerShell 直接执行，无需预先安装任何工具：
 
 ```powershell
+# 首选：jsDelivr CDN（国内快，全球稳）
+irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCLI@main/scripts/bootstrap.ps1 | iex
+
+# 备选：GitHub 官方源（如遇 404 请等待 2-3 分钟后重试）
 irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCLI/main/scripts/bootstrap.ps1 | iex
 ```
 
