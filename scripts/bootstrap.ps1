@@ -1,6 +1,7 @@
 # GaleHarnessCLI Windows 零依赖启动脚本
 # 用途：在全新 Windows 上（无 Git）一键完成环境准备
 # 运行方式：复制以下命令到 PowerShell 执行
+#   irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCLI@main/scripts/bootstrap.ps1 | iex
 #   irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCLI/main/scripts/bootstrap.ps1 | iex
 
 $ErrorActionPreference = "Stop"
@@ -34,6 +35,12 @@ foreach ($cmd in @("git", "C:\Program Files\Git\bin\git.exe", "C:\Program Files 
 
 if ($gitAvailable) {
     ok "Git 已安装"
+    # Fix Windows schannel TLS issue with GitHub
+    info "配置 Git 使用 OpenSSL 后端（避免 schannel TLS 握手失败）..."
+    git config --global http.sslBackend openssl 2>$null
+    # Disable Git Credential Manager pop-ups for public repos
+    info "禁用 Git Credential Manager 弹窗..."
+    git config --global credential.helper "" 2>$null
 } else {
     info "未检测到 Git，正在安装..."
 
@@ -77,6 +84,13 @@ if ($gitAvailable) {
     # Refresh PATH so git is available in this session
     $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
 
+    # Configure Git to use OpenSSL backend (avoids schannel TLS handshake failures on Windows)
+    info "配置 Git 使用 OpenSSL 后端..."
+    git config --global http.sslBackend openssl 2>$null
+    # Disable Git Credential Manager pop-ups for public repos
+    info "禁用 Git Credential Manager 弹窗..."
+    git config --global credential.helper "" 2>$null
+
     # Verify
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         err "Git 安装后仍无法找到"
@@ -97,7 +111,67 @@ if (Test-Path "$cloneDir\.git") {
     if (Test-Path $cloneDir) {
         Remove-Item -Recurse -Force $cloneDir
     }
-    git clone https://github.com/wangrenzhu-ola/GaleHarnessCLI.git $cloneDir
+
+    # Query GitHub API for the latest release tag (shallow clone for speed)
+    $repoUrl = "https://github.com/wangrenzhu-ola/GaleHarnessCLI.git"
+    $apiTagsUrl = "https://api.github.com/repos/wangrenzhu-ola/GaleHarnessCodingCLI/tags?per_page=1"
+    $cloneRef = "main"
+
+    try {
+        info "查询最新 release tag..."
+        $tags = Invoke-RestMethod -Uri $apiTagsUrl -UseBasicParsing -TimeoutSec 10
+        if ($tags -and $tags.Count -gt 0) {
+            $cloneRef = $tags[0].name
+            ok "最新版本: $cloneRef"
+        } else {
+            warn "未获取到 tag，将使用 main 分支"
+        }
+    } catch {
+        warn "查询 tag 失败（可能是网络问题），将使用 main 分支"
+    }
+
+    # Clone with retry logic and OpenSSL backend to avoid schannel TLS failures
+    $cloneSuccess = $false
+    $maxAttempts = 3
+    for ($i = 1; $i -le $maxAttempts; $i++) {
+        info "克隆仓库 $cloneRef（尝试 $i / $maxAttempts）..."
+        try {
+            $gitArgs = @(
+                "clone",
+                "--config", "http.sslBackend=openssl",
+                "--config", "credential.helper=",
+                "--branch", $cloneRef,
+                "--depth", "1",
+                "--single-branch",
+                $repoUrl,
+                $cloneDir
+            )
+            & git @gitArgs 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                $cloneSuccess = $true
+                break
+            }
+        } catch {
+            warn "克隆失败: $_"
+        }
+        if ($i -lt $maxAttempts) {
+            warn "等待 3 秒后重试..."
+            Start-Sleep -Seconds 3
+        }
+    }
+
+    if (-not $cloneSuccess) {
+        err "仓库克隆失败，已尝试 $maxAttempts 次"
+        Write-Host ""
+        Write-Host "可能的原因和解决方案：" -ForegroundColor Yellow
+        Write-Host "• 网络不稳定：请检查网络连接后重试" -ForegroundColor White
+        Write-Host "• GitHub 被墙：请尝试使用代理或镜像" -ForegroundColor White
+        Write-Host "• 手动克隆：git config --global http.sslBackend openssl" -ForegroundColor White
+        Write-Host "             git config --global credential.helper ''" -ForegroundColor White
+        Write-Host "             git clone --depth 1 --branch main $repoUrl" -ForegroundColor White
+        exit 1
+    }
+
     ok "仓库克隆完成: $cloneDir"
 }
 
