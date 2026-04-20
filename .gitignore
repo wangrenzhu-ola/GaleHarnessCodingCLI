@@ -20,3 +20,4 @@ todos/
 # Sync temp files
 .compound-sync.diff
 .compound-sync.raw.diff
+.qoder/
