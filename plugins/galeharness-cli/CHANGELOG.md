@@ -9,6 +9,18 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.10.0...galeharness-cli-v1.11.0) (2026-04-20)
+
+
+### Features
+
+* **knowledge-repo:** implement global knowledge repository infrastructure ([1e121f4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1e121f40d292d22fab1001914924e5fd50fd7200))
+
+
+### Bug Fixes
+
+* **knowledge-repo:** address PR [#31](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/31) code review findings ([6629912](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/66299125aaa601c27e9bdd1d42fb6fb0b4402544))
+
 ## [1.10.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.9.0...galeharness-cli-v1.10.0) (2026-04-20)
 
 

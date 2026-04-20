@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.11.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.10.0...cli-v1.11.0) (2026-04-20)
+
+
+### Features
+
+* **knowledge-repo:** implement global knowledge repository infrastructure ([1e121f4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/1e121f40d292d22fab1001914924e5fd50fd7200))
+
+
+### Bug Fixes
+
+* **board:** resolve BUG-010~013 knowledge-reader, board-list integration, and subcommand registration ([d4ef964](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d4ef96403a7284580df12a33eec978d798cd7288))
+* **board:** set cwd for board-serve spawn to taskboardRoot ([6375b75](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/6375b75bbd90261dc03f1a0caa468e8fd1f10636))
+* **board:** 修复子命令注册、测试时间敏感性和前端构建问题 ([e52137c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e52137c00df63472a4856c865aea3a0b0e69f26f))
+* **cli:** show help instead of error when no subcommand is provided ([12605f2](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/12605f2137479515478a37b051785137dc883cc1))
+* **knowledge-reader:** use forward-slash literals in path assertions for Windows compat ([428accf](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/428accf5f017e89971073092123324ffdeb7eaf0))
+* **knowledge-repo:** address PR [#31](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/31) code review findings ([6629912](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/66299125aaa601c27e9bdd1d42fb6fb0b4402544))
+* **knowledge-repo:** configure local git identity before commit in CI ([a1f5f39](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a1f5f39a01c4978a2a952e45097e5d73ee642568))
+* **knowledge-repo:** fix rebuildIndex commit tracking and Windows path compat ([7faae7b](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/7faae7b3f2fb0750d40c3bf350c70104302657bc))
+* **knowledge:** resolve BUG-001~004 path resolution, project name extraction, path traversal protection, and frontmatter injection ([c398d2c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c398d2c7f974ed32bd8a058f33de9bf4b5347e54))
+
 ## [1.10.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.9.1...cli-v1.10.0) (2026-04-20)
 
 
