@@ -12,6 +12,7 @@ import type { TaskEvent, DerivedTask } from "../src/board/types"
 describe("board reader", () => {
   describe("mergeEvents", () => {
     it("should merge skill_started events into tasks", () => {
+      const now = new Date("2026-04-19T11:00:00Z").getTime()
       const events: TaskEvent[] = [
         {
           task_id: "task1",
@@ -23,7 +24,7 @@ describe("board reader", () => {
         },
       ]
 
-      const tasks = mergeEvents(events)
+      const tasks = mergeEvents(events, now, 2)
       expect(tasks).toHaveLength(1)
       expect(tasks[0].task_id).toBe("task1")
       expect(tasks[0].project).toBe("my-app")
@@ -33,6 +34,7 @@ describe("board reader", () => {
     })
 
     it("should mark completed tasks", () => {
+      const now = new Date("2026-04-19T12:00:00Z").getTime()
       const events: TaskEvent[] = [
         {
           task_id: "task1",
@@ -49,12 +51,13 @@ describe("board reader", () => {
         },
       ]
 
-      const tasks = mergeEvents(events)
+      const tasks = mergeEvents(events, now, 2)
       expect(tasks[0].status).toBe("completed")
       expect(tasks[0].completed_at).toBe("2026-04-19T11:00:00Z")
     })
 
     it("should mark failed tasks", () => {
+      const now = new Date("2026-04-19T12:00:00Z").getTime()
       const events: TaskEvent[] = [
         {
           task_id: "task1",
@@ -72,7 +75,7 @@ describe("board reader", () => {
         },
       ]
 
-      const tasks = mergeEvents(events)
+      const tasks = mergeEvents(events, now, 2)
       expect(tasks[0].status).toBe("failed")
       expect(tasks[0].error).toBe("Build failed")
     })
@@ -95,6 +98,7 @@ describe("board reader", () => {
     })
 
     it("should capture PR links", () => {
+      const now = new Date("2026-04-19T12:00:00Z").getTime()
       const events: TaskEvent[] = [
         {
           task_id: "task1",
@@ -113,12 +117,13 @@ describe("board reader", () => {
         },
       ]
 
-      const tasks = mergeEvents(events)
+      const tasks = mergeEvents(events, now, 2)
       expect(tasks[0].pr_url).toBe("https://github.com/org/repo/pull/123")
       expect(tasks[0].pr_number).toBe(123)
     })
 
     it("should capture memory entries", () => {
+      const now = new Date("2026-04-19T12:00:00Z").getTime()
       const events: TaskEvent[] = [
         {
           task_id: "task1",
@@ -137,13 +142,14 @@ describe("board reader", () => {
         },
       ]
 
-      const tasks = mergeEvents(events)
+      const tasks = mergeEvents(events, now, 2)
       expect(tasks[0].memories).toHaveLength(1)
       expect(tasks[0].memories[0].memory_id).toBe("mem1")
       expect(tasks[0].memories[0].memory_title).toBe("Learning about feature X")
     })
 
     it("should sort tasks by started_at descending", () => {
+      const now = new Date("2026-04-19T14:00:00Z").getTime()
       const events: TaskEvent[] = [
         {
           task_id: "task1",
@@ -163,7 +169,7 @@ describe("board reader", () => {
         },
       ]
 
-      const tasks = mergeEvents(events)
+      const tasks = mergeEvents(events, now, 2)
       expect(tasks[0].task_id).toBe("task2")
       expect(tasks[1].task_id).toBe("task1")
     })

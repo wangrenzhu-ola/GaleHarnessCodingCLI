@@ -35,12 +35,13 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
     return "No tasks found."
   }
 
-  // Bug 5: limit=0 should show message instead of empty table header
+  // limit=0 should show message instead of empty table header
   if (options.limit === 0) {
     return "No tasks found."
   }
 
   const { noColor } = options
+  const offset = options.offset ?? 0
 
   const headers = ["Task ID", "Title", "Project", "Skill", "Status", "Started"]
   const colWidths = [10, 30, 15, 15, 12, 16]
@@ -53,7 +54,7 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
   lines.push(headerRow)
   lines.push("-".repeat(headerRow.length))
 
-  for (const task of tasks.slice(options.offset, options.offset + options.limit)) {
+  for (const task of tasks.slice(offset, offset + options.limit)) {
     const statusText = task.status
     const row = [
       truncate(task.task_id, colWidths[0]).padEnd(colWidths[0]),
@@ -66,7 +67,7 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
     lines.push(row)
   }
 
-  const remaining = tasks.length - (options.offset + options.limit)
+  const remaining = tasks.length - (offset + options.limit)
   if (remaining > 0) {
     lines.push(`\n... and ${remaining} more tasks`)
   }
@@ -75,13 +76,15 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
 }
 
 export function formatJson(tasks: DerivedTask[], options: FormatOptions): string {
-  const limited = tasks.slice(options.offset, options.offset + options.limit)
+  const offset = options.offset ?? 0
+  const limited = tasks.slice(offset, offset + options.limit)
   return JSON.stringify(limited, null, 2)
 }
 
 export function formatQuiet(tasks: DerivedTask[], options: FormatOptions): string {
+  const offset = options.offset ?? 0
   const ids = tasks
-    .slice(options.offset, options.offset + options.limit)
+    .slice(offset, offset + options.limit)
     .map(t => t.task_id)
   return ids.length > 0 ? ids.join("\n") + "\n" : ""
 }

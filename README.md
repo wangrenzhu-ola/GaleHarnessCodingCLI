@@ -471,10 +471,82 @@ flowchart LR
 
 ### 前置要求
 
-- [Bun](https://bun.sh/) >= 1.0.0
-- Node.js >= 18 (可选，用于部分工具)
-- Git
-- Python >= 3.9 (用于 HKTMemory)
+| 工具 | 版本 | 用途 | 必需 |
+|------|------|------|------|
+| [Git](https://git-scm.com/) | 任意 | 代码管理 | 是 |
+| [Bun](https://bun.sh/) | >= 1.0.0 | 运行时与包管理 | 是 |
+| [Node.js](https://nodejs.org/) | >= 18 | 部分工具依赖 | 否 |
+| [Python](https://www.python.org/) | >= 3.9 | HKTMemory 知识库 | 是 |
+| [uv](https://docs.astral.sh/uv/) | 任意 | Python 依赖管理（推荐） | 否 |
+| [gh](https://cli.github.com/) | 任意 | GitHub CLI | 否 |
+| [jq](https://jqlang.github.io/jq/) | 任意 | JSON 处理 | 否 |
+
+---
+
+### 环境准备（按平台）
+
+#### macOS
+
+```bash
+# 1. 安装 Homebrew（如未安装）
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 2. 安装 Bun
+curl -fsSL https://bun.sh/install | bash
+# 安装完成后，按提示将 bun 加入 PATH，或重启终端
+
+# 3. 安装 Git、Python、uv（如未安装）
+brew install git python jq gh
+# uv 推荐通过官方脚本安装：
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 4. 验证
+bun --version    # >= 1.0.0
+python3 --version # >= 3.9
+git --version
+```
+
+#### Windows
+
+Windows 用户建议使用 **PowerShell 7+** 或 Windows Terminal。部分 bash 脚本在 Windows 上不可用，但 `gh:setup` 已内置 PowerShell 替代路径。
+
+```powershell
+# 1. 安装 Git（如未安装）
+winget install Git.Git
+
+# 2. 安装 Bun（PowerShell）
+powershell -c "irm bun.sh/install.ps1|iex"
+# 安装完成后，将以下路径加入用户 PATH：
+#   C:\Users\<你的用户名>\.bun\bin
+# 或在 PowerShell profile 中添加：
+#   $env:PATH = "$env:USERPROFILE\.bun\bin;$env:PATH"
+
+# 3. 安装 Python（推荐通过 Microsoft Store 或 python.org 安装）
+winget install Python.Python.3.12
+
+# 4. 安装 uv（PowerShell）
+irm https://astral.sh/uv/install.ps1 | iex
+# 安装后，将以下路径加入用户 PATH（如未自动添加）：
+#   $env:USERPROFILE\.local\bin
+
+# 5. 安装其他推荐工具
+winget install GitHub.cli      # gh
+winget install jqlang.jq       # jq
+winget install Gyan.FFmpeg     # ffmpeg（可选）
+
+# 6. 验证（重新打开 PowerShell 后）
+bun --version
+python --version  # 或 py --version
+git --version
+uv --version
+```
+
+> **注意：** Windows 默认 PowerShell 执行策略可能阻止脚本运行。如遇到权限错误，以管理员身份运行：
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
+
+---
 
 ### 方式一：克隆源码（所有安装方式的前提）
 
@@ -485,19 +557,79 @@ cd GaleHarnessCLI
 
 # 安装依赖
 bun install
+```
 
-# 安装 HKTMemory (必需)
+#### 安装 HKTMemory（必需）
+
+**macOS / Linux：**
+
+```bash
 bash vendor/hkt-memory/install.sh
+```
 
-# 配置 HKTMemory 环境变量
+**Windows：**
+
+`install.sh` 依赖 bash，在 Windows 上不可用。请手动执行以下等价步骤：
+
+```powershell
+# 1. 验证 Python 版本（>= 3.9）
+python --version
+
+# 2. 安装 Python 依赖（二选一）
+# 方式 A：使用 uv（推荐）
+uv pip install openai requests tqdm
+# 方式 B：使用 pip
+pip install openai requests tqdm
+
+# 3. 创建目录结构（PowerShell）
+New-Item -ItemType Directory -Force -Path memory/L0-Abstract/topics
+New-Item -ItemType Directory -Force -Path memory/L1-Overview/topics
+New-Item -ItemType Directory -Force -Path memory/L2-Full/daily
+New-Item -ItemType Directory -Force -Path memory/L2-Full/evergreen
+New-Item -ItemType Directory -Force -Path memory/L2-Full/episodes
+New-Item -ItemType File -Force -Path memory/L0-Abstract/index.md
+New-Item -ItemType File -Force -Path memory/L1-Overview/index.md
+New-Item -ItemType File -Force -Path memory/L2-Full/evergreen/MEMORY.md
+
+# 4. 验证
+uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats
+```
+
+#### 配置 HKTMemory 环境变量
+
+**macOS / Linux（~/.zshrc 或 ~/.bashrc）：**
+
+```bash
 export HKT_MEMORY_API_KEY=<your_key>
 export HKT_MEMORY_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
 export HKT_MEMORY_MODEL=embedding-3
 
 # 或使用文件模式（无需 API）
 export HKT_MEMORY_FILE_MODE=true
+```
 
-# 验证安装
+**Windows（系统环境变量）：**
+
+在「系统属性 → 环境变量」中，添加以下**用户变量**（或 PowerShell 临时设置）：
+
+```powershell
+$env:HKT_MEMORY_API_KEY = "<your_key>"
+$env:HKT_MEMORY_BASE_URL = "https://open.bigmodel.cn/api/paas/v4/"
+$env:HKT_MEMORY_MODEL = "embedding-3"
+
+# 或使用文件模式（无需 API）
+$env:HKT_MEMORY_FILE_MODE = "true"
+```
+
+> 如需永久生效，使用「系统属性 → 环境变量」设置，或添加到 PowerShell profile：
+> ```powershell
+> notepad $PROFILE
+> # 将上述 $env:... 行加入文件并保存
+> ```
+
+#### 验证安装
+
+```bash
 bun test
 ```
 
@@ -510,11 +642,25 @@ bun test
 ```bash
 # 在仓库根目录执行
 bun link
+```
 
-# 确保 ~/.bun/bin 在 PATH 中（添加到 ~/.zshrc 或 ~/.bashrc）
-export PATH="$HOME/.bun/bin:$PATH"
+**确保 bun 全局 bin 目录在 PATH 中：**
 
-# 之后在仓库根目录或任何指定了绝对/相对路径的目录直接使用
+- **macOS / Linux：** 添加到 `~/.zshrc` 或 `~/.bashrc`
+  ```bash
+  export PATH="$HOME/.bun/bin:$PATH"
+  ```
+
+- **Windows（PowerShell）：** 添加到 PowerShell profile
+  ```powershell
+  $env:PATH = "$env:USERPROFILE\.bun\bin;$env:PATH"
+  # 或永久写入 profile：
+  Add-Content -Path $PROFILE -Value '$env:PATH = "$env:USERPROFILE\.bun\bin;$env:PATH"'
+  ```
+
+**验证全局安装：**
+
+```bash
 gale-harness install ./plugins/galeharness-cli --to qoder
 ```
 
@@ -627,12 +773,14 @@ bun run src/index.ts install ./plugins/galeharness-cli --to all
 ```
 
 这将：
-- 诊断环境配置
+- 诊断环境配置（自动检测 Windows / macOS / Linux）
 - **强制安装 HKTMemory 向量知识库**
 - 交互式配置 HKTMemory API 凭证（支持文件模式回退）
 - 安装缺失工具 (agent-browser, gh, jq, vhs, silicon, ffmpeg)
 - 引导项目配置
 - 验证 HKTMemory 连接状态
+
+> **Windows 用户：** `gh:setup` 会自动使用 PowerShell 路径进行工具检测和安装，无需手动运行 `install.sh`。
 
 ---
 
@@ -783,6 +931,14 @@ bun run src/index.ts sync --target all
 | `HKT_MEMORY_FILE_MODE` | 启用纯文件模式（无需 API） | 否 |
 
 **文件模式**：设置 `HKT_MEMORY_FILE_MODE=true` 可在无 API 密钥的情况下使用 HKTMemory，仅使用本地文件存储（L0/L1/L2 层 + 本地索引）。
+
+**配置方式：**
+
+- **macOS / Linux：** 在 `~/.zshrc` 或 `~/.bashrc` 中添加 `export VAR=value`，然后 `source ~/.zshrc`
+- **Windows：**
+  - 临时（当前 PowerShell 会话）：`$env:VAR = "value"`
+  - 永久：系统属性 → 环境变量 → 新建用户变量
+  - 或添加到 PowerShell profile：`notepad $PROFILE`
 
 ---
 

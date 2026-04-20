@@ -2,8 +2,14 @@ import { defineCommand } from "citty"
 import { spawn } from "node:child_process"
 import { existsSync } from "node:fs"
 import { homedir } from "node:os"
-import { join } from "node:path"
+import { join, dirname } from "node:path"
 import { createServer } from "node:net"
+import { fileURLToPath } from "node:url"
+
+// Resolve vendor/taskboard path relative to this file's location
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const vendoredTaskboard = join(__dirname, "..", "..", "vendor", "taskboard")
 
 export function checkPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -54,32 +60,31 @@ export default defineCommand({
     },
   },
   async run({ args }) {
-    // Bug 6: Validate --port is integer and in valid range
+    // Validate --port is integer and in valid range
     const requestedPort = Number(args.port)
     if (!Number.isInteger(requestedPort) || requestedPort < 0 || requestedPort >= 65536) {
       console.error("Error: --port must be an integer between 0 and 65535")
       process.exit(1)
     }
 
-    const defaultTaskboardRoot = join(homedir(), ".galeharness", "boards", "taskboard")
-    const fallbackTaskboardRoot = "/tmp/taskboard"
+    const userTaskboardRoot = join(homedir(), ".galeharness", "boards", "taskboard")
 
-    // Determine TaskBoard root: env var > default path > fallback path
-    let taskboardRoot = process.env.TASKBOARD_ROOT ?? defaultTaskboardRoot
-
-    // If default path doesn't exist, try fallback path for testing/development
-    if (!process.env.TASKBOARD_ROOT && !existsSync(taskboardRoot) && existsSync(fallbackTaskboardRoot)) {
-      taskboardRoot = fallbackTaskboardRoot
-    }
-
-    if (!existsSync(taskboardRoot)) {
-      console.error(`Error: TaskBoard not found at ${taskboardRoot}`)
+    // Determine TaskBoard root: env var > vendored > user path
+    let taskboardRoot: string
+    if (process.env.TASKBOARD_ROOT) {
+      taskboardRoot = process.env.TASKBOARD_ROOT
+    } else if (existsSync(vendoredTaskboard)) {
+      taskboardRoot = vendoredTaskboard
+    } else if (existsSync(userTaskboardRoot)) {
+      taskboardRoot = userTaskboardRoot
+    } else {
+      console.error("Error: TaskBoard not found")
       console.error("")
-      console.error("To install TaskBoard:")
-      console.error("  1. Clone the TaskBoard repository")
-      console.error("  2. Set TASKBOARD_ROOT environment variable, or install to ~/.galeharness/boards/taskboard/")
+      console.error("TaskBoard should be available at one of these locations:")
+      console.error(`  1. Vendored: ${vendoredTaskboard}`)
+      console.error(`  2. User: ${userTaskboardRoot}`)
       console.error("")
-      console.error(`You can also place TaskBoard at ${fallbackTaskboardRoot} for testing.`)
+      console.error("Or set TASKBOARD_ROOT environment variable to the TaskBoard directory.")
       process.exit(1)
     }
 

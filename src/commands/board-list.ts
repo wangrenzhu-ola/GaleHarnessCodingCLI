@@ -42,19 +42,19 @@ export default defineCommand({
     },
   },
   async run({ args }) {
-    // Bug 1: Validate --status
+    // Validate --status
     if (args.status && args.status !== "all" && !VALID_STATUSES.includes(args.status as TaskStatus)) {
       console.error(`Error: Invalid status '${args.status}'. Must be one of: ${VALID_STATUSES.join(", ")}, or all`)
       process.exit(1)
     }
 
-    // Bug 2: Validate --format
+    // Validate --format
     if (!VALID_FORMATS.includes(args.format as typeof VALID_FORMATS[number])) {
       console.error(`Error: Invalid format '${args.format}'. Must be one of: ${VALID_FORMATS.join(", ")}`)
       process.exit(1)
     }
 
-    // Bug 4: Validate --limit is not negative and is integer
+    // Validate --limit is not negative and is integer
     const parsedLimit = Number(args.limit)
     if (!Number.isInteger(parsedLimit) || parsedLimit < 0) {
       console.error("Error: --limit must be a non-negative integer")
@@ -77,17 +77,17 @@ export default defineCommand({
       filtered = filtered.filter(t => t.status === status)
     }
 
-    // Bug 7: --project "" should be treated as no filter, not as empty string filter
+    // --project "" should be treated as no filter, not as empty string filter
     if (args.project && args.project.trim() !== "") {
       filtered = filtered.filter(t => t.project === args.project)
     }
 
-    // Bug 7: --skill "" should be treated as no filter
+    // --skill "" should be treated as no filter
     if (args.skill && args.skill.trim() !== "") {
       filtered = filtered.filter(t => t.skill === args.skill)
     }
 
-    // Bug 3: limit=0 should produce empty table (header only), not show all records
+    // limit=0 should produce empty table (header only), not show all records
     const formatOptions: FormatOptions = {
       format: args.format as "table" | "json" | "quiet",
       limit: parsedLimit,
