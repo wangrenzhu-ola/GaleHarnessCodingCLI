@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { defineCommand, runMain } from "citty"
+import { defineCommand, runMain, showUsage } from "citty"
 import packageJson from "../package.json"
 import convert from "./commands/convert"
 import install from "./commands/install"
@@ -21,6 +21,12 @@ const main = defineCommand({
     "plugin-path": () => pluginPath,
     sync: () => sync,
     board: () => board,
+  },
+  run: async (ctx) => {
+    const hasSubCommand = ctx.rawArgs.some((arg) => !arg.startsWith("-"));
+    if (!hasSubCommand) {
+      await showUsage(ctx.cmd);
+    }
   },
 })
 
