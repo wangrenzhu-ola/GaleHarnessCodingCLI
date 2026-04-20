@@ -12,18 +12,20 @@ import type { TaskEvent, DerivedTask } from "../src/board/types"
 describe("board reader", () => {
   describe("mergeEvents", () => {
     it("should merge skill_started events into tasks", () => {
+      const startTime = "2026-04-19T10:00:00Z"
+      const now = new Date(startTime).getTime() + 60 * 60 * 1000 // 1 hour after start
       const events: TaskEvent[] = [
         {
           task_id: "task1",
           event_type: "skill_started",
-          timestamp: "2026-04-19T10:00:00Z",
+          timestamp: startTime,
           project: "my-app",
           skill: "gh:work",
           title: "Add feature",
         },
       ]
 
-      const tasks = mergeEvents(events)
+      const tasks = mergeEvents(events, now)
       expect(tasks).toHaveLength(1)
       expect(tasks[0].task_id).toBe("task1")
       expect(tasks[0].project).toBe("my-app")

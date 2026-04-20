@@ -46,6 +46,6 @@ export interface FilterOptions {
 export interface FormatOptions {
   format: "table" | "json" | "quiet"
   limit: number
-  offset: number
+  offset?: number
   noColor: boolean
 }
