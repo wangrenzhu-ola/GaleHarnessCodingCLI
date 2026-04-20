@@ -17,7 +17,7 @@ export default defineCommand({
   },
   async run({ args, cmd }) {
     if (!args._.length) {
-      return boardList.run?.({ args: { ...args, format: args.format ?? "table", limit: args.limit ?? "20", offset: args.offset ?? "0" }, cmd } as any)
+      return boardList.run?.({ args: { ...args, format: args.format ?? "table", limit: args.limit ?? "20", offset: args.offset ?? "0", "with-knowledge": args["with-knowledge"] ?? false, "knowledge-only": args["knowledge-only"] ?? false, "knowledge-type": args["knowledge-type"] }, cmd } as any)
     }
   },
 })
