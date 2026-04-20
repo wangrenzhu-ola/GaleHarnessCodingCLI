@@ -471,79 +471,90 @@ flowchart LR
 
 ### 前置要求
 
-- [Bun](https://bun.sh/) >= 1.0.0
-- Node.js >= 18 (可选，用于部分工具)
-- Git
-- Python >= 3.9 (用于 HKTMemory)
+- macOS 11+ 或 Windows 10/11
+- 能联网的终端（macOS: Terminal / iTerm2，Windows: PowerShell）
 
-### 方式一：克隆源码（所有安装方式的前提）
+> 不需要预先安装任何工具。一键脚本会自动检测并安装缺失的依赖。
+
+### 一键安装
+
+#### macOS
 
 ```bash
-# 克隆仓库
+# 1. 克隆仓库
 git clone https://github.com/wangrenzhu-ola/GaleHarnessCLI.git
 cd GaleHarnessCLI
 
-# 安装依赖
-bun install
+# 2. 运行一键安装脚本
+bash scripts/setup.sh
+```
 
-# 安装 HKTMemory (必需)
-bash vendor/hkt-memory/install.sh
+脚本会交互式提示你输入 **HKT_MEMORY_API_KEY**，并自动配置好所有环境变量。
 
-# 配置 HKTMemory 环境变量
-export HKT_MEMORY_API_KEY=<your_key>
-export HKT_MEMORY_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
-export HKT_MEMORY_MODEL=embedding-3
+#### Windows
 
-# 或使用文件模式（无需 API）
-export HKT_MEMORY_FILE_MODE=true
+```powershell
+# 1. 克隆仓库
+git clone https://github.com/wangrenzhu-ola/GaleHarnessCLI.git
+cd GaleHarnessCLI
 
-# 验证安装
+# 2. 运行一键安装脚本（如遇到权限问题，以管理员身份运行 PowerShell）
+.\scripts\setup.ps1
+```
+
+脚本会自动安装 Git（如未安装）、Bun、Python、uv，交互式提示输入 **API Key** 并写入系统环境变量。
+
+> **PowerShell 执行策略：** 如果脚本无法运行，先执行：
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
+
+### 安装后自检
+
+安装脚本运行完毕后，请**重新打开终端**，然后依次运行以下命令验证：
+
+```bash
+# 1. Bun 运行时
+bun --version
+# → 期望: 1.x.x
+
+# 2. Python 版本
+python3 --version        # macOS
+python --version         # Windows
+# → 期望: Python 3.9+
+
+# 3. uv 包管理器
+uv --version
+# → 期望: uv x.x.x
+
+# 4. 全局 CLI
+gale-harness --help
+# → 期望: 显示 CLI 帮助信息
+
+# 5. HKTMemory 统计
+uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats
+# → 期望: 数据库和向量存储的统计信息
+
+# 6. 项目测试
 bun test
+# → 期望: 测试通过
 ```
 
-> 本项目不发布到 npm。所有安装方式均基于源码克隆。
+### 安装到 AI 编码工具
 
-### 方式二：全局安装（推荐，随处可用）
-
-克隆后通过 `bun link` 将 CLI 链接到全局，无需每次指定路径：
+全局安装后，在任意目录使用 `gale-harness` 命令：
 
 ```bash
-# 在仓库根目录执行
-bun link
-
-# 确保 ~/.bun/bin 在 PATH 中（添加到 ~/.zshrc 或 ~/.bashrc）
-export PATH="$HOME/.bun/bin:$PATH"
-
-# 之后在仓库根目录或任何指定了绝对/相对路径的目录直接使用
-gale-harness install ./plugins/galeharness-cli --to qoder
-```
-
-**支持的平台 (15个)：**
-
-| 平台 | 说明 |
-|------|------|
-| `claude` | Claude Code |
-| `opencode` | OpenCode |
-| `codex` | OpenAI Codex |
-| `droid` | Droid |
-| `pi` | PI |
-| `copilot` | GitHub Copilot |
-| `gemini` | Gemini CLI |
-| `kiro` | Kiro |
-| `windsurf` | Windsurf |
-| `openclaw` | OpenClaw |
-| `qwen` | Qwen |
-| `qoder` | Qoder |
-| `trae` | Trae (字节跳动) |
-| `cursor` | Cursor |
-| `kimi` | Kimi Code CLI |
-
-**一键安装到所有平台：**
-
-```bash
-# 安装到所有检测到的平台
+# 一键安装到所有检测到的平台
 gale-harness install ./plugins/galeharness-cli --to all
+
+# 或指定平台
+gale-harness install ./plugins/galeharness-cli --to claude
+gale-harness install ./plugins/galeharness-cli --to cursor
+gale-harness install ./plugins/galeharness-cli --to kimi
 ```
+
+**支持的平台 (15个)：** `claude`, `opencode`, `codex`, `droid`, `pi`, `gemini`, `copilot`, `kiro`, `windsurf`, `openclaw`, `qwen`, `qoder`, `trae`, `cursor`, `kimi`
 
 **Claude Code** —— 本地插件模式：
 
@@ -554,70 +565,6 @@ alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
 
 运行 `ghc` 而不是 `claude` 来加载本地插件。
 
-### 方式三：安装到目标平台
-
-#### Claude Code
-
-```bash
-# 加载本地插件（在 ~/.zshrc 或 ~/.bashrc 中设置 alias 后随处使用）
-alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
-
-# 或用 CLI 安装（一次性写入配置）
-bun run src/index.ts install ./plugins/galeharness-cli --to claude
-```
-
-#### OpenCode / Codex / Gemini / Qoder / 其他平台
-
-```bash
-# 在仓库根目录执行
-
-# OpenCode
-bun run src/index.ts install ./plugins/galeharness-cli --to opencode
-
-# Codex
-bun run src/index.ts install ./plugins/galeharness-cli --to codex
-
-# Gemini CLI
-bun run src/index.ts install ./plugins/galeharness-cli --to gemini
-
-# GitHub Copilot
-bun run src/index.ts install ./plugins/galeharness-cli --to copilot
-
-# Qoder
-bun run src/index.ts install ./plugins/galeharness-cli --to qoder
-
-# 支持的平台: claude, opencode, codex, droid, pi, gemini, copilot, kiro, windsurf, openclaw, qwen, qoder, trae, cursor, kimi
-bun run src/index.ts install ./plugins/galeharness-cli --to <platform>
-
-# 安装到所有检测到的平台
-bun run src/index.ts install ./plugins/galeharness-cli --to all
-```
-
-<details>
-<summary>各平台输出详情</summary>
-
-| 平台 | 输出路径 | 说明 |
-|------|----------|------|
-| `claude` | `~/.claude/` | 原生格式：skills、agents、commands 直接写入 |
-| `opencode` | `~/.config/opencode/` | 命令作为 `.md` 文件；`opencode.json` MCP 配置深度合并；覆盖前备份 |
-| `codex` | `~/.codex/prompts` + `~/.codex/skills` | 命令成为 prompt + skill 对 |
-| `droid` | `~/.factory/` | 工具名称映射 (`Bash`->`Execute`, `Write`->`Create`) |
-| `pi` | `~/.pi/agent/` | Prompts, skills, extensions 和 `mcporter.json` |
-| `gemini` | `.gemini/` | Skills 来自 agents；命令作为 `.toml` |
-| `copilot` | `.github/` | Agents 作为 `.agent.md` 带 Copilot frontmatter |
-| `kiro` | `.kiro/` | Agents 作为 JSON configs + prompt `.md` 文件 |
-| `openclaw` | `~/.openclaw/extensions/<plugin>/` | 入口 TypeScript skill 文件 |
-| `windsurf` | `~/.codeium/windsurf/` (global) 或 `.windsurf/` (workspace) | Agents 成为 skills；命令成为 flat workflows |
-| `qwen` | `~/.qwen/extensions/<plugin>/` | Agents 作为 `.yaml` |
-| `qoder` | `~/.qoder/` | Skills, agents, commands 作为 `.md` 文件 |
-| `trae` | `~/.trae/` | Skills, agents, commands 作为 `.md` 文件 (Agent Skills 标准) |
-| `cursor` | `~/.cursor/rules/` | Skills 作为 `.mdc` 规则文件 |
-| `kimi` | `~/.kimi/` | Skills、agents、commands 统一作为 `~/.kimi/skills/<name>/SKILL.md` |
-
-所有平台都是实验性的，可能随格式演进变化。
-
-</details>
-
 ### 项目初始化
 
 安装完成后，在项目目录运行：
@@ -627,12 +574,12 @@ bun run src/index.ts install ./plugins/galeharness-cli --to all
 ```
 
 这将：
-- 诊断环境配置
-- **强制安装 HKTMemory 向量知识库**
-- 交互式配置 HKTMemory API 凭证（支持文件模式回退）
-- 安装缺失工具 (agent-browser, gh, jq, vhs, silicon, ffmpeg)
+- 诊断环境配置（自动检测 Windows / macOS）
+- 安装缺失的推荐工具 (agent-browser, gh, jq, vhs, silicon, ffmpeg)
 - 引导项目配置
 - 验证 HKTMemory 连接状态
+
+> **Windows 用户：** `gh:setup` 会自动使用 PowerShell 路径进行工具检测和安装。
 
 ---
 
@@ -775,6 +722,8 @@ bun run src/index.ts sync --target all
 
 ## 环境变量
 
+安装脚本会自动配置以下变量，通常无需手动操作：
+
 | 变量 | 说明 | 必需 |
 |------|------|------|
 | `HKT_MEMORY_API_KEY` | HKTMemory API 密钥 | 否（可用文件模式） |
@@ -783,6 +732,11 @@ bun run src/index.ts sync --target all
 | `HKT_MEMORY_FILE_MODE` | 启用纯文件模式（无需 API） | 否 |
 
 **文件模式**：设置 `HKT_MEMORY_FILE_MODE=true` 可在无 API 密钥的情况下使用 HKTMemory，仅使用本地文件存储（L0/L1/L2 层 + 本地索引）。
+
+**如需手动修改：**
+
+- **macOS：** 编辑 shell profile（`~/.zshrc` 或 `~/.bashrc`）
+- **Windows：** 系统属性 → 环境变量 → 用户变量，或编辑 PowerShell profile（`notepad $PROFILE`）
 
 ---
 

@@ -1,0 +1,304 @@
+#!/usr/bin/env bash
+# GaleHarnessCLI 环境一键安装脚本 (macOS)
+# 用法: bash scripts/setup.sh
+
+set -euo pipefail
+
+# =====================================================
+#  Colors
+# =====================================================
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+ok()     { echo -e "${GREEN}✓${NC} $1"; }
+warn()   { echo -e "${YELLOW}⚠${NC} $1"; }
+err()    { echo -e "${RED}✗${NC} $1"; }
+info()   { echo -e "${CYAN}→${NC} $1"; }
+header() { echo -e "\n${BLUE}${BOLD}▶ $1${NC}"; }
+
+# =====================================================
+#  OS Check
+# =====================================================
+OS="$(uname -s)"
+if [ "$OS" != "Darwin" ]; then
+  err "本脚本仅支持 macOS。请在 macOS 上运行，或使用 Windows PowerShell 脚本。"
+  exit 1
+fi
+
+# Detect shell profile
+SHELL_PROFILE=""
+case "${SHELL##*/}" in
+  zsh)  SHELL_PROFILE="$HOME/.zshrc" ;;
+  bash) SHELL_PROFILE="$HOME/.bashrc" ;;
+  *)    SHELL_PROFILE="$HOME/.profile" ;;
+esac
+
+# =====================================================
+#  Banner
+# =====================================================
+echo -e "${BOLD}GaleHarnessCLI 环境一键安装 (macOS)${NC}"
+echo "本脚本将自动检测并安装所有依赖。"
+echo ""
+
+# =====================================================
+#  1. Git
+# =====================================================
+header "1. 检查 Git"
+if command -v git >/dev/null 2>&1; then
+  ok "Git 已安装 ($(git --version))"
+else
+  info "正在安装 Git..."
+  if command -v brew >/dev/null 2>&1; then
+    brew install git
+  else
+    info "正在安装 Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew install git
+  fi
+  ok "Git 安装完成"
+fi
+
+# =====================================================
+#  2. Bun
+# =====================================================
+header "2. 检查 Bun"
+if command -v bun >/dev/null 2>&1; then
+  ok "Bun 已安装 (v$(bun --version))"
+else
+  info "正在安装 Bun..."
+  curl -fsSL https://bun.sh/install | bash
+  ok "Bun 安装完成"
+fi
+
+# Ensure bun is in PATH for this session
+if [ -d "$HOME/.bun/bin" ]; then
+  export PATH="$HOME/.bun/bin:$PATH"
+fi
+
+# =====================================================
+#  3. Python 3.9+
+# =====================================================
+header "3. 检查 Python"
+
+PYTHON_CMD=""
+for cmd in python3 python; do
+  if command -v "$cmd" >/dev/null 2>&1; then
+    PYTHON_CMD="$cmd"
+    break
+  fi
+done
+
+if [ -z "$PYTHON_CMD" ]; then
+  info "正在安装 Python..."
+  if command -v brew >/dev/null 2>&1; then
+    brew install python@3.12
+  fi
+  PYTHON_CMD="python3"
+fi
+
+PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | grep -oE '[0-9]+\.[0-9]+' | head -1)
+PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
+PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
+
+if [ "$PYTHON_MAJOR" -gt 3 ] || { [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 9 ]; }; then
+  ok "Python 已安装 (${PYTHON_VERSION})"
+else
+  err "Python 版本过低: ${PYTHON_VERSION}，需要 >= 3.9"
+  info "建议运行: brew install python@3.12"
+  exit 1
+fi
+
+# =====================================================
+#  4. uv
+# =====================================================
+header "4. 检查 uv"
+if command -v uv >/dev/null 2>&1; then
+  ok "uv 已安装"
+else
+  info "正在安装 uv..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ok "uv 安装完成"
+fi
+
+# Ensure uv is in PATH for this session
+if [ -d "$HOME/.local/bin" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# =====================================================
+#  5. Python Dependencies
+# =====================================================
+header "5. 安装 HKTMemory Python 依赖"
+if uv pip install openai requests tqdm >/dev/null 2>&1; then
+  ok "Python 依赖安装完成 (via uv)"
+elif $PYTHON_CMD -m pip install openai requests tqdm >/dev/null 2>&1; then
+  ok "Python 依赖安装完成 (via pip)"
+else
+  warn "Python 依赖安装失败，请手动运行: uv pip install openai requests tqdm"
+fi
+
+# =====================================================
+#  6. HKTMemory Directory Structure
+# =====================================================
+header "6. 创建 HKTMemory 目录结构"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$REPO_ROOT"
+
+mkdir -p memory/L0-Abstract/topics
+mkdir -p memory/L1-Overview/topics
+mkdir -p memory/L2-Full/daily
+mkdir -p memory/L2-Full/evergreen
+mkdir -p memory/L2-Full/episodes
+touch memory/L0-Abstract/index.md
+touch memory/L1-Overview/index.md
+touch memory/L2-Full/evergreen/MEMORY.md
+ok "HKTMemory 目录结构就绪"
+
+# =====================================================
+#  7. Project Dependencies & Global Link
+# =====================================================
+header "7. 安装项目依赖并全局链接"
+if command -v bun >/dev/null 2>&1; then
+  bun install >/dev/null 2>&1 && ok "项目依赖安装完成" || warn "bun install 失败，请手动运行"
+
+  bun link >/dev/null 2>&1 && ok "gale-harness 已全局链接" || warn "bun link 失败，请手动运行"
+else
+  warn "Bun 未就绪，跳过项目依赖安装"
+fi
+
+# =====================================================
+#  8. Optional Tools
+# =====================================================
+header "8. 检查可选工具"
+optional_tools=("gh" "jq" "ffmpeg")
+for tool in "${optional_tools[@]}"; do
+  if command -v "$tool" >/dev/null 2>&1; then
+    ok "${tool} 已安装"
+  else
+    warn "${tool} 未安装 (可选，建议: brew install ${tool})"
+  fi
+done
+
+# =====================================================
+#  9. HKTMemory API Key (Interactive)
+# =====================================================
+header "9. 配置 HKTMemory"
+
+echo ""
+echo "HKTMemory 支持两种模式:"
+echo "  1. API 模式 — 需要 API Key，向量检索功能完整"
+echo "  2. 文件模式 — 无需 API，仅使用本地文件存储"
+echo ""
+read -r -p "是否使用 API 模式? (y/n，默认 y): " use_api
+use_api=${use_api:-y}
+
+if [[ "$use_api" =~ ^[Yy] ]]; then
+  read -r -s -p "请输入 HKT_MEMORY_API_KEY: " api_key
+  echo ""
+
+  # Write to shell profile
+  {
+    echo ""
+    echo "# HKTMemory Configuration (auto-generated by setup.sh)"
+    echo "export HKT_MEMORY_API_KEY=\"${api_key}\""
+    echo "export HKT_MEMORY_BASE_URL=\"https://open.bigmodel.cn/api/paas/v4/\""
+    echo "export HKT_MEMORY_MODEL=\"embedding-3\""
+  } >> "$SHELL_PROFILE"
+
+  # Export for current session
+  export HKT_MEMORY_API_KEY="$api_key"
+  export HKT_MEMORY_BASE_URL="https://open.bigmodel.cn/api/paas/v4/"
+  export HKT_MEMORY_MODEL="embedding-3"
+
+  ok "API 配置已写入 ${SHELL_PROFILE}"
+else
+  {
+    echo ""
+    echo "# HKTMemory Configuration (auto-generated by setup.sh)"
+    echo "export HKT_MEMORY_FILE_MODE=true"
+  } >> "$SHELL_PROFILE"
+
+  export HKT_MEMORY_FILE_MODE=true
+  ok "文件模式已启用，配置已写入 ${SHELL_PROFILE}"
+fi
+
+# =====================================================
+#  10. PATH Setup (bun bin)
+# =====================================================
+header "10. 配置 PATH"
+if ! grep -q '\.bun/bin' "$SHELL_PROFILE" 2>/dev/null; then
+  {
+    echo ""
+    echo "# Bun (auto-generated by setup.sh)"
+    echo 'export PATH="$HOME/.bun/bin:$PATH"'
+  } >> "$SHELL_PROFILE"
+  ok "Bun PATH 已写入 ${SHELL_PROFILE}"
+else
+  ok "Bun PATH 已存在"
+fi
+
+if ! grep -q '\.local/bin' "$SHELL_PROFILE" 2>/dev/null; then
+  {
+    echo ""
+    echo "# uv tools (auto-generated by setup.sh)"
+    echo 'export PATH="$HOME/.local/bin:$PATH"'
+  } >> "$SHELL_PROFILE"
+  ok "uv PATH 已写入 ${SHELL_PROFILE}"
+else
+  ok "uv PATH 已存在"
+fi
+
+# =====================================================
+#  Summary & Self-Check
+# =====================================================
+header "安装完成！"
+
+cat << EOF
+
+${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+
+${GREEN}  ✅ GaleHarnessCLI 环境安装完成${NC}
+
+${BOLD}请重新打开终端，或运行以下命令使配置生效:${NC}
+  source ${SHELL_PROFILE}
+
+${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+${BOLD}  自检清单 — 请依次运行以下命令验证:${NC}
+
+  ${CYAN}bun --version${NC}
+    → 期望: 1.x.x
+
+  ${CYAN}python3 --version${NC}
+    → 期望: Python 3.9+
+
+  ${CYAN}uv --version${NC}
+    → 期望: uv x.x.x
+
+  ${CYAN}gale-harness --help${NC}
+    → 期望: 显示 CLI 帮助信息
+
+  ${CYAN}uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats${NC}
+    → 期望: HKTMemory 统计信息
+
+  ${CYAN}bun test${NC}
+    → 期望: 测试通过
+
+${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+${BOLD}  全局使用:${NC}
+
+  安装到目标平台:
+    ${CYAN}gale-harness install ./plugins/galeharness-cli --to all${NC}
+
+  同步个人配置:
+    ${CYAN}gale-harness sync${NC}
+
+${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+
+EOF
+
+ok "全部完成！"
