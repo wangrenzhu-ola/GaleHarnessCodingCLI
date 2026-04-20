@@ -111,7 +111,7 @@ if ($gitAvailable) {
 # =====================================================
 header "2. 克隆仓库"
 
-$cloneDir = "$env:USERPROFILE\GaleHarnessCodingCLI"
+$cloneDir = "$PWD\GaleHarnessCodingCLI"
 if (Test-Path "$cloneDir\.git") {
     info "仓库已存在，跳过克隆"
 } else {
