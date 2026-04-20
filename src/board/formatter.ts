@@ -53,7 +53,7 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
   lines.push(headerRow)
   lines.push("-".repeat(headerRow.length))
 
-  for (const task of tasks.slice(options.offset, options.offset + options.limit)) {
+  for (const task of tasks.slice(options.offset ?? 0, (options.offset ?? 0) + options.limit)) {
     const statusText = task.status
     const row = [
       truncate(task.task_id, colWidths[0]).padEnd(colWidths[0]),
@@ -66,7 +66,7 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
     lines.push(row)
   }
 
-  const remaining = tasks.length - (options.offset + options.limit)
+  const remaining = tasks.length - ((options.offset ?? 0) + options.limit)
   if (remaining > 0) {
     lines.push(`\n... and ${remaining} more tasks`)
   }
@@ -75,13 +75,13 @@ export function formatTable(tasks: DerivedTask[], options: FormatOptions): strin
 }
 
 export function formatJson(tasks: DerivedTask[], options: FormatOptions): string {
-  const limited = tasks.slice(options.offset, options.offset + options.limit)
+  const limited = tasks.slice(options.offset ?? 0, (options.offset ?? 0) + options.limit)
   return JSON.stringify(limited, null, 2)
 }
 
 export function formatQuiet(tasks: DerivedTask[], options: FormatOptions): string {
   const ids = tasks
-    .slice(options.offset, options.offset + options.limit)
+    .slice(options.offset ?? 0, (options.offset ?? 0) + options.limit)
     .map(t => t.task_id)
   return ids.length > 0 ? ids.join("\n") + "\n" : ""
 }
