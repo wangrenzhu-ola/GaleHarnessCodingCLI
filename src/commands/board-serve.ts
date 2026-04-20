@@ -94,6 +94,21 @@ export default defineCommand({
       process.exit(1)
     }
 
+    // Auto-build frontend if dist/ is missing
+    const distDir = join(taskboardRoot, "dist")
+    if (!existsSync(distDir)) {
+      console.log("Building TaskBoard frontend...")
+      const buildResult = Bun.spawnSync(["bun", "run", "build"], {
+        cwd: taskboardRoot,
+        stdout: "inherit",
+        stderr: "inherit",
+      })
+      if (buildResult.exitCode !== 0) {
+        console.error("Error: Frontend build failed")
+        process.exit(1)
+      }
+    }
+
     const isAvailable = await checkPortAvailable(requestedPort)
     let port = requestedPort
 
@@ -111,6 +126,7 @@ export default defineCommand({
     console.log(`Starting TaskBoard server on port ${port}...`)
 
     const child = spawn("bun", ["run", serverScript], {
+      cwd: taskboardRoot,
       env: { ...process.env, BOARD_PORT: String(port) },
       stdio: "inherit",
     })
