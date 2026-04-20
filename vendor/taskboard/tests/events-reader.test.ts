@@ -28,7 +28,8 @@ describe("mergeEvents", () => {
 
   test("produces in_progress task from skill_started alone", () => {
     const events = [makeEvent({ project: "myrepo", skill: "gh:work", title: "feat X" })]
-    const tasks = mergeEvents(events)
+    const now = new Date("2026-04-17T10:00:00.000Z").getTime() + 60 * 60 * 1000 // 1h after start
+    const tasks = mergeEvents(events, now)
     expect(tasks).toHaveLength(1)
     expect(tasks[0].status).toBe("in_progress")
     expect(tasks[0].project).toBe("myrepo")
@@ -221,7 +222,8 @@ describe("readAndMergeTasks integration", () => {
       makeEvent({ task_id: "t2", project: "repo-b", skill: "gh:plan", title: "plan B", timestamp: "2026-04-17T11:00:00.000Z" }),
     ])
 
-    const tasks = await readAndMergeTasks(tempDbPath)
+    const now = new Date("2026-04-17T11:00:00.000Z").getTime() + 60 * 60 * 1000 // 1h after latest start
+    const tasks = await readAndMergeTasks(tempDbPath, now)
     expect(tasks).toHaveLength(2)
     expect(tasks[0].task_id).toBe("t2")
     expect(tasks[0].status).toBe("in_progress")

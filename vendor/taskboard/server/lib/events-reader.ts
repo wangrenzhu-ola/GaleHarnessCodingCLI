@@ -105,7 +105,7 @@ export function mergeEvents(events: TaskEvent[], now?: number, staleHours?: numb
   return tasks
 }
 
-export async function readAndMergeTasks(overrideDbPath?: string): Promise<DerivedTask[]> {
+export async function readAndMergeTasks(overrideDbPath?: string, now?: number): Promise<DerivedTask[]> {
   const dbPath = overrideDbPath ?? DB_PATH
   if (!existsSync(dbPath)) {
     return []
@@ -154,7 +154,7 @@ export async function readAndMergeTasks(overrideDbPath?: string): Promise<Derive
       `)
       const rows = query.all() as TaskEvent[]
       query.finalize()
-      return mergeEvents(rows)
+      return mergeEvents(rows, now)
     } finally {
       db.close()
     }
