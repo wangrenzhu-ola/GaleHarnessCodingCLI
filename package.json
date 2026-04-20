@@ -6,7 +6,8 @@
   "private": true,
   "bin": {
     "gale-harness": "src/index.ts",
-    "compound-plugin": "src/index.ts"
+    "compound-plugin": "src/index.ts",
+    "gale-knowledge": "cmd/gale-knowledge/index.ts"
   },
   "scripts": {
     "dev": "bun run src/index.ts",

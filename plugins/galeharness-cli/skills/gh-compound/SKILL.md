@@ -257,6 +257,23 @@ The orchestrating agent (main conversation) performs these steps:
    - Tag session-sourced content with "(session history)" so its origin is clear to future readers
    - If findings are thin or "no relevant prior sessions," proceed without session context
 4. Assemble complete markdown file from the collected pieces, reading `assets/resolution-template.md` for the section structure of new docs
+<!-- HKT-PATCH:knowledge-write-path -->
+### Knowledge Repository Write Path
+
+Before writing the solution document, resolve the target directory:
+
+```bash
+# Try global knowledge repo first, fall back to project docs/
+KNOWLEDGE_PATH=$(gale-knowledge resolve-path --type solutions 2>/dev/null)
+if [ -z "$KNOWLEDGE_PATH" ] || [ $? -ne 0 ]; then
+  KNOWLEDGE_PATH="docs/solutions"
+fi
+```
+
+Use `$KNOWLEDGE_PATH/[category]/` as the target directory for the solution document instead of the hardcoded `docs/solutions/[category]/` path.
+
+<!-- /HKT-PATCH:knowledge-write-path -->
+
 5. Validate YAML frontmatter against `references/schema.yaml`
 6. Create directory if needed: `mkdir -p docs/solutions/[category]/`
 7. Write the file: either the updated existing doc or the new `docs/solutions/[category]/[filename].md`
@@ -271,17 +288,19 @@ When creating a new doc, preserve the section order from `assets/resolution-temp
 
 After successfully writing the solution doc to `docs/solutions/`:
 
-1. Read back the full content of the written file
+1. Compose a concise summary (2-4 sentences) covering: the problem, the solution, key decisions, and the repo-relative file path to the solution document
 2. Extract `title` and `category` values from its YAML frontmatter
 3. Run:
    ```bash
    uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
-     --content "<full file content>" \
+     --content "<summary + repo-relative file path>" \
      --title "<frontmatter title>" \
      --topic "<frontmatter category>" \
      --layer all
    ```
 4. Log: `Stored to HKTMemory: [title]` on success, or note the error (non-blocking — do not fail the compound workflow if HKTMemory is unavailable).
+
+**Rationale:** The vector database's job is *discovery*, not full-text storage. The document already lives in a git-managed file. Store the summary and path so retrieval can surface it; the agent reads the actual file when details are needed.
 
 <!-- HKT-PATCH:gale-task-memory -->
 5. After a successful HKTMemory store, log the memory_linked event (use the same `<frontmatter title>` as the `--memory-title` value):
@@ -289,6 +308,19 @@ After successfully writing the solution doc to `docs/solutions/`:
    gale-task log memory_linked --memory-title "<frontmatter title>" 2>/dev/null || true
    ```
 <!-- /HKT-PATCH:gale-task-memory -->
+
+<!-- HKT-PATCH:knowledge-commit -->
+### Knowledge Repository Commit
+
+After the solution document is written and stored to HKTMemory:
+
+```bash
+gale-knowledge commit --project "$(gale-knowledge extract-project 2>/dev/null || basename $(pwd))" --type solution --title "<frontmatter-title>" 2>/dev/null || true
+```
+
+If `gale-knowledge` is not on PATH, skip silently — this must never block the skill.
+
+<!-- /HKT-PATCH:knowledge-commit -->
 
 ### Phase 2.5: Selective Refresh Check
 

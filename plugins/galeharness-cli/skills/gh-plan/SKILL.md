@@ -716,6 +716,23 @@ If the plan originated from a requirements document, re-read that document and v
 - Blocking questions were either resolved, explicitly assumed, or sent back to `gh:brainstorm`
 - Every section of the origin document is addressed in the plan — scan each section to confirm nothing was silently dropped
 
+<!-- HKT-PATCH:knowledge-write-path -->
+##### Knowledge Repository Write Path
+
+Before writing the plan file, resolve the target directory:
+
+```bash
+# Try global knowledge repo first, fall back to project docs/
+KNOWLEDGE_PATH=$(gale-knowledge resolve-path --type plans 2>/dev/null)
+if [ -z "$KNOWLEDGE_PATH" ] || [ $? -ne 0 ]; then
+  KNOWLEDGE_PATH="docs/plans"
+fi
+```
+
+Write the plan document to `$KNOWLEDGE_PATH/<filename>.md` instead of the hardcoded `docs/plans/` path.
+
+<!-- /HKT-PATCH:knowledge-write-path -->
+
 #### 5.2 Write Plan File
 
 **REQUIRED: Write the plan file to disk before presenting any options.**
@@ -789,12 +806,12 @@ When reaching this phase, read `references/plan-handoff.md` for document review 
 
 After the plan file is finalized and document review has run:
 
-1. Read back the full content of the written plan file
+1. Compose a concise summary (2-4 sentences) covering: the problem, the chosen approach, key decisions, and the repo-relative file path to the plan document
 2. Extract `title` and `type` values from its YAML frontmatter
 3. Run:
    ```bash
    uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
-     --content "<full plan file content>" \
+     --content "<summary + repo-relative file path>" \
      --title "<frontmatter title>" \
      --topic "<frontmatter type or 'plan'>" \
      --layer all
@@ -802,7 +819,22 @@ After the plan file is finalized and document review has run:
 4. Log on success: `Stored to HKTMemory: [title]`
 5. On error, note it briefly but do not fail the plan workflow — memory storage is supplementary, not critical path
 
+**Rationale:** The vector database's job is *discovery*, not full-text storage. The document already lives in a git-managed file. Store the summary and path so retrieval can surface it; the agent reads the actual file when details are needed.
+
 **Note:** This enables future plans and brainstorms to discover and build upon this work through their Phase 0 retrieve steps.
+
+<!-- HKT-PATCH:knowledge-commit -->
+##### Knowledge Repository Commit
+
+After the plan file is finalized and stored to HKTMemory:
+
+```bash
+gale-knowledge commit --project "$(gale-knowledge extract-project 2>/dev/null || basename $(pwd))" --type plan --title "<plan-title>" 2>/dev/null || true
+```
+
+If `gale-knowledge` is not on PATH, skip silently — this must never block the skill.
+
+<!-- /HKT-PATCH:knowledge-commit -->
 
 NEVER CODE! Research, decide, and write the plan.
 

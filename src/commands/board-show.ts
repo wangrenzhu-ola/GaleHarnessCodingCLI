@@ -1,6 +1,6 @@
 import { defineCommand } from "citty"
-import { readAndMergeTasks } from "../board/reader.ts"
-import { formatTaskDetail } from "../board/formatter.ts"
+import { readAndMergeTasks } from "../board/reader"
+import { formatTaskDetail } from "../board/formatter"
 
 export default defineCommand({
   meta: {

@@ -141,6 +141,54 @@ Before Phase 1, query the vector memory database for related brainstorms and req
 - Related requirements documents that might inform scope
 - Past decisions or constraints that still apply
 
+### Phase 0.5: Environment Setup (Branch / Worktree)
+
+Before starting substantive brainstorming work, set up an isolated working environment. Brainstorm produces documents (requirements docs in `docs/brainstorms/`), not code, but keeping the default branch clean is still good practice.
+
+1. Check the current branch:
+
+   ```bash
+   current_branch=$(git branch --show-current)
+   default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+   if [ -z "$default_branch" ]; then
+     default_branch=$(git rev-parse --verify origin/main >/dev/null 2>&1 && echo "main" || echo "master")
+   fi
+   ```
+
+2. **If already on a feature branch** (not the default branch):
+   - Continue on the current branch — no action needed
+
+3. **If on the default branch**, offer options using the platform's blocking question tool:
+
+   ```
+   1. Create a feature branch (quick — stays in current checkout)
+   2. Use a worktree (isolated — recommended for parallel work)
+   3. Stay on [default_branch] (only if you're sure)
+   ```
+
+   **Option 1: Create a feature branch**
+   ```bash
+   git pull origin [default_branch]
+   git checkout -b brainstorm/<descriptive-name>
+   ```
+   Derive the branch name from the brainstorm topic (e.g., `brainstorm/global-knowledge-repo`).
+
+   **Option 2: Use a worktree (recommended for parallel development)**
+   ```bash
+   skill: git-worktree
+   # The skill will create a new branch from the default branch in an isolated worktree
+   ```
+   Use a branch name like `brainstorm/<descriptive-name>`.
+
+   **Option 3: Stay on default branch**
+   - Requires explicit user confirmation
+   - Only proceed after user explicitly says "yes, stay on [default_branch]"
+
+   **Recommendation**: Use worktree if:
+   - You are working on multiple brainstorms or tasks simultaneously
+   - You want to keep the default branch clean
+   - You may want to switch between branches during the brainstorm
+
 ### Phase 1: Understand the Idea
 
 #### 1.1 Existing Context Scan
@@ -230,6 +278,23 @@ If relevant, call out whether the choice is:
 - Extend an existing capability
 - Build something net new
 
+<!-- HKT-PATCH:knowledge-write-path -->
+### Knowledge Repository Write Path
+
+Before writing the output document, resolve the target directory:
+
+```bash
+# Try global knowledge repo first, fall back to project docs/
+KNOWLEDGE_PATH=$(gale-knowledge resolve-path --type brainstorms 2>/dev/null)
+if [ -z "$KNOWLEDGE_PATH" ] || [ $? -ne 0 ]; then
+  KNOWLEDGE_PATH="docs/brainstorms"
+fi
+```
+
+Write the document to `$KNOWLEDGE_PATH/<filename>.md`.
+
+<!-- /HKT-PATCH:knowledge-write-path -->
+
 ### Phase 3: Capture the Requirements
 
 Write or update a requirements document only when the conversation produced durable decisions worth preserving. Read `references/requirements-capture.md` for the document template, formatting rules, visual aid guidance, and completeness checks.
@@ -251,12 +316,12 @@ When document-review returns "Review complete", proceed to Phase 4.
 
 After successfully writing or updating the requirements document:
 
-1. Read back the full content of the written file
+1. Compose a concise summary (2-4 sentences) covering: the problem, the chosen approach, key decisions, and the repo-relative file path to the document
 2. Extract `title` and `category` values from its YAML frontmatter (if present)
 3. Run:
    ```bash
    uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
-     --content "<full file content>" \
+     --content "<summary + repo-relative file path>" \
      --title "<frontmatter title or filename>" \
      --topic "<frontmatter category or 'brainstorm'>" \
      --layer all
@@ -264,7 +329,22 @@ After successfully writing or updating the requirements document:
 4. Log on success: `Stored to HKTMemory: [title]`
 5. On error, note it briefly but do not fail the brainstorm workflow — memory storage is supplementary, not critical path
 
+**Rationale:** The vector database's job is *discovery* — helping future sessions find related past work. The full document already lives in a git-managed file; storing it again in the vector DB is redundant, expensive, and may exceed content limits. Store the summary and path so retrieval can surface it; the agent reads the actual file when details are needed.
+
 **Note:** This enables future brainstorms to discover and build upon this work through Phase 0.4's retrieve step.
+
+<!-- HKT-PATCH:knowledge-commit -->
+### Knowledge Repository Commit
+
+After the document is written:
+
+```bash
+gale-knowledge commit --project "$(gale-knowledge extract-project 2>/dev/null || basename $(pwd))" --type brainstorm --title "<document-title>" 2>/dev/null || true
+```
+
+If `gale-knowledge` is not on PATH, skip silently — this must never block the skill.
+
+<!-- /HKT-PATCH:knowledge-commit -->
 
 ### Phase 4: Handoff
 

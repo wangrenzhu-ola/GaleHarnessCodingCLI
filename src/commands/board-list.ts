@@ -1,7 +1,9 @@
 import { defineCommand } from "citty"
-import { readAndMergeTasks } from "../board/reader.ts"
-import { formatTable, formatJson, formatQuiet } from "../board/formatter.ts"
-import type { TaskStatus, FormatOptions } from "../board/types.ts"
+import { readAndMergeTasks } from "../board/reader"
+import { formatTable, formatJson, formatQuiet } from "../board/formatter"
+import { readKnowledgeDocuments } from "../board/knowledge-reader"
+import type { KnowledgeDocType } from "../knowledge/types"
+import type { TaskStatus, FormatOptions } from "../board/types"
 
 const VALID_STATUSES: TaskStatus[] = ["in_progress", "completed", "failed", "stale"]
 const VALID_FORMATS = ["table", "json", "quiet"] as const
@@ -40,6 +42,20 @@ export default defineCommand({
       description: "Output format: table, json, or quiet",
       default: "table",
     },
+    "with-knowledge": {
+      type: "boolean",
+      description: "Append knowledge documents after task list",
+      default: false,
+    },
+    "knowledge-only": {
+      type: "boolean",
+      description: "Show only knowledge documents",
+      default: false,
+    },
+    "knowledge-type": {
+      type: "string",
+      description: "Filter knowledge documents by type: brainstorms, plans, solutions",
+    },
   },
   async run({ args }) {
     // Bug 1: Validate --status
@@ -66,6 +82,16 @@ export default defineCommand({
     if (!Number.isInteger(parsedOffset) || parsedOffset < 0) {
       console.error("Error: --offset must be a non-negative integer")
       process.exit(1)
+    }
+
+    // Knowledge-only mode: skip task loading entirely
+    if (args["knowledge-only"]) {
+      const knowledgeDocs = readKnowledgeDocuments({
+        project: (args.project && args.project.trim() !== "") ? args.project : undefined,
+        type: args["knowledge-type"] as KnowledgeDocType | undefined,
+      })
+      console.log(formatKnowledgeOutput(knowledgeDocs, args.project))
+      return
     }
 
     const tasks = await readAndMergeTasks()
@@ -110,5 +136,45 @@ export default defineCommand({
     }
 
     console.log(output)
+
+    // Knowledge documents section
+    if (args["with-knowledge"]) {
+      const knowledgeDocs = readKnowledgeDocuments({
+        project: (args.project && args.project.trim() !== "") ? args.project : undefined,
+        type: args["knowledge-type"] as KnowledgeDocType | undefined,
+      })
+      console.log(formatKnowledgeOutput(knowledgeDocs, args.project))
+    }
   },
 })
+
+function formatKnowledgeOutput(docs: ReturnType<typeof readKnowledgeDocuments>, project?: string): string {
+  const header = project && project.trim()
+    ? `\n\xF0\x9F\x93\x9A Knowledge Documents (project: ${project})`
+    : "\n\xF0\x9F\x93\x9A Knowledge Documents"
+
+  if (docs.length === 0) {
+    return `${header}\n\n  No documents found.`
+  }
+
+  const lines: string[] = [header, ""]
+
+  // Group by type
+  const grouped = new Map<string, typeof docs>()
+  for (const doc of docs) {
+    const list = grouped.get(doc.type) ?? []
+    list.push(doc)
+    grouped.set(doc.type, list)
+  }
+
+  for (const [type, typeDocs] of grouped) {
+    lines.push(`  ${type}/`)
+    for (const doc of typeDocs) {
+      const dateStr = doc.date ? `${doc.date} ` : ""
+      lines.push(`    ${dateStr}${doc.title}`)
+    }
+    lines.push("")
+  }
+
+  return lines.join("\n")
+}
