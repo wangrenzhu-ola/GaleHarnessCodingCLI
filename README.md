@@ -482,7 +482,7 @@ flowchart LR
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
+git clone https://github.com/wangrenzhu-ola/GaleHarnessCLI.git
 cd GaleHarnessCLI
 
 # 2. 运行一键安装脚本
@@ -500,8 +500,8 @@ bash scripts/setup.sh
 git config --global credential.helper ""
 
 # 2. 查询最新 tag 并浅克隆（只下载最新版本，快且小）
-$latestTag = (git ls-remote --tags --sort="-v:refname" https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git | Select-Object -First 1).Split("`t")[1].Replace("refs/tags/", "")
-git clone --branch $latestTag --depth 1 --single-branch https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
+$latestTag = (git ls-remote --tags --sort="-v:refname" https://github.com/wangrenzhu-ola/GaleHarnessCLI.git | Select-Object -First 1).Split("`t")[1].Replace("refs/tags/", "")
+git clone --branch $latestTag --depth 1 --single-branch https://github.com/wangrenzhu-ola/GaleHarnessCLI.git
 cd GaleHarnessCLI
 
 # 3. 运行一键安装脚本（如遇到权限问题，以管理员身份运行 PowerShell）
@@ -514,10 +514,10 @@ cd GaleHarnessCLI
 
 ```powershell
 # 首选：jsDelivr CDN（国内快，全球稳）
-irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCodingCLI@main/scripts/bootstrap.ps1 | iex
+irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCLI@main/scripts/bootstrap.ps1 | iex
 
 # 备选：GitHub 官方源（如遇 404 请等待 2-3 分钟后重试）
-irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/bootstrap.ps1 | iex
+irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCLI/main/scripts/bootstrap.ps1 | iex
 ```
 
 `bootstrap.ps1` 会自动：

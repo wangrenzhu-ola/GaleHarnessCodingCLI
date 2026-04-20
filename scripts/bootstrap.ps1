@@ -1,8 +1,8 @@
 # GaleHarnessCLI Windows 零依赖启动脚本
 # 用途：在全新 Windows 上（无 Git）一键完成环境准备
 # 运行方式：复制以下命令到 PowerShell 执行
-#   irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCodingCLI@main/scripts/bootstrap.ps1 | iex
-#   irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/bootstrap.ps1 | iex
+#   irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCLI@main/scripts/bootstrap.ps1 | iex
+#   irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCLI/main/scripts/bootstrap.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
@@ -113,7 +113,7 @@ if (Test-Path "$cloneDir\.git") {
     }
 
     # Query GitHub API for the latest release tag (shallow clone for speed)
-    $repoUrl = "https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git"
+    $repoUrl = "https://github.com/wangrenzhu-ola/GaleHarnessCLI.git"
     $apiTagsUrl = "https://api.github.com/repos/wangrenzhu-ola/GaleHarnessCodingCLI/tags?per_page=1"
     $cloneRef = "main"
 
