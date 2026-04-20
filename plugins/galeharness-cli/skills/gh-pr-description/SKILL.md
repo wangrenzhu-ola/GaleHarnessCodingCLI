@@ -321,26 +321,6 @@ Assemble the body in this order:
 2. **Body sections** -- only the sections that earn their keep for this change: what changed and why, design decisions, tables for data, visual aids when complexity warrants. Skip empty sections entirely.
 3. **Test plan** -- only when non-obvious per the writing principles. Omit otherwise.
 4. **Evidence block** -- only the preserved block from Step 3, if one exists. Do not fabricate or placeholder.
-5. **Compound Engineering badge** -- append a badge footer separated by a `---` rule. Skip if the existing body (for `pr:` input) already contains the badge.
-
-**Badge:**
-
-```markdown
----
-
-[![Compound Engineering](https://img.shields.io/badge/Built_with-Compound_Engineering-6366f1)](https://github.com/EveryInc/compound-engineering-plugin)
-![HARNESS](https://img.shields.io/badge/MODEL_SLUG-COLOR?logo=LOGO&logoColor=white)
-```
-
-**Harness lookup:**
-
-| Harness | `LOGO` | `COLOR` |
-|---------|--------|---------|
-| Claude Code | `claude` | `D97757` |
-| Codex | (omit logo param) | `000000` |
-| Gemini CLI | `googlegemini` | `4285F4` |
-
-**Model slug:** Replace spaces with underscores. Append context window and thinking level in parentheses if known. Examples: `Opus_4.6_(1M,_Extended_Thinking)`, `Sonnet_4.6_(200K)`, `Gemini_3.1_Pro`.
 
 ---
 
