@@ -483,7 +483,7 @@ flowchart LR
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
-cd GaleHarnessCLI
+cd GaleHarnessCodingCLI
 
 # 2. 运行一键安装脚本
 bash scripts/setup.sh
@@ -502,7 +502,7 @@ git config --global credential.helper ""
 # 2. 查询最新 tag 并浅克隆（只下载最新版本，快且小）
 $latestTag = (git ls-remote --tags --sort="-v:refname" https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git | Select-Object -First 1).Split("`t")[1].Replace("refs/tags/", "")
 git clone --branch $latestTag --depth 1 --single-branch https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
-cd GaleHarnessCLI
+cd GaleHarnessCodingCLI
 
 # 3. 运行一键安装脚本（如遇到权限问题，以管理员身份运行 PowerShell）
 .\scripts\setup.ps1
@@ -522,7 +522,7 @@ irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/s
 
 `bootstrap.ps1` 会自动：
 - 下载并安装 Git（支持 winget 或离线安装包）
-- 克隆本仓库到 `~/GaleHarnessCLI`
+- 克隆本仓库到 `~/GaleHarnessCodingCLI`
 - 自动运行 `setup.ps1` 完成后续所有环境配置
 
 > **PowerShell 执行策略：** 如果脚本无法运行，先执行：
@@ -563,7 +563,7 @@ bun test
 
 ### 安装到 AI 编码工具
 
-全局安装后，在任意目录使用 `gale-harness` 命令：
+在 repo 根目录（`GaleHarnessCodingCLI/`）执行以下命令，将插件安装到各 AI 编码工具：
 
 ```bash
 # 一键安装到所有检测到的平台
@@ -575,13 +575,15 @@ gale-harness install ./plugins/galeharness-cli --to cursor
 gale-harness install ./plugins/galeharness-cli --to kimi
 ```
 
+> **注意：** `./plugins/galeharness-cli` 是相对路径，必须在 repo 根目录下执行。
+
 **支持的平台 (15个)：** `claude`, `opencode`, `codex`, `droid`, `pi`, `gemini`, `copilot`, `kiro`, `windsurf`, `openclaw`, `qwen`, `qoder`, `trae`, `cursor`, `kimi`
 
 **Claude Code** —— 本地插件模式：
 
 ```bash
 # 添加到 ~/.zshrc 或 ~/.bashrc
-alias ghc='claude --plugin-dir /path/to/GaleHarnessCLI/plugins/galeharness-cli'
+alias ghc='claude --plugin-dir /path/to/GaleHarnessCodingCLI/plugins/galeharness-cli'
 ```
 
 运行 `ghc` 而不是 `claude` 来加载本地插件。
@@ -666,8 +668,7 @@ bun run src/index.ts sync --target all
 ## 目录结构
 
 ```
-GaleHarnessCLI/
-├── src/                      # CLI 入口、解析器、转换器
+GaleHarnessCodingCLI/
 │   ├── index.ts             # 主入口
 │   ├── converters/          # 平台转换逻辑
 │   └── targets/             # 目标平台写入器
@@ -695,7 +696,7 @@ GaleHarnessCLI/
 添加到 `~/.zshrc` 或 `~/.bashrc`：
 
 ```bash
-GHC_REPO=~/code/GaleHarnessCLI
+GHC_REPO=~/code/GaleHarnessCodingCLI
 
 ghc-cli() { bun run "$GHC_REPO/src/index.ts" "$@"; }
 
