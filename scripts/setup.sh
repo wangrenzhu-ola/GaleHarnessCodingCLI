@@ -166,6 +166,8 @@ header "7. 安装项目依赖并全局链接"
 if command -v bun >/dev/null 2>&1; then
   bun install >/dev/null 2>&1 && ok "项目依赖安装完成" || warn "bun install 失败，请手动运行"
 
+  # bun link 创建的 symlink 依赖源文件有可执行权限，需要先 chmod +x
+  chmod +x src/index.ts 2>/dev/null || true
   bun link >/dev/null 2>&1 && ok "gale-harness 已全局链接" || warn "bun link 失败，请手动运行"
 else
   warn "Bun 未就绪，跳过项目依赖安装"
