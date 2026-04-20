@@ -496,11 +496,15 @@ bash scripts/setup.sh
 **方式 A：已有 Git**
 
 ```powershell
-# 1. 克隆仓库
-git clone https://github.com/wangrenzhu-ola/GaleHarnessCLI.git
+# 1. 禁用 Git Credential Manager 弹窗（公开仓库不需要授权）
+git config --global credential.helper ""
+
+# 2. 查询最新 tag 并浅克隆（只下载最新版本，快且小）
+$latestTag = (git ls-remote --tags --sort="-v:refname" https://github.com/wangrenzhu-ola/GaleHarnessCLI.git | Select-Object -First 1).Split("`t")[1].Replace("refs/tags/", "")
+git clone --branch $latestTag --depth 1 --single-branch https://github.com/wangrenzhu-ola/GaleHarnessCLI.git
 cd GaleHarnessCLI
 
-# 2. 运行一键安装脚本（如遇到权限问题，以管理员身份运行 PowerShell）
+# 3. 运行一键安装脚本（如遇到权限问题，以管理员身份运行 PowerShell）
 .\scripts\setup.ps1
 ```
 
