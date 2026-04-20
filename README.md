@@ -509,7 +509,11 @@ cd GaleHarnessCLI
 复制以下整行命令到 PowerShell 直接执行，无需预先安装任何工具：
 
 ```powershell
-irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCLI/main/scripts/bootstrap.ps1 | iex
+# 国内网络推荐（jsDelivr CDN 加速）
+irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCodingCLI@main/scripts/bootstrap.ps1 | iex
+
+# 或 GitHub 官方源（部分地区可能访问较慢）
+irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/bootstrap.ps1 | iex
 ```
 
 `bootstrap.ps1` 会自动：
@@ -521,6 +525,8 @@ irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCLI/main/scripts
 > ```powershell
 > Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 > ```
+>
+> **网络问题备选：** 如果以上命令均下载失败，请手动下载 Git（https://git-scm.com/download/win）安装后，回到「方式 A」继续。
 
 ### 安装后自检
 
