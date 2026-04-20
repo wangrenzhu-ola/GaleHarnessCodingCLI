@@ -3,16 +3,23 @@
 
 #Requires -Version 5.1
 
-$ErrorActionPreference = "Stop"
+# 注意：使用 Continue 而非 Stop，避免非致命错误中断整个安装流程
+$ErrorActionPreference = "Continue"
+
+# 修正 Windows PowerShell 5.1 控制台编码，避免 Unicode 字符导致输出乱码或崩溃
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    $OutputEncoding = [System.Text.Encoding]::UTF8
+}
 
 # =====================================================
 #  Colors
 # =====================================================
-function ok($msg)     { Write-Host "✓ $msg" -ForegroundColor Green }
-function warn($msg)   { Write-Host "⚠ $msg" -ForegroundColor Yellow }
-function err($msg)    { Write-Host "✗ $msg" -ForegroundColor Red }
-function info($msg)   { Write-Host "→ $msg" -ForegroundColor Cyan }
-function header($msg) { Write-Host "`n▶ $msg" -ForegroundColor Blue }
+function ok($msg)     { Write-Host "[OK] $msg" -ForegroundColor Green }
+function warn($msg)   { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
+function err($msg)    { Write-Host "[ERR] $msg" -ForegroundColor Red }
+function info($msg)   { Write-Host "[INFO] $msg" -ForegroundColor Cyan }
+function header($msg) { Write-Host "`n== $msg ==" -ForegroundColor Blue }
 
 # =====================================================
 #  Helpers
@@ -248,35 +255,35 @@ header "安装完成！"
 
 Write-Host @"
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------
 
-  ✅ GaleHarnessCLI 环境安装完成
+  GaleHarnessCLI 环境安装完成
 
 请重新打开 PowerShell，或运行以下命令使配置生效:
   `$env:Path = [Environment]::GetEnvironmentVariable("Path", "User")
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------
   自检清单 — 请依次运行以下命令验证:
 
   bun --version
-    → 期望: 1.x.x
+    -> 期望: 1.x.x
 
   python --version
-    → 期望: Python 3.9+
+    -> 期望: Python 3.9+
 
   uv --version
-    → 期望: uv x.x.x
+    -> 期望: uv x.x.x
 
   gale-harness --help
-    → 期望: 显示 CLI 帮助信息
+    -> 期望: 显示 CLI 帮助信息
 
   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats
-    → 期望: HKTMemory 统计信息
+    -> 期望: HKTMemory 统计信息
 
   bun test
-    → 期望: 测试通过
+    -> 期望: 测试通过
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------
   全局使用:
 
   安装到目标平台:
@@ -285,7 +292,7 @@ Write-Host @"
   同步个人配置:
     gale-harness sync
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------
 
 "@ -ForegroundColor White
 

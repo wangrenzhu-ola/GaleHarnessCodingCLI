@@ -4,19 +4,26 @@
 #   irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCodingCLI@main/scripts/bootstrap.ps1 | iex
 #   irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/bootstrap.ps1 | iex
 
-$ErrorActionPreference = "Stop"
+# 注意：此处使用 Continue 而非 Stop，防止 irm|iex 管道中非致命错误终止整个 PowerShell 会话
+$ErrorActionPreference = "Continue"
 
-function ok($msg)     { Write-Host "✓ $msg" -ForegroundColor Green }
-function warn($msg)   { Write-Host "⚠ $msg" -ForegroundColor Yellow }
-function err($msg)    { Write-Host "✗ $msg" -ForegroundColor Red }
-function info($msg)   { Write-Host "→ $msg" -ForegroundColor Cyan }
-function header($msg) { Write-Host "`n▶ $msg" -ForegroundColor Blue }
+# 修正 Windows PowerShell 5.1 控制台编码，避免 Unicode 字符导致输出乱码或崩溃
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    $OutputEncoding = [System.Text.Encoding]::UTF8
+}
+
+function ok($msg)     { Write-Host "[OK] $msg" -ForegroundColor Green }
+function warn($msg)   { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
+function err($msg)    { Write-Host "[ERR] $msg" -ForegroundColor Red }
+function info($msg)   { Write-Host "[INFO] $msg" -ForegroundColor Cyan }
+function header($msg) { Write-Host "`n== $msg ==" -ForegroundColor Blue }
 
 # =====================================================
 #  Banner
 # =====================================================
 Write-Host ""
-Write-Host "GaleHarnessCLI Windows 零依赖启动" -ForegroundColor White -BackgroundColor DarkBlue
+Write-Host "GaleHarnessCLI Windows Bootstrap" -ForegroundColor White -BackgroundColor DarkBlue
 Write-Host "本脚本适用于未安装 Git 的全新 Windows 环境。" -ForegroundColor Gray
 Write-Host ""
 
@@ -104,7 +111,7 @@ if ($gitAvailable) {
 # =====================================================
 header "2. 克隆仓库"
 
-$cloneDir = "$env:USERPROFILE\GaleHarnessCLI"
+$cloneDir = "$env:USERPROFILE\GaleHarnessCodingCLI"
 if (Test-Path "$cloneDir\.git") {
     info "仓库已存在，跳过克隆"
 } else {
@@ -164,9 +171,9 @@ if (Test-Path "$cloneDir\.git") {
         err "仓库克隆失败，已尝试 $maxAttempts 次"
         Write-Host ""
         Write-Host "可能的原因和解决方案：" -ForegroundColor Yellow
-        Write-Host "• 网络不稳定：请检查网络连接后重试" -ForegroundColor White
-        Write-Host "• GitHub 被墙：请尝试使用代理或镜像" -ForegroundColor White
-        Write-Host "• 手动克隆：git config --global http.sslBackend openssl" -ForegroundColor White
+        Write-Host "- 网络不稳定：请检查网络连接后重试" -ForegroundColor White
+        Write-Host "- GitHub 被墙：请尝试使用代理或镜像" -ForegroundColor White
+        Write-Host "- 手动克隆：git config --global http.sslBackend openssl" -ForegroundColor White
         Write-Host "             git config --global credential.helper ''" -ForegroundColor White
         Write-Host "             git clone --depth 1 --branch main $repoUrl" -ForegroundColor White
         exit 1
@@ -185,7 +192,7 @@ Set-Location $cloneDir
 if (Test-Path ".\scripts\setup.ps1") {
     ok "准备运行 setup.ps1..."
     Write-Host ""
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+    Write-Host "-----------------------------------------------------------------" -ForegroundColor Cyan
     & ".\scripts\setup.ps1"
 } else {
     err "未找到 setup.ps1"
