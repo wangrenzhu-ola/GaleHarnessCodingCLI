@@ -9,7 +9,7 @@ import { dirname, join, resolve, sep } from "node:path"
 
 import { parseFrontmatter, formatFrontmatter } from "../utils/frontmatter.js"
 
-import { extractProjectName, resolveKnowledgePath } from "./home.js"
+import { extractProjectName, resolveKnowledgePath, sanitizePathComponent } from "./home.js"
 import type { KnowledgeDocType } from "./types.js"
 
 // ---------------------------------------------------------------------------
@@ -57,7 +57,15 @@ export function writeKnowledgeDocument(options: WriteKnowledgeDocumentOptions): 
   const resolved = resolveKnowledgePath({ type, projectName })
   const primaryPath = join(resolved.docDir, filename)
 
-  // Path traversal guard
+  // Path traversal guard: 检查 filename 的每个路径组件
+  const pathComponents = filename.split(/[/\\]/)
+  for (const component of pathComponents) {
+    if (component) {
+      sanitizePathComponent(component)
+    }
+  }
+
+  // 额外检查：确保最终路径在 safeBase 内
   const finalPath = resolve(primaryPath)
   const safeBase = resolve(resolved.docDir)
   if (!finalPath.startsWith(safeBase + sep) && finalPath !== safeBase) {
@@ -82,9 +90,13 @@ export function writeKnowledgeDocument(options: WriteKnowledgeDocumentOptions): 
       writeFileSync(fallbackPath, finalContent, "utf8")
       console.warn(warning)
       return { path: fallbackPath, usedFallback: true, warning }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      throw new Error(`Failed to write knowledge document to both primary and fallback paths: ${msg}`)
+    } catch (fallbackError) {
+      const fallbackMsg = fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+      // BUG-004: 聚合主路径和 fallback 的错误信息
+      throw new Error(
+        `Failed to write knowledge document to both primary and fallback paths. ` +
+        `Primary error: ${primaryWarning}. Fallback error: ${fallbackMsg}`
+      )
     }
   }
 }
@@ -99,6 +111,7 @@ export function writeKnowledgeDocument(options: WriteKnowledgeDocumentOptions): 
  * - 如果内容已有 YAML frontmatter，解析并确保 project 字段存在
  * - 如果没有 frontmatter，注入包含 project 字段的 frontmatter
  * - 保留已有 frontmatter 中的其他字段不变
+ * - 不覆盖已有的 project 字段
  */
 export function injectProjectFrontmatter(content: string, projectName: string): string {
   if (!content) {
@@ -107,7 +120,7 @@ export function injectProjectFrontmatter(content: string, projectName: string): 
 
   const { data, body } = parseFrontmatter(content)
 
-  // 设置 project（不覆盖已有值——但 spec 要求"确保 project 字段存在"）
+  // 设置 project（不覆盖已有值）
   if (!data.project) {
     data.project = projectName
   }

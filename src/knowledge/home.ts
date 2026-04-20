@@ -143,10 +143,30 @@ export function extractProjectName(cwd?: string): string {
  * @param options.projectName - 项目名（可选）
  * @returns 路径解析结果
  */
-/** Reject path components containing traversal sequences or separators */
-function sanitizePathComponent(name: string): string {
-  if (/[\/\\]|\.\./g.test(name)) {
+
+/**
+ * Reject path components containing traversal sequences or separators
+ *
+ * 拒绝包含以下内容的 path component:
+ * - 正斜杠 `/` 或反斜杠 `\`
+ * - `..` (路径穿越)
+ * - 绝对路径 (以 / 开头或 Windows 盘符格式)
+ */
+export function sanitizePathComponent(name: string): string {
+  // 拒绝包含路径分隔符的组件
+  if (name.includes('/') || name.includes('\\')) {
     throw new Error(`Invalid path component: ${name}`)
+  }
+  // 拒绝 .. 路径穿越 (精确匹配或为路径的一部分)
+  if (name === '..' || name.startsWith('../') || name.endsWith('/..') || name.includes('/../')) {
+    throw new Error(`Invalid path component: ${name}`)
+  }
+  // 拒绝绝对路径 (Unix 和 Windows)
+  if (name.startsWith('/')) {
+    throw new Error(`Invalid path component: absolute path not allowed`)
+  }
+  if (/^[a-zA-Z]:[\\/]/.test(name)) {
+    throw new Error(`Invalid path component: absolute path not allowed`)
   }
   return name
 }
