@@ -5,17 +5,16 @@
 ## 目录
 
 - [核心理念](#核心理念)
-- [工程师实战指南](#工程师实战指南)
 - [工作流](#工作流)
+- [工程师实战指南](#工程师实战指南)
 - [系统架构](#系统架构)
 - [核心工作流时序图](#核心工作流时序图)
 - [核心功能](#核心功能)
 - [全局知识仓库](#全局知识仓库)
 - [安装方式](#安装方式)
+- [AI工具安装](#ai工具安装)
 - [同步个人配置](#同步个人配置)
-- [快速开始](#快速开始)
 - [目录结构](#目录结构)
-- [开发指南](#开发指南)
 - [环境变量](#环境变量)
 - [贡献指南](#贡献指南)
 - [许可证](#许可证)
@@ -33,268 +32,6 @@
 
 ---
 
-## 工程师实战指南
-
-本章节以研发导师的视角，指导工程师在不同开发场景下如何高效使用 GaleHarnessCLI。
-
-### 场景一：新需求开发
-
-当你接到一个新需求时，遵循「先规划、后执行」的原则：
-
-```
-需求理解 -> 技术规划 -> 编码实现 -> 代码审查 -> 知识沉淀
-```
-
-**步骤一：需求探索**
-
-```bash
-/gh:brainstorm "实现用户登录功能"
-```
-
-这会：
-- 自动检索 HKTMemory 中相关的历史需求案例
-- 通过交互式问答帮你细化需求
-- 输出一份结构化的需求文档到 `docs/brainstorms/`
-- 自动将需求存储到 HKTMemory
-
-**步骤二：技术规划**
-
-```bash
-/gh:plan docs/brainstorms/user-login-requirements.md
-```
-
-这会：
-- 检索相似的技术方案
-- 生成详细的实施计划，包含任务分解和置信度评估
-- 输出到 `docs/plans/`
-
-**步骤三：编码实现**
-
-```bash
-/gh:work docs/plans/user-login-plan.md
-```
-
-这会：
-- 创建 git worktree 隔离开发环境
-- 系统化执行任务清单
-- 检索相关的实现模式参考
-- 存储实现总结
-
-**步骤四：代码审查**
-
-```bash
-/gh:review
-```
-
-这会启动多代理并行审查，从安全、性能、正确性、可维护性等维度检查代码。
-
-**步骤五：知识沉淀**
-
-```bash
-/gh:compound "用户登录功能的实现经验"
-```
-
-记录解决方案，供未来类似需求参考。
-
----
-
-### 场景二：Bug 修复
-
-当你遇到 Bug 时，有两种选择：
-
-**选项 A：使用 GaleHarnessCLI 工作流（推荐）**
-
-```bash
-/gh:debug
-```
-
-这会：
-- 自动检索 HKTMemory 中类似的历史问题
-- 系统性定位根本原因
-- 修复后自动存储调试经验
-- 知识自动沉淀到向量库
-
-**调试输入方式**：
-
-```
-/gh:debug "用户登录时偶尔出现 500 错误"
-
-# 或直接粘贴错误信息
-/gh:debug
-> Error: Connection timeout at UserService.authenticate()
-> Stack trace: ...
-
-# 或引用 GitHub Issue
-/gh:debug https://github.com/org/repo/issues/123
-```
-
----
-
-### 场景三：需求讨论与评审
-
-当需要评审需求文档或技术方案时：
-
-**需求文档评审**
-
-```bash
-/document-review docs/brainstorms/new-feature.md
-```
-
-这会启动多个角色代理并行评审：
-- **产品视角**：挑战前提假设，评估战略影响
-- **安全视角**：识别数据暴露风险、认证漏洞
-- **可行性视角**：评估技术可行性、架构冲突
-- **范围视角**：识别不必要的复杂度、过度设计
-
-**技术方案评审**
-
-```bash
-/document-review docs/plans/implementation-plan.md
-```
-
-产出一份包含各角色视角的评审报告。
-
----
-
-### 场景四：知识归档与复用
-
-**归档已解决的问题**
-
-当你完成一个有价值的解决方案后：
-
-```bash
-/gh:compound "解决大文件上传超时问题"
-```
-
-这会：
-- 检索是否已有相关记录，避免重复
-- 引导你描述问题背景、方案选择、最终实现
-- 存储到 HKTMemory 向量库
-- 以后遇到类似问题自动检索参考
-
-**查询历史经验**
-
-当你遇到问题时，可以先查询是否有相关经验：
-
-```bash
-# 在工作流中自动触发
-/gh:brainstorm "..."
-/gh:plan "..."
-/gh:debug "..."
-# 以上命令都会自动检索 HKTMemory
-
-# 或显式查询
-Task 工具调用 galeharness-cli:research:learnings-researcher
-```
-
----
-
-### 场景五：代码优化
-
-当你需要优化性能、重构代码或提升质量时：
-
-```bash
-/gh:optimize "优化首页加载速度"
-```
-
-这会：
-- 定义可测量的目标指标
-- 构建测量脚手架
-- 并行运行多个实验方案
-- 用 LLM 作为评分器评估效果
-- 自动保留改进方案，回退失败的尝试
-
----
-
-### 场景六：研究现有代码
-
-当你需要理解项目背景或查找历史决策时：
-
-**查询历史会话**
-
-```bash
-/gh:sessions "上次我们是怎么处理认证问题的？"
-```
-
-这会搜索你过去的 Claude Code、Codex、Cursor 会话记录。
-
-**搜索 Slack 讨论**
-
-```bash
-/gh:slack-research "团队对微服务拆分的讨论"
-```
-
-这会搜索 Slack 获取组织上下文，产出研究摘要。
-
-**分析 Issue 趋势**
-
-```bash
-# 需要通过 Task 工具调用
-Task 工具调用 issue-intelligence-analyst
-```
-
-分析 GitHub Issues 发现重复主题和痛点模式。
-
----
-
-### 场景七：探索改进机会
-
-当你想主动发现项目改进点时：
-
-```bash
-/gh:ideate
-```
-
-这会：
-- 扫描代码库发现潜在改进点
-- 通过发散思维生成改进建议
-- 使用对抗性过滤筛选高价值项目
-- 引导你选择优先处理的方向
-
----
-
-### 快速决策表
-
-| 我想要... | 使用命令 | 记忆交互 |
-|-----------|----------|----------|
-| 细化新需求 | `/gh:brainstorm` | 读取历史需求，存储新需求 |
-| 制定实施计划 | `/gh:plan` | 读取相似方案，存储技术规划 |
-| 执行开发任务 | `/gh:work` | 读取实现模式，存储实现总结 |
-| 修复 Bug | `/gh:debug` | 读取类似问题，存储调试经验 |
-| 审查代码 | `/gh:review` | 读取审查模式，存储审查发现 |
-| 沉淀知识 | `/gh:compound` | 检索重复，存储完整方案 |
-| 优化性能 | `/gh:optimize` | 读取策略，存储优化结果 |
-| 评审文档 | `/document-review` | 无 |
-| 查历史会话 | `/gh:sessions` | 无 |
-| 查 Slack 讨论 | `/gh:slack-research` | 无 |
-| 发现改进点 | `/gh:ideate` | 读取历史建议，存储新发现 |
-
----
-
-### 新手上路建议
-
-**第一周：熟悉工作流**
-
-1. 用 `/gh:brainstorm` 练习一个小需求
-2. 用 `/gh:plan` 生成技术规划
-3. 用 `/gh:work` 执行实现
-4. 用 `/gh:review` 审查自己的代码
-5. 用 `/gh:compound` 记录学到的经验
-
-**第二周：积累知识库**
-
-1. 遇到问题先用 `/gh:debug` 让系统检索历史方案
-2. 解决后用 `/gh:compound` 归档
-3. 开始体会到「知识复利」的效果
-
-**第三周及以后：形成习惯**
-
-1. 所有需求走完整工作流
-2. 所有 Bug 先查后改再归档
-3. 定期用 `/gh:ideate` 发现改进机会
-
----
-
 ## 工作流
 
 ```
@@ -305,9 +42,11 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
 
 **每个阶段都与 HKTMemory 向量知识库双向交互**：阶段开始前检索相关记忆，阶段完成后存储新产生的知识。
 
+### 命令一览表
+
 | 命令 | 用途 | HKTMemory 交互 |
 |------|------|----------------|
-| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力项目改进点 | 检索历史改进建议，存储新发现 |
+| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力改进点 | 检索历史建议，存储新发现 |
 | `/gh:brainstorm` | 在规划前探索需求和方案，通过交互式问答细化想法 | 检索相关需求，存储需求文档 |
 | `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 | 检索相似方案，存储技术规划 |
 | `/gh:work` | 系统化执行工作项，使用 worktree 和任务追踪 | 检索实现模式，存储实现总结 |
@@ -315,12 +54,97 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
 | `/gh:compound` | 记录已解决问题，沉淀团队知识 | 检索相关解决方案，存储完整知识 |
 | `/gh:debug` | 系统性查找根本原因并修复缺陷 | 检索类似问题，存储调试经验 |
 | `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 | 检索优化策略，存储优化结果 |
+| `/document-review` | 多角色并行评审需求/方案文档 | 无 |
+| `/gh:sessions` | 搜索历史 Claude Code/Codex/Cursor 会话 | 无 |
+| `/gh:slack-research` | 搜索 Slack 获取组织上下文 | 无 |
 
-`/gh:brainstorm` 是主要入口 —— 它通过交互式问答将想法细化为需求文档，并在不需要时自动跳过。`/gh:plan` 接收 brainstorming 输出的需求文档或详细想法，转化为技术实施方案。
+> **入口说明**：`/gh:brainstorm` 是主要入口 —— 它通过交互式问答将想法细化为需求文档，在不需要时自动跳过。`/gh:ideate` 效果显著但使用较少 —— 基于代码库主动发现改进建议。
 
-`/gh:ideate` 使用较少但效果显著 —— 它基于代码库主动发现改进建议，支持你的方向引导。
+---
 
-**记忆驱动的复利效应**：每个阶段自动读取历史记忆辅助决策，执行完毕后自动写入新产生的知识。Brainstorms 优化 Plans，Plans 参考历史实现，Reviews 捕获模式，所有经验沉淀到 HKTMemory 供未来循环复用。
+## 工程师实战指南
+
+以研发导师的视角，指导工程师在不同开发场景下如何高效使用。
+
+### 场景一：新需求开发
+
+```
+需求理解 -> 技术规划 -> 编码实现 -> 代码审查 -> 知识沉淀
+```
+
+| 步骤 | 命令 | 产出 |
+|------|------|------|
+| 需求探索 | `/gh:brainstorm "实现用户登录功能"` | 检索历史案例，输出结构化需求文档到 `docs/brainstorms/` |
+| 技术规划 | `/gh:plan docs/brainstorms/user-login-requirements.md` | 检索相似方案，输出任务分解和置信度评估到 `docs/plans/` |
+| 编码实现 | `/gh:work docs/plans/user-login-plan.md` | 创建 git worktree，检索实现模式，存储实现总结 |
+| 代码审查 | `/gh:review` | 多代理并行审查（安全/性能/正确性/可维护性） |
+| 知识沉淀 | `/gh:compound "用户登录功能的实现经验"` | 记录解决方案供未来参考 |
+
+### 场景二：Bug 修复
+
+```bash
+# 推荐：使用完整工作流
+/gh:debug
+
+# 支持多种输入方式
+/gh:debug "用户登录时偶尔出现 500 错误"
+/gh:debug
+> Error: Connection timeout at UserService.authenticate()
+> Stack trace: ...
+/gh:debug https://github.com/org/repo/issues/123
+```
+
+`/gh:debug` 会自动检索 HKTMemory 中类似历史问题，系统性定位根因，修复后自动存储调试经验。
+
+### 场景三：需求讨论与评审
+
+```bash
+# 需求文档评审
+/document-review docs/brainstorms/new-feature.md
+
+# 技术方案评审
+/document-review docs/plans/implementation-plan.md
+```
+
+多角色代理并行评审：**产品视角**（挑战假设/战略影响）、**安全视角**（数据暴露/认证漏洞）、**可行性视角**（技术可行性/架构冲突）、**范围视角**（复杂度/过度设计）。
+
+### 场景四：知识归档与复用
+
+```bash
+# 归档已解决的问题
+/gh:compound "解决大文件上传超时问题"
+
+# 以上命令都会自动检索 HKTMemory
+/gh:brainstorm "..."
+/gh:plan "..."
+/gh:debug "..."
+```
+
+### 场景五：代码优化
+
+```bash
+/gh:optimize "优化首页加载速度"
+```
+
+定义可测量目标，构建测量脚手架，并行运行多个实验方案，用 LLM 评分评估效果，自动保留改进方案。
+
+### 场景六：研究现有代码
+
+```bash
+# 查询历史会话
+/gh:sessions "上次我们是怎么处理认证问题的？"
+
+/# 搜索 Slack 讨论
+/gh:slack-research "团队对微服务拆分的讨论"
+```
+
+### 场景七：探索改进机会
+
+```bash
+/gh:ideate
+```
+
+扫描代码库发现潜在改进点，通过发散思维生成建议，使用对抗性过滤筛选高价值项目，引导选择优先方向。
 
 ---
 
@@ -453,34 +277,23 @@ flowchart LR
 
 ## 核心功能
 
-### 工作流命令 (Workflow Commands)
+### 工作流命令
 
-每个命令在执行前后都与 HKTMemory 交互，实现记忆驱动的开发：
+每个命令在执行前后都与 HKTMemory 交互，实现记忆驱动的开发。
 
-| 命令 | 功能描述 | 记忆读取 | 记忆写入 |
-|------|----------|----------|----------|
-| `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力项目改进点 | 历史改进建议 | 新发现的机会 |
-| `/gh:brainstorm` | 在规划前探索需求和方案 | 相关需求案例 | 需求文档 |
-| `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 | 相似技术方案 | 技术规划 |
-| `/gh:work` | 系统化执行工作项 | 实现模式与代码示例 | 实现总结 |
-| `/gh:review` | 多代理代码审查，分层角色和置信度门控 | 审查模式与常见问题 | 审查发现与模式 |
-| `/gh:compound` | 记录已解决问题，沉淀团队知识 | 相关解决方案 | 完整知识条目 |
-| `/gh:debug` | 系统性查找根本原因并修复缺陷 | 类似问题与修复方案 | 调试经验 |
-| `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 | 优化策略与实验结果 | 优化结果 |
+### 研究代理
 
-### 研究代理 (Research Agents)
-
-| 代理 | 功能描述 |
-|------|----------|
+| 代理 | 功能 |
+|------|------|
 | `learnings-researcher` | 搜索机构知识库寻找相关过往解决方案 |
 | `session-historian` | 搜索 Claude Code、Codex、Cursor 历史会话 |
 | `slack-researcher` | 搜索 Slack 获取组织上下文 |
 | `issue-intelligence-analyst` | 分析 GitHub Issues 发现重复主题和痛点 |
 
-### 审查代理 (Review Agents)
+### 审查代理
 
-| 代理 | 功能描述 |
-|------|----------|
+| 代理 | 功能 |
+|------|------|
 | `security-reviewer` | 安全漏洞检测，带置信度校准 |
 | `performance-reviewer` | 运行时性能分析 |
 | `correctness-reviewer` | 逻辑错误、边界情况、状态缺陷 |
@@ -491,23 +304,16 @@ flowchart LR
 
 ## 全局知识仓库
 
-### 概述
+所有 `gh:` 工作流技能产生的知识文档统一存储到 `~/.galeharness/knowledge/<project>/<type>/`。
 
-所有 `gh:` 工作流技能（brainstorm、plan、compound 等）产生的知识文档现在统一存储到全局知识仓库 `~/.galeharness/knowledge/`，按项目和文档类型组织：`~/.galeharness/knowledge/<project>/<type>/`。
+**路径解析优先级**：
+1. 环境变量 `GALE_KNOWLEDGE_HOME`（最高）
+2. 配置文件 `~/.galeharness/config.json` 或 `config.yaml` 中的 `knowledge_home`
+3. 默认 `~/.galeharness/knowledge/`
 
-项目仓库保持整洁，知识积累在 Git 管理的专属存储中。写入失败时自动回退到项目本地 `docs/` 目录，确保知识不会丢失。
-
-### 路径解析优先级
-
-知识仓库根目录通过三层优先级解析：
-
-1. 环境变量 `GALE_KNOWLEDGE_HOME`（最高优先级）
-2. 配置文件 `~/.galeharness/config.json` 或 `config.yaml` 中的 `knowledge_home` 字段
-3. 默认路径 `~/.galeharness/knowledge/`
+项目仓库保持整洁，知识积累在 Git 管理的专属存储中。写入失败时自动回退到项目本地 `docs/` 目录。
 
 ### CLI 管理命令
-
-`gale-knowledge` 提供以下子命令管理全局知识仓库：
 
 | 命令 | 功能 |
 |------|------|
@@ -515,30 +321,17 @@ flowchart LR
 | `gale-knowledge resolve-home` | 输出知识仓库根目录路径 |
 | `gale-knowledge resolve-path --type <type>` | 输出指定类型的文档目录路径 |
 | `gale-knowledge extract-project` | 输出当前项目名（从 Git remote 提取） |
-| `gale-knowledge commit --project <p> --type <t> --title <title>` | 批量提交知识文档 |
+| `gale-knowledge commit` | 批量提交知识文档 |
 | `gale-knowledge rebuild-index` | 重建 HKTMemory 向量索引（支持增量/全量） |
-
-### TaskBoard 集成
-
-`gale-harness board list --knowledge`、`board show`、`board stats` 现在可以查看全局知识文档，将知识仓库纳入统一的任务看板视图。
 
 ### 示例
 
 ```bash
-# 初始化知识仓库
 gale-knowledge init
-
-# 查看知识仓库路径
 gale-knowledge resolve-home
-
-# 查看当前项目的 brainstorms 目录
 gale-knowledge resolve-path --type brainstorms
-
-# 重建向量索引（增量模式）
-gale-knowledge rebuild-index
-
-# 全量重建
-gale-knowledge rebuild-index --full
+gale-knowledge rebuild-index      # 增量模式
+gale-knowledge rebuild-index --full  # 全量
 ```
 
 ---
@@ -557,192 +350,98 @@ gale-knowledge rebuild-index --full
 #### macOS
 
 ```bash
-# 1. 克隆仓库
 git clone https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
 cd GaleHarnessCodingCLI
-
-# 2. 运行一键安装脚本
 bash scripts/setup.sh
 ```
 
-脚本会交互式提示你输入 **HKT_MEMORY_API_KEY**，并自动配置好所有环境变量。
-
 #### Windows
 
-**方式 A：已有 Git**
+**已有 Git：**
 
 ```powershell
-# 1. 禁用 Git Credential Manager 弹窗（公开仓库不需要授权）
 git config --global credential.helper ""
-
-# 2. 查询最新 tag 并浅克隆（只下载最新版本，快且小）
 $latestTag = (git ls-remote --tags --sort="-v:refname" https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git | Select-Object -First 1).Split("`t")[1].Replace("refs/tags/", "")
 git clone --branch $latestTag --depth 1 --single-branch https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
 cd GaleHarnessCodingCLI
-
-# 3. 运行一键安装脚本（如遇到权限问题，以管理员身份运行 PowerShell）
 .\scripts\setup.ps1
 ```
 
-**方式 B：全新 Windows（未安装 Git）**
-
-复制以下整行命令到 PowerShell 直接执行，无需预先安装任何工具：
+**全新 Windows（未安装 Git）：**
 
 ```powershell
-# 首选：jsDelivr CDN（国内快，全球稳）
+# 首选：jsDelivr CDN（国内快）
 irm https://cdn.jsdelivr.net/gh/wangrenzhu-ola/GaleHarnessCodingCLI@main/scripts/bootstrap.ps1 | iex
 
-# 备选：GitHub 官方源（如遇 404 请等待 2-3 分钟后重试）
+# 备选：GitHub 官方源
 irm https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/bootstrap.ps1 | iex
 ```
 
-`bootstrap.ps1` 会自动：
-- 下载并安装 Git（支持 winget 或离线安装包）
-- 克隆本仓库到 `~/GaleHarnessCodingCLI`
-- 自动运行 `setup.ps1` 完成后续所有环境配置
-
-> **PowerShell 执行策略：** 如果脚本无法运行，先执行：
-> ```powershell
-> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-> ```
+> **PowerShell 执行策略：** 如果脚本无法运行，先执行：`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
 ### 安装后自检
 
-安装脚本运行完毕后，请**重新打开终端**，然后依次运行以下命令验证：
+重新打开终端后依次运行：
 
 ```bash
-# 1. Bun 运行时
-bun --version
-# → 期望: 1.x.x
-
-# 2. Python 版本
-python3 --version        # macOS
-python --version         # Windows
-# → 期望: Python 3.9+
-
-# 3. uv 包管理器
-uv --version
-# → 期望: uv x.x.x
-
-# 4. 全局 CLI
-gale-harness --help
-# → 期望: 显示 CLI 帮助信息
-
-# 5. 全局知识仓库
-gale-knowledge init
-gale-knowledge resolve-home
-# → 期望: ~/.galeharness/knowledge/
-
-# 6. HKTMemory 统计
-uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats
-# → 期望: 数据库和向量存储的统计信息
-
-# 7. 项目测试
-bun test
-# → 期望: 测试通过
+bun --version                    # 期望: 1.x.x
+python3 --version                # 期望: Python 3.9+
+uv --version                     # 期望: uv x.x.x
+gale-harness --help              # 期望: 显示 CLI 帮助
+gale-knowledge init              # 初始化知识仓库
+gale-knowledge resolve-home      # 期望: ~/.galeharness/knowledge/
+uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats  # 期望: 统计信息
+bun test                         # 期望: 测试通过
 ```
 
-### 安装到 AI 编码工具
+---
 
-在 repo 根目录（`GaleHarnessCodingCLI/`）执行以下命令，将插件安装到各 AI 编码工具：
+## AI工具安装
+
+在 repo 根目录执行：
 
 ```bash
-# 一键安装到所有检测到的平台
+# 安装到所有检测到的平台
 gale-harness install ./plugins/galeharness-cli --to all
 
-# 或指定平台
+# 指定平台
 gale-harness install ./plugins/galeharness-cli --to claude
 gale-harness install ./plugins/galeharness-cli --to cursor
 gale-harness install ./plugins/galeharness-cli --to kimi
 ```
 
-> **注意：** `./plugins/galeharness-cli` 是相对路径，必须在 repo 根目录下执行。
-
 **支持的平台 (15个)：** `claude`, `opencode`, `codex`, `droid`, `pi`, `gemini`, `copilot`, `kiro`, `windsurf`, `openclaw`, `qwen`, `qoder`, `trae`, `cursor`, `kimi`
 
-**Claude Code** —— 本地插件模式：
+**Claude Code 本地插件模式：**
 
 ```bash
-# 添加到 ~/.zshrc 或 ~/.bashrc
 alias ghc='claude --plugin-dir /path/to/GaleHarnessCodingCLI/plugins/galeharness-cli'
 ```
 
-运行 `ghc` 而不是 `claude` 来加载本地插件。
-
 ### 项目初始化
-
-安装完成后，在项目目录运行：
 
 ```bash
 /gh:setup
 ```
 
-这将：
-- 诊断环境配置（自动检测 Windows / macOS）
-- 安装缺失的推荐工具 (agent-browser, gh, jq, vhs, silicon, ffmpeg)
-- 引导项目配置
-- 验证 HKTMemory 连接状态
-
-> **Windows 用户：** `gh:setup` 会自动使用 PowerShell 路径进行工具检测和安装。
+这将诊断环境配置、安装缺失推荐工具、引导项目配置、验证 HKTMemory 连接状态。
 
 ---
 
 ## 同步个人配置
 
-将个人 Claude Code 配置 (`~/.claude/`) 同步到其他 AI 编码工具。省略 `--target` 自动同步到所有检测到的支持工具：
+将个人 Claude Code 配置同步到其他 AI 编码工具：
 
 ```bash
-# 在仓库根目录执行
-
-# 同步到所有检测到的工具 (默认)
+# 在仓库根目录执行，同步到所有检测到的工具
 bun run src/index.ts sync
 
 # 同步到特定平台
 bun run src/index.ts sync --target opencode
 bun run src/index.ts sync --target codex
-bun run src/index.ts sync --target gemini
-bun run src/index.ts sync --target copilot
-bun run src/index.ts sync --target windsurf
-bun run src/index.ts sync --target kiro
-bun run src/index.ts sync --target qwen
-bun run src/index.ts sync --target qoder
-bun run src/index.ts sync --target trae
-bun run src/index.ts sync --target cursor
-
-# 同步到所有检测到的平台
-bun run src/index.ts sync --target all
 ```
 
-这将同步：
-- 个人 skills 从 `~/.claude/skills/` (作为符号链接)
-- 个人斜杠命令从 `~/.claude/commands/`
-- MCP servers 从 `~/.claude/settings.json`
-
----
-
-## 快速开始
-
-### 典型工作流示例（记忆驱动）
-
-```bash
-# 1. 探索需求（自动读取历史需求，存储新需求文档）
-/gh:brainstorm "我们需要一个用户认证系统"
-
-# 2. 生成技术规划（自动检索相似方案，存储技术规划）
-/gh:plan docs/brainstorms/auth-system-requirements.md
-
-# 3. 执行开发（自动检索实现模式，存储实现总结）
-/gh:work docs/plans/auth-system-plan.md
-
-# 4. 代码审查（自动检索审查模式，存储审查发现）
-/gh:review
-
-# 5. 沉淀知识（自动检索相关方案，存储完整知识）
-/gh:compound "用户认证系统的最佳实践"
-
-# 所有阶段自动与 HKTMemory 交互，无需手动操作
-# 跨环境使用时，memory/ 目录已提交到 git，可同步记忆数据
-```
+同步内容：个人 skills（符号链接）、斜杠命令、MCP servers。
 
 ---
 
@@ -750,85 +449,23 @@ bun run src/index.ts sync --target all
 
 ```
 GaleHarnessCodingCLI/
-├── cmd/
-│   └── gale-knowledge/     # 全局知识仓库 CLI 命令
-├── src/
-│   ├── index.ts             # 主入口
-│   ├── converters/          # 平台转换逻辑
-│   └── targets/             # 目标平台写入器
+├── cmd/gale-knowledge/          # 全局知识仓库 CLI
+├── src/                         # 主入口、转换器、目标写入器
 ├── plugins/
-│   ├── galeharness-cli/     # 核心工作流插件 (gh: prefix)
-│   └── coding-tutor/        # 编程导师插件
-├── vendor/
-│   └── hkt-memory/          # HKTMemory v5.0 向量知识库
-├── scripts/                 # 发布工具
-├── tests/                   # 转换器、写入器和 CLI 测试
-├── docs/                    # 需求、规划、解决方案、规范
-│   ├── brainstorms/         # 需求探索
-│   ├── plans/               # 实施规划
-│   ├── solutions/           # 已记录解决方案
-│   └── specs/               # 目标平台规范
-└── .claude-plugin/          # Claude 市场目录元数据
-```
-
----
-
-## 开发指南
-
-### Shell 别名
-
-添加到 `~/.zshrc` 或 `~/.bashrc`：
-
-```bash
-GHC_REPO=~/code/GaleHarnessCodingCLI
-
-ghc-cli() { bun run "$GHC_REPO/src/index.ts" "$@"; }
-
-# --- 本地副本 (活跃开发) ---
-alias ghc='claude --plugin-dir $GHC_REPO/plugins/galeharness-cli'
-
-ghc-codex() {
-  ghc-cli install "$GHC_REPO/plugins/galeharness-cli" --to codex "$@"
-}
-
-# --- 推送分支 (测试 PRs, worktree workflows) ---
-ghcb() {
-  claude --plugin-dir "$(ghc-cli plugin-path galeharness-cli --branch "$1")" "${@:2}"
-}
-
-ghc-codexb() {
-  ghc-cli install galeharness-cli --to codex --branch "$1" "${@:2}"
-}
-```
-
-使用方式：
-
-```bash
-ghc                              # 本地副本 + Claude Code
-ghc-codex                        # 安装本地副本到 Codex
-ghcb feat/new-agents             # 测试推送分支 + Claude Code
-ghcb feat/new-agents --verbose   # 额外标志转发到 claude
-ghc-codexb feat/new-agents       # 安装推送分支到 Codex
-```
-
-### 常用命令
-
-```bash
-# 列出所有可用插件
-bun run src/index.ts list
-
-# 转换插件到指定格式
-bun run src/index.ts convert ./plugins/galeharness-cli --to opencode
-
-# 同步个人配置到其他工具
-bun run src/index.ts sync --target all
+│   ├── galeharness-cli/         # 核心工作流插件 (gh: prefix)
+│   └── coding-tutor/            # 编程导师插件
+├── vendor/hkt-memory/           # HKTMemory v5.0 向量知识库
+├── scripts/                     # 发布工具
+├── tests/                       # 测试
+├── docs/                        # 需求、规划、解决方案、规范
+└── .claude-plugin/              # Claude 市场目录元数据
 ```
 
 ---
 
 ## 环境变量
 
-安装脚本会自动配置以下变量，通常无需手动操作：
+安装脚本自动配置，通常无需手动操作。
 
 | 变量 | 说明 | 必需 |
 |------|------|------|
@@ -836,22 +473,21 @@ bun run src/index.ts sync --target all
 | `HKT_MEMORY_BASE_URL` | HKTMemory 服务端点 | 否（可用文件模式） |
 | `HKT_MEMORY_MODEL` | Embedding 模型 | 否（可用文件模式） |
 | `HKT_MEMORY_FILE_MODE` | 启用纯文件模式（无需 API） | 否 |
-| `GALE_KNOWLEDGE_HOME` | 全局知识仓库路径（覆盖默认的 `~/.galeharness/knowledge/`） | 否 |
+| `GALE_KNOWLEDGE_HOME` | 全局知识仓库路径 | 否 |
 
-**文件模式**：设置 `HKT_MEMORY_FILE_MODE=true` 可在无 API 密钥的情况下使用 HKTMemory，仅使用本地文件存储（L0/L1/L2 层 + 本地索引）。
+**文件模式**：`HKT_MEMORY_FILE_MODE=true` 可在无 API 密钥情况下使用 HKTMemory。
 
-**如需手动修改：**
-
-- **macOS：** 编辑 shell profile（`~/.zshrc` 或 `~/.bashrc`）
-- **Windows：** 系统属性 → 环境变量 → 用户变量，或编辑 PowerShell profile（`notepad $PROFILE`）
+**手动修改位置**：
+- macOS：`~/.zshrc` 或 `~/.bashrc`
+- Windows：`notepad $PROFILE` 或系统环境变量
 
 ---
 
 ## 贡献指南
 
-1. **测试**: 任何影响解析、转换或输出的更改后运行 `bun test`
-2. **验证**: 运行 `bun run release:validate` 验证插件一致性
-3. **提交**: 使用 conventional commits (`feat:`, `fix:`, `docs:` 等)
+1. **测试**：更改后运行 `bun test`
+2. **验证**：运行 `bun run release:validate` 验证插件一致性
+3. **提交**：使用 conventional commits（`feat:`、`fix:`、`docs:` 等）
 
 ---
 
