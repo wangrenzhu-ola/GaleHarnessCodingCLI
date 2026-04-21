@@ -277,11 +277,12 @@ describe("rebuildIndex", () => {
     addAndCommit(repoDir, { "doc2.md": "# Doc 2\n" }, "add doc2")
 
     // Run rebuild (uv is likely not available in test env, so it will warn and return 0)
+    // Windows CI is slower due to process spawning overhead; allow extra time
     const result = rebuildIndex({ knowledgeHome: repoDir })
 
     // The mode should be incremental since .last-rebuild-commit exists
     expect(result.mode).toBe("incremental")
-  })
+  }, 15000)
 
   it("incremental mode: falls back to full when .last-rebuild-commit missing", () => {
     const repoDir = createInitializedRepo(testDir)
