@@ -4,17 +4,22 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: bash scripts/upstream-sync/apply-patch-to-worktree.sh [--allow-main-worktree] <path-to-adapted.patch>
+Usage: bash scripts/upstream-sync/apply-patch-to-worktree.sh [--allow-main-worktree] [--3way] <path-to-adapted.patch>
 EOF
 }
 
 ALLOW_MAIN_WORKTREE="false"
+USE_3WAY="false"
 PATCH_FILE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --allow-main-worktree)
       ALLOW_MAIN_WORKTREE="true"
+      shift
+      ;;
+    --3way)
+      USE_3WAY="true"
       shift
       ;;
     -h|--help)
@@ -43,8 +48,15 @@ REPO_ROOT="$(git rev-parse --path-format=absolute --show-toplevel)"
 GIT_COMMON_DIR="$(git rev-parse --path-format=absolute --git-common-dir)"
 MAIN_WORKTREE_ROOT="$(dirname "$GIT_COMMON_DIR")"
 
+# Smart patch resolution: if relative path fails in current dir, check if it exists in MAIN_WORKTREE_ROOT
 if [[ "$PATCH_FILE" != /* ]]; then
-  PATCH_FILE="$(cd "$(dirname "$PATCH_FILE")" && pwd)/$(basename "$PATCH_FILE")"
+  if [[ ! -f "$PATCH_FILE" ]] && [[ -f "$MAIN_WORKTREE_ROOT/$PATCH_FILE" ]]; then
+    PATCH_FILE="$MAIN_WORKTREE_ROOT/$PATCH_FILE"
+  fi
+  # Convert to absolute path
+  if [[ -f "$PATCH_FILE" ]]; then
+    PATCH_FILE="$(cd "$(dirname "$PATCH_FILE")" && pwd)/$(basename "$PATCH_FILE")"
+  fi
 fi
 
 if [[ ! -f "$PATCH_FILE" ]]; then
@@ -74,17 +86,26 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if ! git apply --check "$PATCH_FILE" >"$CHECK_OUTPUT" 2>&1; then
+# Construct apply command
+APPLY_CMD=("git" "apply")
+if [[ "$USE_3WAY" == "true" ]]; then
+  APPLY_CMD+=("--3way")
+fi
+
+if ! "${APPLY_CMD[@]}" --check "$PATCH_FILE" >"$CHECK_OUTPUT" 2>&1; then
   echo "Patch preflight failed: git apply --check reported conflicts or drift." >&2
   cat "$CHECK_OUTPUT" >&2
   echo "Next step options:" >&2
   echo "  1. Inspect the raw patch for upstream intent." >&2
   echo "  2. Rebase or recreate the worktree from a cleaner base." >&2
   echo "  3. Mechanically adjust the adapted patch, then retry." >&2
+  if [[ "$USE_3WAY" != "true" ]]; then
+    echo "  4. Try re-running this script with the --3way flag to attempt a 3-way merge." >&2
+  fi
   exit 1
 fi
 
-git apply "$PATCH_FILE"
+"${APPLY_CMD[@]}" "$PATCH_FILE"
 
 echo "Patch applied successfully."
 echo "Worktree: $REPO_ROOT"

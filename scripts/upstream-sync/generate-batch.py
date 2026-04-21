@@ -220,8 +220,9 @@ def write_readme(
 
 
 def run_adaptation(raw_patch: Path, adapted_patch: Path, rules_path: Path) -> None:
+    # Use standard python3 rather than sys.executable to avoid virtualenv mismatch if run from bash
     result = subprocess.run(
-        [sys.executable, str(Path(__file__).with_name("adapt-patch.py")), "--input", str(raw_patch), "--output", str(adapted_patch), "--rules", str(rules_path)],
+        ["python3", str(Path(__file__).with_name("adapt-patch.py")), "--input", str(raw_patch), "--output", str(adapted_patch), "--rules", str(rules_path)],
         text=True,
         capture_output=True,
         check=False,
@@ -301,6 +302,9 @@ def main() -> int:
         write_commit_range(batch_dir, generated_at, upstream_repo, baseline_sha, exported_commits)
         write_readme(batch_dir, generated_at, baseline_sha, exported_commits, status="ready")
     except Exception as exc:
+        if not exported_commits:
+            # If no commits were processed yet, we can't write a useful readme, just fail
+            raise
         write_readme(batch_dir, generated_at, baseline_sha, exported_commits, status="incomplete", failure_reason=str(exc))
         raise
 

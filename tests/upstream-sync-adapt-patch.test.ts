@@ -25,7 +25,7 @@ async function runPython(args: string[]) {
 }
 
 describe("adapt-patch.py", () => {
-  test("rewrites upstream paths and gh namespace tokens", async () => {
+  test("rewrites upstream paths and gh namespace tokens without corrupting partial matches", async () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "adapt-patch-"))
     const outputPath = path.join(tempDir, "adapted.patch")
 

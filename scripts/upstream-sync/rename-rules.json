@@ -31,8 +31,9 @@
       "to": "/gh:"
     },
     {
-      "from": "ce-",
-      "to": "gh-"
+      "from": "\\bce-",
+      "to": "gh-",
+      "regex": true
     }
   ],
   "warn_on_tokens": [

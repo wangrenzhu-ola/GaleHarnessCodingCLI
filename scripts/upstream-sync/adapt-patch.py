@@ -2,14 +2,16 @@
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
-
 PATH_METADATA_PREFIXES = (
     "diff --git ",
-    "--- ",
-    "+++ ",
+    "--- a/",
+    "--- b/",
+    "+++ a/",
+    "+++ b/",
     "rename from ",
     "rename to ",
     "copy from ",
@@ -29,19 +31,39 @@ def load_rules(rules_path: Path) -> dict:
 def apply_replacements(text: str, replacements: list[dict]) -> tuple[str, int]:
     total = 0
     result = text
-    for rule in sorted(replacements, key=lambda item: len(item["from"]), reverse=True):
-        count = result.count(rule["from"])
-        if count:
-            result = result.replace(rule["from"], rule["to"])
-            total += count
+    # Sort non-regex replacements by length descending
+    sorted_replacements = sorted(
+        [r for r in replacements if not r.get("regex")], 
+        key=lambda item: len(item["from"]), 
+        reverse=True
+    ) + [r for r in replacements if r.get("regex")]
+
+    for rule in sorted_replacements:
+        if rule.get("regex"):
+            pattern = re.compile(rule["from"])
+            matches = len(pattern.findall(result))
+            if matches:
+                result = pattern.sub(rule["to"], result)
+                total += matches
+        else:
+            count = result.count(rule["from"])
+            if count:
+                result = result.replace(rule["from"], rule["to"])
+                total += count
     return result, total
 
 
 def split_patch_sections(text: str) -> tuple[list[str], list[str]]:
+    """
+    Splits the patch into preamble (commit message + diffstat) and body (the diff itself).
+    Using `diff --git ` as the reliable delimiter for the start of the diff.
+    """
     lines = text.splitlines(keepends=True)
     for index, line in enumerate(lines):
-        if line.strip() == "---":
-            return lines[: index + 1], lines[index + 1 :]
+        if line.startswith("diff --git "):
+            return lines[:index], lines[index:]
+    
+    # Fallback if no diff --git is found (e.g. empty commit or weird patch)
     return [], lines
 
 
@@ -56,6 +78,17 @@ def adapt_patch_text(text: str, rules: dict) -> tuple[str, list[str]]:
             "Detected binary patch content; leaving binary hunks untouched and only adapting text paths."
         )
 
+    adapted_preamble: list[str] = []
+    for line in preamble:
+        updated = line
+        # Diffstat path replacements
+        if "|" in updated and "file changed" not in updated:
+            updated, _ = apply_replacements(updated, path_replacements)
+        
+        # General text replacements in commit message and diffstat
+        updated, _ = apply_replacements(updated, text_replacements)
+        adapted_preamble.append(updated)
+
     adapted_body: list[str] = []
     path_hits = 0
     text_hits = 0
@@ -67,6 +100,7 @@ def adapt_patch_text(text: str, rules: dict) -> tuple[str, list[str]]:
             updated, count = apply_replacements(updated, path_replacements)
             path_hits += count
 
+        # Avoid replacing inside binary patch payloads or index lines
         if "GIT binary patch" not in updated and not updated.startswith("index "):
             updated, count = apply_replacements(updated, text_replacements)
             text_hits += count
@@ -78,7 +112,7 @@ def adapt_patch_text(text: str, rules: dict) -> tuple[str, list[str]]:
     if text_hits == 0:
         warnings.append("No namespace/text replacements were applied.")
 
-    adapted_text = "".join(preamble + adapted_body)
+    adapted_text = "".join(adapted_preamble + adapted_body)
     for token in rules.get("warn_on_tokens", []):
         if token and token in adapted_text:
             warnings.append(f"Leftover token detected after adaptation: {token}")
