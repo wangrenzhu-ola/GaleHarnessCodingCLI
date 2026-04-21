@@ -1,0 +1,13 @@
+From 2222222222222222222222222222222222222222 Mon Sep 17 00:00:00 2001
+From: Test <test@example.com>
+Date: Tue, 21 Apr 2026 10:05:00 +0000
+Subject: [PATCH] feat: binary asset
+
+---
+ plugins/compound-engineering/assets/logo.png | Bin 0 -> 8 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+diff --git a/plugins/compound-engineering/assets/logo.png b/plugins/compound-engineering/assets/logo.png
+new file mode 100644
+index 0000000..1234567
+Binary files /dev/null and b/plugins/compound-engineering/assets/logo.png differ

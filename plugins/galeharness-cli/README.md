@@ -71,6 +71,28 @@ For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/RE
 | `git-commit-push-pr` | Commit, push, and open a PR with an adaptive description; also update an existing PR description (delegates title/body generation to `gh:pr-description`) |
 | `git-worktree` | Manage Git worktrees for parallel development |
 
+### Upstream Sync Workflow
+
+GaleHarnessCLI maintains a local per-commit upstream sync workflow for bringing changes over from the reference upstream repo without collapsing everything into one giant diff.
+
+Repository entry points:
+
+```bash
+bash scripts/upstream-sync/generate-batch.sh --upstream-repo /path/to/upstream-checkout
+bash scripts/upstream-sync/apply-patch-to-worktree.sh .context/galeharness-cli/upstream-sync/<date>/adapted/<patch>.patch
+```
+
+What this workflow records:
+- `commit-range.txt` records the batch start commit, end commit, and `next_baseline_candidate`
+- `README.md` in the batch directory records the patch table and recommended worktree flow
+- `.upstream-ref` remains the durable baseline and should be updated manually to the batch `next_baseline_candidate` only after the whole batch has landed
+
+Recommended operating model:
+- Generate one dated batch from `.upstream-ref` -> upstream HEAD
+- Process one adapted patch per isolated worktree
+- Open one PR per adapted patch
+- After all PRs land, write the batch `end_commit` / `next_baseline_candidate` into `.upstream-ref`
+
 ### Workflow Utilities
 
 | Skill | Description |

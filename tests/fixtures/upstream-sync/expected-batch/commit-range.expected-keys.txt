@@ -1,0 +1,9 @@
+patch_dir:
+baseline_before_batch:
+start_commit:
+end_commit:
+next_baseline_candidate:
+generated_at:
+patch_count:
+upstream_repo:
+commits:

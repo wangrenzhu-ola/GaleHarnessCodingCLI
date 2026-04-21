@@ -1,0 +1,43 @@
+{
+  "path_prefix_replacements": [
+    {
+      "from": "plugins/compound-engineering/",
+      "to": "plugins/galeharness-cli/"
+    },
+    {
+      "from": "plugins/compound-engineering-plugin/",
+      "to": "plugins/galeharness-cli/"
+    },
+    {
+      "from": ".context/compound-engineering/",
+      "to": ".context/galeharness-cli/"
+    }
+  ],
+  "text_replacements": [
+    {
+      "from": "compound-engineering-plugin",
+      "to": "galeharness-cli"
+    },
+    {
+      "from": "compound-engineering",
+      "to": "galeharness-cli"
+    },
+    {
+      "from": "ce:",
+      "to": "gh:"
+    },
+    {
+      "from": "/ce:",
+      "to": "/gh:"
+    },
+    {
+      "from": "ce-",
+      "to": "gh-"
+    }
+  ],
+  "warn_on_tokens": [
+    "compound-engineering-plugin",
+    "plugins/compound-engineering/",
+    "ce:"
+  ]
+}

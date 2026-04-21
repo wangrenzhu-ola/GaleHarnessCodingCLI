@@ -5,7 +5,7 @@ description: "Sync GaleHarnessCLI skills with latest changes from the reference 
 
 # Compound Sync
 
-Sync GaleHarnessCLI with upstream compound-engineering-plugin changes.
+Sync GaleHarnessCLI with upstream compound-engineering-plugin changes through per-commit patch batches.
 
 ## Upstream Reference
 
@@ -26,51 +26,50 @@ GaleHarnessCLI was forked from EveryInc/compound-engineering-plugin at the commi
 
 ## Workflow
 
-### Step 1: Check Upstream Status
+### Step 1: Read Local Baseline
 
-Compare current baseline with upstream HEAD:
+- Read `.upstream-ref` for the last synced upstream commit.
+- Read `.upstream-repo` for the local upstream checkout path, unless an explicit path is provided for this run.
+- Treat the value in `.upstream-ref` as the start of the new batch, not as something to mutate immediately.
 
-```bash
-# Fetch upstream without merging
-git fetch https://github.com/EveryInc/compound-engineering-plugin.git main
+### Step 2: Generate A Per-Commit Batch
 
-# Show commits since baseline
-git log $(cat .upstream-ref)..FETCH_HEAD --oneline
-```
+From the repository root, generate a dated batch under `.context/galeharness-cli/upstream-sync/`.
 
-### Step 2: Review Changes
+The batch should contain:
+- `raw/NNNN-*.patch` for exact upstream provenance
+- `adapted/NNNN-*.patch` for mechanical GaleHarnessCLI renames
+- `commit-range.txt` with `baseline_before_batch`, `end_commit`, and `next_baseline_candidate`
+- `README.md` with the patch table and worktree instructions
 
-For each upstream commit, review the diff to understand:
-- What skills/agents changed
-- Breaking changes that need attention
-- New features to adopt
+### Step 3: Review And Process One Patch At A Time
 
-### Step 3: Apply Sync
+For each adapted patch:
+- Review the paired raw patch to understand upstream intent
+- Create an isolated worktree
+- Apply exactly one adapted patch in that worktree
+- Run focused verification for that patch's scope
+- Commit and open a PR for that patch
 
-Run the sync script (if available) or manually:
+Default operating model:
+- one upstream commit -> one adapted patch
+- one adapted patch -> one isolated worktree
+- one adapted patch -> one PR
 
-```bash
-# If scripts/sync-from-upstream.sh exists
-bash scripts/sync-from-upstream.sh
-```
+### Step 4: Re-apply GaleHarnessCLI-Specific Logic
 
-### Step 4: Re-apply Transformations
+Mechanical adaptation only handles naming and path rewrites. After a patch applies:
 
-After syncing upstream:
+1. Re-apply `gh:` naming expectations not covered by raw text replacement
+2. Re-inject HKTMemory workflow patches where upstream does not know about them
+3. Update or add tests for the changed behavior
+4. Run verification before creating the PR
 
-1. **Rename ce: → gh:** prefixes
-2. **Re-inject HKTMemory patches** (Phase 0.4 retrieve, Phase 2.3 store)
-3. **Update test fixtures**
-4. **Run tests** to verify
+### Step 5: Advance Baseline Only After The Batch Lands
 
-### Step 5: Update Baseline
+Do not update `.upstream-ref` when the batch is merely generated.
 
-After successful sync, update the reference:
-
-```bash
-# Update .upstream-ref with new commit
-echo "<new-commit-id>" > .upstream-ref
-```
+Update `.upstream-ref` only after every patch in the batch has landed. The new value should be the batch's `next_baseline_candidate`, which is also the batch `end_commit`. That makes the recorded terminal commit the next run's starting baseline.
 
 ## HKTMemory Patches to Re-apply
 
@@ -89,5 +88,6 @@ After each upstream sync, these patches must be re-applied:
 ## Notes
 
 - GaleHarnessCLI is now fully independent (upstream remote removed)
-- This skill provides Agent-driven diff workflow instead of direct git merge
-- Always review upstream changes before applying — not all changes may be relevant
+- This skill provides an Agent-driven batch workflow instead of a direct git merge
+- Always review upstream changes before applying; not every upstream commit will be mechanically clean
+- The batch directory is local workflow state under `.context/`, not a Git-tracked artifact
