@@ -1,10 +1,18 @@
 # GaleHarnessCLI 环境一键安装脚本 (Windows)
 # 用法: .\scripts\setup.ps1
+# CI:  $env:GHALE_CI=1; .\scripts\setup.ps1   (非交互模式，跳过 Read-Host)
 
 #Requires -Version 5.1
 
 # 注意：使用 Continue 而非 Stop，避免非致命错误中断整个安装流程
 $ErrorActionPreference = "Continue"
+
+# CI 模式：通过环境变量 GHALE_CI=1 激活
+# - 跳过交互式提示 (Read-Host)
+# - 跳过 winget 安装 (CI Runner 已预装工具)
+# - 使用环境变量配置 HKTMemory (无则使用文件模式)
+# - 末尾追加 CLI 启动验证
+$CI_MODE = [bool]($env:GHALE_CI -match "^[1YyTt]")
 
 # 修正 Windows PowerShell 5.1 控制台编码，避免 Unicode 字符导致输出乱码或崩溃
 if ($PSVersionTable.PSVersion.Major -lt 6) {
@@ -51,6 +59,10 @@ Write-Host ""
 header "1. 检查 Git"
 if (Test-Command "git") {
     ok "Git 已安装 ($(git --version))"
+} elseif ($CI_MODE) {
+    # CI Runner 应预装 Git，如果找不到则直接失败
+    err "CI 模式下未检测到 Git，CI Runner 应预装此工具"
+    exit 1
 } else {
     info "正在通过 winget 安装 Git..."
     try {
@@ -99,6 +111,10 @@ foreach ($cmd in @("python", "python3", "py")) {
 }
 
 if (-not $pythonCmd) {
+    if ($CI_MODE) {
+        err "CI 模式下未检测到 Python，CI Runner 应预装此工具"
+        exit 1
+    }
     info "正在通过 winget 安装 Python 3.12..."
     try {
         winget install --id Python.Python.3.12 --accept-source-agreements --accept-package-agreements --silent
@@ -130,6 +146,19 @@ if (-not $pythonCmd) {
 header "4. 检查 uv"
 if (Test-Command "uv") {
     ok "uv 已安装"
+} elseif ($CI_MODE) {
+    # CI 模式下尝试 pip 安装 uv，或跳过
+    info "CI 模式：uv 未找到，尝试 pip 安装..."
+    try {
+        & $pythonCmd -m pip install uv 2>$null | Out-Null
+        if (Test-Command "uv") {
+            ok "uv 安装完成 (via pip)"
+        } else {
+            warn "CI 模式：uv 安装失败，将使用 pip 替代"
+        }
+    } catch {
+        warn "CI 模式：uv 安装失败，将使用 pip 替代"
+    }
 } else {
     info "正在安装 uv..."
     try {
@@ -231,36 +260,46 @@ foreach ($tool in $optionalTools) {
 }
 
 # =====================================================
-#  9. HKTMemory API Key (Interactive)
+#  9. HKTMemory API Key (Interactive / CI)
 # =====================================================
 header "9. 配置 HKTMemory"
 
-Write-Host ""
-Write-Host "HKTMemory 支持两种模式:" -ForegroundColor White
-Write-Host "  1. API 模式 — 需要 API Key，向量检索功能完整"
-Write-Host "  2. 文件模式 — 无需 API，仅使用本地文件存储"
-Write-Host ""
-
-$useApi = Read-Host "是否使用 API 模式? (y/n，默认 y)"
-if ([string]::IsNullOrWhiteSpace($useApi)) { $useApi = "y" }
-
-if ($useApi -match "^[Yy]") {
-    $secureApiKey = Read-Host "请输入 HKT_MEMORY_API_KEY" -AsSecureString
-    $apiKey = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureApiKey))
-
-    [Environment]::SetEnvironmentVariable("HKT_MEMORY_API_KEY", $apiKey, "User")
-    [Environment]::SetEnvironmentVariable("HKT_MEMORY_BASE_URL", "https://open.bigmodel.cn/api/paas/v4/", "User")
-    [Environment]::SetEnvironmentVariable("HKT_MEMORY_MODEL", "embedding-3", "User")
-
-    $env:HKT_MEMORY_API_KEY = $apiKey
-    $env:HKT_MEMORY_BASE_URL = "https://open.bigmodel.cn/api/paas/v4/"
-    $env:HKT_MEMORY_MODEL = "embedding-3"
-
-    ok "API 配置已写入用户环境变量"
+if ($CI_MODE) {
+    # CI 模式：优先使用环境变量，无则自动切换文件模式
+    if ($env:HKT_MEMORY_API_KEY) {
+        ok "CI 模式：检测到 HKT_MEMORY_API_KEY 环境变量"
+    } else {
+        info "CI 模式：未检测到 API Key，自动启用文件模式"
+        $env:HKT_MEMORY_FILE_MODE = "true"
+    }
 } else {
-    [Environment]::SetEnvironmentVariable("HKT_MEMORY_FILE_MODE", "true", "User")
-    $env:HKT_MEMORY_FILE_MODE = "true"
-    ok "文件模式已启用，配置已写入用户环境变量"
+    Write-Host ""
+    Write-Host "HKTMemory 支持两种模式:" -ForegroundColor White
+    Write-Host "  1. API 模式 — 需要 API Key，向量检索功能完整"
+    Write-Host "  2. 文件模式 — 无需 API，仅使用本地文件存储"
+    Write-Host ""
+
+    $useApi = Read-Host "是否使用 API 模式? (y/n，默认 y)"
+    if ([string]::IsNullOrWhiteSpace($useApi)) { $useApi = "y" }
+
+    if ($useApi -match "^[Yy]") {
+        $secureApiKey = Read-Host "请输入 HKT_MEMORY_API_KEY" -AsSecureString
+        $apiKey = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureApiKey))
+
+        [Environment]::SetEnvironmentVariable("HKT_MEMORY_API_KEY", $apiKey, "User")
+        [Environment]::SetEnvironmentVariable("HKT_MEMORY_BASE_URL", "https://open.bigmodel.cn/api/paas/v4/", "User")
+        [Environment]::SetEnvironmentVariable("HKT_MEMORY_MODEL", "embedding-3", "User")
+
+        $env:HKT_MEMORY_API_KEY = $apiKey
+        $env:HKT_MEMORY_BASE_URL = "https://open.bigmodel.cn/api/paas/v4/"
+        $env:HKT_MEMORY_MODEL = "embedding-3"
+
+        ok "API 配置已写入用户环境变量"
+    } else {
+        [Environment]::SetEnvironmentVariable("HKT_MEMORY_FILE_MODE", "true", "User")
+        $env:HKT_MEMORY_FILE_MODE = "true"
+        ok "文件模式已启用，配置已写入用户环境变量"
+    }
 }
 
 # =====================================================
@@ -268,7 +307,49 @@ if ($useApi -match "^[Yy]") {
 # =====================================================
 header "安装完成！"
 
-Write-Host @"
+if ($CI_MODE) {
+    # ── CI 模式：CLI 启动验证 ──
+    Write-Host ""
+    info "CI 模式：验证 CLI 可正常启动..."
+
+    $cliOk = $true
+
+    # 验证 gale-harness
+    try {
+        $ghResult = & gale-harness --help 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            ok "gale-harness CLI 启动正常"
+        } else {
+            err "gale-harness CLI 启动失败 (exit code: $LASTEXITCODE)"
+            $cliOk = $false
+        }
+    } catch {
+        err "gale-harness CLI 启动异常: $_"
+        $cliOk = $false
+    }
+
+    # 验证 gale-knowledge
+    try {
+        $gkResult = & gale-knowledge --help 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            ok "gale-knowledge CLI 启动正常"
+        } else {
+            err "gale-knowledge CLI 启动失败 (exit code: $LASTEXITCODE)"
+            $cliOk = $false
+        }
+    } catch {
+        err "gale-knowledge CLI 启动异常: $_"
+        $cliOk = $false
+    }
+
+    if (-not $cliOk) {
+        err "CI 验证失败：CLI 无法正常启动"
+        exit 1
+    }
+
+    ok "CI 验证通过：CLI 可正常启动"
+} else {
+    Write-Host @"
 
 -----------------------------------------------------------------
 
@@ -313,5 +394,6 @@ Write-Host @"
 -----------------------------------------------------------------
 
 "@ -ForegroundColor White
+}
 
 ok "全部完成！"

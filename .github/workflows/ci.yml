@@ -70,5 +70,13 @@ jobs:
       - name: Validate release metadata
         run: bun run release:validate
 
+      - name: Run setup.ps1 (CI mode)
+        shell: pwsh
+        env:
+          GHALE_CI: "1"
+        run: |
+          $env:GHALE_CI = "1"
+          & .\scripts\setup.ps1
+
       - name: Run tests
         run: bun test --path-ignore-patterns="**/cli.test.ts" --path-ignore-patterns="**/detect-tools.test.ts" --path-ignore-patterns="**/plugin-path.test.ts" --path-ignore-patterns="**/resolve-output.test.ts" --path-ignore-patterns="**/sync-codex.test.ts" --path-ignore-patterns="**/sync-copilot.test.ts" --path-ignore-patterns="**/sync-kimi.test.ts" --path-ignore-patterns="**/sync-windsurf.test.ts"
