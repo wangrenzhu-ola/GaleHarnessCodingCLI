@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.11.0...cli-v1.12.0) (2026-04-21)
+
+
+### Bug Fixes
+
+* **ci:** re-add CI mode to setup.ps1 + fix rebuildIndex test timeout ([ab67ab8](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ab67ab88120eb598ae393493e7c7a188a564f3d5))
+
 ## [1.11.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.10.0...cli-v1.11.0) (2026-04-20)
 
 
