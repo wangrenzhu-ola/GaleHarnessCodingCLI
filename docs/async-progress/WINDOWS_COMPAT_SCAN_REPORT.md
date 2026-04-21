@@ -1,6 +1,6 @@
 # Windows Compatibility Scan Report
 
-Generated: 2026-04-20T13:42:25.634Z
+Generated: 2026-04-21T02:39:00.627Z
 
 ## Summary
 
@@ -623,7 +623,7 @@ Generated: 2026-04-20T13:42:25.634Z
 - **Line:** `- **审查员误报**：检查是否为文档中的"source"单词而非bash命令；审查员对"single source of truth"等术语有误报倾向。`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
-### plugins/galeharness-cli/CHANGELOG.md:814
+### plugins/galeharness-cli/CHANGELOG.md:826
 - **Rule:** `source-bash`
 - **Line:** `- Phase 3: Synthesizes all findings with clear source attribution (skill-based >`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
