@@ -1,6 +1,6 @@
 # Windows Compatibility Scan Report
 
-Generated: 2026-04-22T02:45:42.347Z
+Generated: 2026-04-22T03:37:05.813Z
 
 ## Summary
 
@@ -593,7 +593,7 @@ Generated: 2026-04-22T02:45:42.347Z
 - **Line:** `- . .\file.ps1 替代 source ./file`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
-### plugins/galeharness-cli/CHANGELOG.md:826
+### plugins/galeharness-cli/CHANGELOG.md:833
 - **Rule:** `source-bash`
 - **Line:** `- Phase 3: Synthesizes all findings with clear source attribution (skill-based >`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.

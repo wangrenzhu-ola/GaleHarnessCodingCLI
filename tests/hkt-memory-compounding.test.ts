@@ -72,12 +72,14 @@ function extractPhaseContext(content: string, patchName: string): string {
   return lines.slice(idx, idx + 60).join("\n")
 }
 
-function extractBashBlock(content: string, subcommand: "retrieve" | "store"): string | null {
-  // Closing ``` may be indented (e.g. "    ```") so we use \s* in the trailing part
+function extractBashBlock(content: string, subcommand: "retrieve" | "store" | "session-search"): string | null {
+  // Closing ``` may be indented (e.g. "    ````") so we use \s* in the trailing part
   const pattern =
     subcommand === "retrieve"
       ? /```bash\s*\n([\s\S]*?hkt_memory_v5\.py retrieve[\s\S]*?)\n\s*```/
-      : /```bash\s*\n([\s\S]*?hkt_memory_v5\.py store[\s\S]*?)\n\s*```/
+      : subcommand === "store"
+        ? /```bash\s*\n([\s\S]*?hkt_memory_v5\.py store[\s\S]*?)\n\s*```/
+        : /```bash\s*\n([\s\S]*?hkt_memory_v5\.py session-search[\s\S]*?)\n\s*```/
   const match = content.match(pattern)
   return match ? match[1].trim() : null
 }
@@ -388,7 +390,7 @@ describe("HKTMemory Compounding — Loop Completeness", () => {
 })
 
 // Session search patches: phase-0.Xb (补充在 retrieve 后)
-const SESSION_SEARCH_PATCHES: Partial<Record<CompoundingSkill | "gh-debug" | "gh-optimize", string>> = {
+const SESSION_SEARCH_PATCHES: Record<"gh-work" | "gh-debug", string> = {
   "gh-work": "phase-0.6b",
   "gh-debug": "phase-0.4b",
 }
@@ -397,22 +399,22 @@ describe("HKTMemory Session Search Integration", () => {
   for (const [skill, patchName] of Object.entries(SESSION_SEARCH_PATCHES)) {
     describe(skill, () => {
       test(`SKILL.md contains ${patchName} session_search patch`, async () => {
-        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf-8")
+        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf8")
         const patches = parseHktPatches(content)
         const found = patches.find(p => p.name === patchName)
         expect(found).toBeDefined()
       })
 
       test(`${patchName} contains session_search command with --query and --limit`, async () => {
-        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf-8")
-        const ctx = extractPhaseContext(content, patchName)
-        expect(ctx).toContain("session_search")
-        expect(ctx).toContain("--query")
-        expect(ctx).toContain("--limit")
+        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf8")
+        const cmd = extractBashBlock(content, "session-search")
+        expect(cmd, `${skill} should have a hkt_memory_v5.py session-search bash block`).not.toBeNull()
+        expect(cmd).toContain("--query")
+        expect(cmd).toContain("--limit")
       })
 
       test(`${patchName} appears after retrieve patch`, async () => {
-        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf-8")
+        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf8")
         const patches = parseHktPatches(content)
         // Get the retrieve patch for this skill
         const retrievePatch = patches.find(p => isRetrievePatch(p.name))
@@ -425,10 +427,10 @@ describe("HKTMemory Session Search Integration", () => {
       })
 
       test(`${patchName} has non-blocking fallback`, async () => {
-        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf-8")
+        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf8")
         const ctx = extractPhaseContext(content, patchName)
         // Should mention silent continuation or non-blocking behavior
-        expect(ctx).toMatch(/静默继续|不阻塞|silently|proceed|continue/)
+        expect(ctx).toMatch(/静默继续|不阻塞|silently|proceed silently|continue silently|non-blocking|not.*critical/i)
       })
     })
   }

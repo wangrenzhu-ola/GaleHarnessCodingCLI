@@ -1,10 +1,12 @@
 import { describe, expect, test, beforeAll } from "bun:test"
-import { promises as fs } from "fs"
+import { promises as fs, accessSync } from "fs"
 import path from "path"
 import os from "os"
 
+// P1-8: Use import.meta.dir instead of process.cwd() for stable path resolution
 const HKT_SCRIPT = path.join(
-  process.cwd(),
+  import.meta.dir,
+  "..",
   "vendor",
   "hkt-memory",
   "scripts",
@@ -20,10 +22,7 @@ function envWithoutHktKeys(): Record<string, string | undefined> {
   return env
 }
 
-// Environment with HKT_MEMORY_* keys (uses real keys when available)
-function envWithHktKeys(): Record<string, string | undefined> {
-  return { ...process.env }
-}
+// P1-7: Removed envWithHktKeys() dead code — it was identical to { ...process.env }
 
 interface RunResult {
   exitCode: number
@@ -31,6 +30,8 @@ interface RunResult {
   stderr: string
 }
 
+// P0-2: Fixed TDZ reference — proc is declared before the timer so the timeout
+// callback can safely reference it even if Bun.spawn throws.
 function runHktCommand(
   subcommand: string,
   args: string[] = [],
@@ -39,24 +40,30 @@ function runHktCommand(
   topLevelArgs: string[] = [],
 ): Promise<RunResult> {
   return new Promise<RunResult>((resolve, reject) => {
+    let proc: ReturnType<typeof Bun.spawn>
+    try {
+      proc = Bun.spawn(["uv", "run", HKT_SCRIPT, ...topLevelArgs, subcommand, ...args], {
+        cwd: path.join(import.meta.dir, ".."),
+        stdout: "pipe",
+        stderr: "pipe",
+        env: env ?? envWithoutHktKeys(),
+      })
+    } catch (err) {
+      reject(err)
+      return
+    }
+
     const timer = setTimeout(() => {
       proc.kill("SIGKILL")
       reject(new Error(`Timeout after ${timeout}ms for: ${subcommand} ${args.join(" ")}`))
     }, timeout)
 
-    const proc = Bun.spawn(["uv", "run", HKT_SCRIPT, ...topLevelArgs, subcommand, ...args], {
-      cwd: process.cwd(),
-      stdout: "pipe",
-      stderr: "pipe",
-      env: env ?? envWithoutHktKeys(),
-    })
-
-    proc.exited.then(async (exitCode) => {
+    proc.exited.then(async (exitCode: number) => {
       clearTimeout(timer)
       const stdout = await new Response(proc.stdout).text()
       const stderr = await new Response(proc.stderr).text()
       resolve({ exitCode, stdout, stderr })
-    }).catch((err) => {
+    }).catch((err: unknown) => {
       clearTimeout(timer)
       reject(err)
     })
@@ -87,42 +94,48 @@ async function isHktScriptPresent(): Promise<boolean> {
   }
 }
 
-describe("HKTMemory CLI Smoke Tests", () => {
-  let uvAvailable: boolean
-  let scriptPresent: boolean
-
-  beforeAll(async () => {
-    uvAvailable = await isUvAvailable()
-    scriptPresent = await isHktScriptPresent()
-  })
-
-  // Helper: skip if prerequisites missing
-  function skipIfMissing(): boolean {
-    if (!scriptPresent) {
-      test.skip("vendor/hkt-memory/scripts/hkt_memory_v5.py not found", () => {})
-      return true
-    }
-    if (!uvAvailable) {
-      test.skip("uv is not available on PATH", () => {})
-      return true
-    }
+// P1-4: Synchronous prerequisites check at module load time.
+// Bun's test.skipIf evaluates its condition eagerly at declaration time,
+// so we must determine prerequisites synchronously before describe blocks
+// are parsed. File existence is sync-checkable; uv availability requires
+// a heuristic (check common paths) or we accept that uv is usually on PATH
+// in CI/dev and rely on the script-existence check as the primary gate.
+function isScriptPresentSync(): boolean {
+  try {
+    accessSync(HKT_SCRIPT)
+    return true
+  } catch {
     return false
   }
+}
+
+const scriptPresentSync = isScriptPresentSync()
+
+// For uv, we do a best-effort sync check: if the HKT script doesn't exist
+// we definitely skip; if it does exist we optimistically assume uv is
+// available. Tests that fail because uv is missing will still error clearly.
+// The beforeAll below also does a proper async check and can warn.
+const skipIfMissing = test.skipIf(!scriptPresentSync)
+
+describe("HKTMemory CLI Smoke Tests", () => {
+  beforeAll(async () => {
+    const uvOk = await isUvAvailable()
+    const scriptOk = await isHktScriptPresent()
+    if (!uvOk || !scriptOk) {
+      console.warn("Prerequisites not met (uv or HKT script missing), some tests may fail or be skipped")
+    }
+  })
 
   // -------------------------------------------------------------------
   // stats
   // -------------------------------------------------------------------
   describe("stats", () => {
-    beforeAll(() => {
-      if (skipIfMissing()) return
-    })
-
-    test("returns exit code 0 without API key (graceful degradation)", async () => {
+    skipIfMissing("returns exit code 0 without API key (graceful degradation)", async () => {
       const result = await runHktCommand("stats", [], envWithoutHktKeys())
       expect(result.exitCode).toBe(0)
     })
 
-    test("produces output containing stats section", async () => {
+    skipIfMissing("produces output containing stats section", async () => {
       const result = await runHktCommand("stats", [], envWithoutHktKeys())
       const combined = result.stdout + result.stderr
       expect(combined.length).toBeGreaterThan(0)
@@ -130,7 +143,7 @@ describe("HKTMemory CLI Smoke Tests", () => {
       expect(combined).toContain("L0")
     })
 
-    test("warns about missing API key for vector store", async () => {
+    skipIfMissing("warns about missing API key for vector store", async () => {
       const result = await runHktCommand("stats", [], envWithoutHktKeys())
       const combined = result.stdout + result.stderr
       expect(combined).toContain("unavailable")
@@ -141,56 +154,60 @@ describe("HKTMemory CLI Smoke Tests", () => {
   // store
   // -------------------------------------------------------------------
   describe("store", () => {
-    beforeAll(() => {
-      if (skipIfMissing()) return
-    })
-
-    test("accepts --content, --title, --topic, --layer params and exits 0 without API key", async () => {
+    skipIfMissing("accepts --content, --title, --topic, --layer params and exits 0 without API key", async () => {
       // Use a temp memory dir to avoid polluting the repo memory/
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "hkt-store-smoke-"))
-      const result = await runHktCommand(
-        "store",
-        [
-          "--content", "smoke test content",
-          "--title", "Smoke Test Entry",
-          "--topic", "smoke-test",
-          "--layer", "L2",
-        ],
-        envWithoutHktKeys(),
-        30_000,
-        ["--memory-dir", tmpDir],
-      )
-      // Clean up temp dir
-      await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {})
-      expect(result.exitCode).toBe(0)
+      try {
+        const result = await runHktCommand(
+          "store",
+          [
+            "--content", "smoke test content",
+            "--title", "Smoke Test Entry",
+            "--topic", "smoke-test",
+            "--layer", "L2",
+          ],
+          envWithoutHktKeys(),
+          30_000,
+          ["--memory-dir", tmpDir],
+        )
+        expect(result.exitCode).toBe(0)
+      } finally {
+        await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {})
+      }
     })
 
-    test("produces output (stdout or stderr) when called without API key", async () => {
+    skipIfMissing("produces output (stdout or stderr) when called without API key", async () => {
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "hkt-store-output-"))
-      const result = await runHktCommand(
-        "store",
-        ["--content", "test", "--layer", "L2"],
-        envWithoutHktKeys(),
-        30_000,
-        ["--memory-dir", tmpDir],
-      )
-      await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {})
-      const combined = result.stdout + result.stderr
-      expect(combined.length).toBeGreaterThan(0)
+      try {
+        const result = await runHktCommand(
+          "store",
+          ["--content", "test", "--layer", "L2"],
+          envWithoutHktKeys(),
+          30_000,
+          ["--memory-dir", tmpDir],
+        )
+        const combined = result.stdout + result.stderr
+        expect(combined.length).toBeGreaterThan(0)
+      } finally {
+        await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {})
+      }
     })
 
-    test("warns about missing API key for embedding", async () => {
+    skipIfMissing("warns about missing API key for embedding", async () => {
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "hkt-store-warn-"))
-      const result = await runHktCommand(
-        "store",
-        ["--content", "test", "--layer", "L2"],
-        envWithoutHktKeys(),
-        30_000,
-        ["--memory-dir", tmpDir],
-      )
-      await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {})
-      const combined = result.stdout + result.stderr
-      expect(combined).toContain("unavailable")
+      try {
+        const result = await runHktCommand(
+          "store",
+          ["--content", "test", "--layer", "L2"],
+          envWithoutHktKeys(),
+          30_000,
+          ["--memory-dir", tmpDir],
+        )
+        const combined = result.stdout + result.stderr
+        expect(combined).toContain("unavailable")
+      } finally {
+        await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {})
+      }
     })
   })
 
@@ -198,21 +215,17 @@ describe("HKTMemory CLI Smoke Tests", () => {
   // retrieve
   // -------------------------------------------------------------------
   describe("retrieve", () => {
-    beforeAll(() => {
-      if (skipIfMissing()) return
-    })
-
-    test("accepts --query param and exits 0 without API key", async () => {
+    skipIfMissing("accepts --query param and exits 0 without API key", async () => {
       const result = await runHktCommand(
         "retrieve",
         ["--query", "smoke test query"],
         envWithoutHktKeys(),
       )
-      // retrieve may exit 0 even without API key (uses BM25 / file fallback)
-      expect(result.exitCode).toBeGreaterThanOrEqual(0)
+      // P2-9: Changed from toBeGreaterThanOrEqual(0) which is always true
+      expect(result.exitCode).toBe(0)
     })
 
-    test("produces output when called", async () => {
+    skipIfMissing("produces output when called", async () => {
       const result = await runHktCommand(
         "retrieve",
         ["--query", "smoke test"],
@@ -222,7 +235,7 @@ describe("HKTMemory CLI Smoke Tests", () => {
       expect(combined.length).toBeGreaterThan(0)
     })
 
-    test("warns about missing API key for vector store", async () => {
+    skipIfMissing("warns about missing API key for vector store", async () => {
       const result = await runHktCommand(
         "retrieve",
         ["--query", "test"],
@@ -237,16 +250,12 @@ describe("HKTMemory CLI Smoke Tests", () => {
   // list-recent
   // -------------------------------------------------------------------
   describe("list-recent", () => {
-    beforeAll(() => {
-      if (skipIfMissing()) return
-    })
-
-    test("exits 0 without API key", async () => {
+    skipIfMissing("exits 0 without API key", async () => {
       const result = await runHktCommand("list-recent", [], envWithoutHktKeys())
       expect(result.exitCode).toBe(0)
     })
 
-    test("produces JSON output with expected structure", async () => {
+    skipIfMissing("produces JSON output with expected structure", async () => {
       const result = await runHktCommand("list-recent", [], envWithoutHktKeys())
       const combined = result.stdout + result.stderr
       expect(combined.length).toBeGreaterThan(0)
@@ -254,7 +263,7 @@ describe("HKTMemory CLI Smoke Tests", () => {
       expect(combined).toContain("success")
     })
 
-    test("accepts --limit param", async () => {
+    skipIfMissing("accepts --limit param", async () => {
       const result = await runHktCommand(
         "list-recent",
         ["--limit", "1"],
@@ -265,26 +274,57 @@ describe("HKTMemory CLI Smoke Tests", () => {
   })
 
   // -------------------------------------------------------------------
+  // P1-3: session-search smoke tests
+  // -------------------------------------------------------------------
+  describe("session-search", () => {
+    skipIfMissing("accepts --query and --limit params and exits 0 without API key", async () => {
+      const result = await runHktCommand(
+        "session-search",
+        ["--query", "test query", "--limit", "5"],
+        envWithoutHktKeys(),
+      )
+      expect(result.exitCode).toBe(0)
+    })
+
+    skipIfMissing("produces output with session search result structure", async () => {
+      const result = await runHktCommand(
+        "session-search",
+        ["--query", "test query", "--limit", "5"],
+        envWithoutHktKeys(),
+      )
+      const combined = result.stdout + result.stderr
+      expect(combined.length).toBeGreaterThan(0)
+    })
+
+    skipIfMissing("warns about missing API key gracefully", async () => {
+      const result = await runHktCommand(
+        "session-search",
+        ["--query", "test query"],
+        envWithoutHktKeys(),
+      )
+      const combined = result.stdout + result.stderr
+      // Should not crash with Python traceback
+      expect(combined).not.toContain("Traceback (most recent call last)")
+    })
+  })
+
+  // -------------------------------------------------------------------
   // prefetch (session search proxy)
   // -------------------------------------------------------------------
   describe("prefetch", () => {
-    beforeAll(() => {
-      if (skipIfMissing()) return
-    })
-
-    test("exits 0 without API key", async () => {
+    skipIfMissing("exits 0 without API key", async () => {
       const result = await runHktCommand("prefetch", [], envWithoutHktKeys())
       expect(result.exitCode).toBe(0)
     })
 
-    test("produces output with prefetch result structure", async () => {
+    skipIfMissing("produces output with prefetch result structure", async () => {
       const result = await runHktCommand("prefetch", [], envWithoutHktKeys())
       const combined = result.stdout + result.stderr
       expect(combined.length).toBeGreaterThan(0)
       expect(combined).toContain("success")
     })
 
-    test("accepts --mode and --query params", async () => {
+    skipIfMissing("accepts --mode and --query params", async () => {
       const result = await runHktCommand(
         "prefetch",
         ["--mode", "debug", "--query", "test query"],
@@ -298,23 +338,21 @@ describe("HKTMemory CLI Smoke Tests", () => {
   // Missing environment variables — graceful degradation
   // -------------------------------------------------------------------
   describe("missing env vars — graceful degradation", () => {
-    beforeAll(() => {
-      if (skipIfMissing()) return
-    })
-
     const commandsNeedingApiKey = [
       { name: "stats", args: [] },
       { name: "store", args: ["--content", "test", "--layer", "L2"] },
       { name: "retrieve", args: ["--query", "test"] },
       { name: "list-recent", args: [] },
+      { name: "session-search", args: ["--query", "test"] },
       { name: "prefetch", args: [] },
     ]
 
     for (const cmd of commandsNeedingApiKey) {
-      test(`${cmd.name} does not crash (uncaught exception) without HKT_MEMORY_API_KEY`, async () => {
+      skipIfMissing(`${cmd.name} does not crash (uncaught exception) without HKT_MEMORY_API_KEY`, async () => {
         const result = await runHktCommand(cmd.name, cmd.args, envWithoutHktKeys())
-        // All commands should exit cleanly (0 or known non-zero, not signal-killed)
-        expect(result.exitCode).toBeGreaterThanOrEqual(0)
+        // P2-9: Changed from toBeGreaterThanOrEqual(0) — that's always true for exitCode.
+        // The real check is that no Python traceback appears (uncaught exception).
+        expect(result.exitCode).toBe(0)
         // Should produce some output (error message or degraded result)
         const combined = result.stdout + result.stderr
         expect(combined.length).toBeGreaterThan(0)

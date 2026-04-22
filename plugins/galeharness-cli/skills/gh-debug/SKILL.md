@@ -83,25 +83,25 @@ Before Phase 1, query the vector memory database for related bugs and debug expe
 <!-- HKT-PATCH:phase-0.4b -->
 #### 0.4b HKTMemory Session Search
 
-在向量检索之外，查询相关的历史调试会话记录：
+In addition to vector retrieval, query related historical debug session records:
 
-1. 从当前错误信息、bug 描述或调试目标构建搜索查询
+1. Build a search query from the current error message, bug description, or debugging target
 
-2. 运行（需要环境变量 HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL）：
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py session_search \
-     --query "<错误信息或 bug 描述摘要>" \
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py session-search \
+     --query "<error message or bug description summary>" \
      --limit 5
    ```
 
-3. 如果返回结果，准备上下文块供 triage 阶段参考：
+3. If results returned, prepare a context block for the triage phase:
    ```
-   ## 历史调试会话记录
-   来源：会话记录搜索。辅助 root cause 分析的补充上下文。
-   [结果列表]
+   ## Historical Debug Session Records
+   Source: session record search. Supplementary context for root cause analysis.
+   [results list]
    ```
 
-4. 如果无结果或命令报错，静默继续，不阻塞后续 triage。
+4. If no results or command error, proceed silently without blocking subsequent triage.
 
 <!-- /HKT-PATCH:phase-0.4b -->
 

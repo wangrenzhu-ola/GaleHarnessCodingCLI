@@ -92,25 +92,25 @@ Before Phase 1, query the vector memory database for related execution context:
 <!-- HKT-PATCH:phase-0.6b -->
 #### 0.6b HKTMemory Session Search
 
-在向量检索之外，查询相关的历史工作会话记录：
+In addition to vector retrieval, query related historical work session records:
 
-1. 从当前任务标题和技能名称构建搜索查询
+1. Build a search query from the current task title and skill name
 
-2. 运行（需要环境变量 HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL）：
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py session_search \
-     --query "<技能名称: gh:work — 任务标题或特征描述>" \
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py session-search \
+     --query "<skill name: gh:work — task title or feature description>" \
      --limit 5
    ```
 
-3. 如果返回结果，准备上下文块供后续阶段参考：
+3. If results returned, prepare a context block for later phases:
    ```
-   ## 相关历史工作会话
-   来源：会话记录搜索。作为补充上下文参考，非主要证据。
-   [结果列表]
+   ## Related Historical Work Sessions
+   Source: session record search. Supplementary context only, not primary evidence.
+   [results list]
    ```
 
-4. 如果无结果或命令报错，静默继续，不阻塞 Phase 1。
+4. If no results or command error, proceed silently without blocking Phase 1.
 
 <!-- /HKT-PATCH:phase-0.6b -->
 

@@ -132,6 +132,28 @@ class HKTMv5:
             entity=entity,
         )
 
+    def session_search(
+        self,
+        query: str = "",
+        limit: int = 5,
+        session_id: str = None,
+        task_id: str = None,
+        project: str = None,
+        branch: str = None,
+        pr: str = None,
+        pr_id: str = None,
+    ) -> Dict[str, Any]:
+        return self.layers.session_search(
+            query=query,
+            limit=limit,
+            session_id=session_id,
+            task_id=task_id,
+            project=project,
+            branch=branch,
+            pr=pr,
+            pr_id=pr_id,
+        )
+
     def list_recent(
         self,
         limit: int = 5,
@@ -360,6 +382,16 @@ def main():
     retrieve_parser.add_argument("--bm25-weight", type=float, help="混合召回中的 BM25 权重")
     retrieve_parser.add_argument("--debug", action="store_true", help="输出命中解释与召回细节")
     retrieve_parser.add_argument("--entity", help="按实体名过滤检索")
+
+    session_search_parser = subparsers.add_parser("session-search", help="搜索 session transcript")
+    session_search_parser.add_argument("--query", "-q", required=True, help="搜索查询")
+    session_search_parser.add_argument("--limit", "-n", type=int, default=5, help="数量限制")
+    session_search_parser.add_argument("--session-id", help="session 过滤")
+    session_search_parser.add_argument("--task-id", help="task 过滤")
+    session_search_parser.add_argument("--project", help="project 过滤")
+    session_search_parser.add_argument("--branch", help="branch 过滤")
+    session_search_parser.add_argument("--pr", help="PR 过滤")
+    session_search_parser.add_argument("--pr-id", help="PR ID 过滤")
 
     recent_parser = subparsers.add_parser("list-recent", help="列出 recent session 摘要")
     recent_parser.add_argument("--limit", "-n", type=int, default=5, help="数量限制")
@@ -605,6 +637,21 @@ def main():
                     print(f"   filtered_by_similarity: {filtered}")
             for layer_name, info in debug_info.get("layers", {}).items():
                 print(f"   {layer_name} candidates={info.get('candidate_count', 0)}")
+
+    elif args.command == "session-search":
+        result = memory.session_search(
+            query=args.query,
+            limit=args.limit,
+            session_id=args.session_id,
+            task_id=args.task_id,
+            project=args.project,
+            branch=args.branch,
+            pr=args.pr,
+            pr_id=args.pr_id,
+        )
+        print("🔎 Session Search")
+        print()
+        print(json.dumps(result, ensure_ascii=False, indent=2))
 
     elif args.command == "list-recent":
         result = memory.list_recent(
