@@ -30,7 +30,7 @@ This skill does not implement code. It explores, clarifies, and documents decisi
 1. **Ask one question at a time** - Do not batch several unrelated questions into one message.
 2. **Prefer single-select multiple choice** - Use single-select when choosing one direction, one priority, or one next step.
 3. **Use multi-select rarely and intentionally** - Use it only for compatible sets such as goals, constraints, non-goals, or success criteria that can all coexist. If prioritization matters, follow up by asking which selected item is primary.
-4. **Use the platform's question tool when available** - When asking the user a question, prefer the platform's blocking question tool if one exists (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+4. **Use the platform's question tool when available** - When asking the user a question, prefer the platform's blocking question tool if one exists (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If the tool is unavailable, do not proceed silently — present numbered options directly in chat and wait for the user's reply before proceeding, and state that the tool is unavailable.
 
 ## Output Guidance
 
@@ -186,6 +186,13 @@ Before starting substantive brainstorming work, set up an isolated working envir
    - You want to keep the default branch clean
    - You may want to switch between branches during the brainstorm
 
+**Deep sub-mode: feature vs product.** For Deep scope, also classify whether the brainstorm must establish product shape or inherit it:
+
+- **Deep — feature** (default): existing product shape anchors decisions. Primary actors, core outcome, positioning, and primary flows are already established in the product or repo. The brainstorm extends or refines within that shape.
+- **Deep — product**: the brainstorm must establish product shape rather than inherit it. Primary actors, core outcome, positioning against adjacent products, or primary end-to-end flows are materially unresolved. Existing code lowers the odds of product-tier but does not by itself rule it out — a half-built tool with ambiguous shape is still product-tier.
+
+Product-tier triggers additional Phase 1.2 questions and additional sections in the requirements document. Feature-tier uses the current Deep behavior unchanged.
+
 ### Phase 1: Understand the Idea
 
 #### 1.1 Existing Context Scan
@@ -208,7 +215,7 @@ If nothing obvious appears after a short scan, say so and continue. Two rules go
 
 **Slack context** (opt-in, Standard and Deep only) — never auto-dispatch. Route by condition:
 
-- **Tools available + user asked**: Dispatch `galeharness-cli:research:slack-researcher` with a brief summary of the brainstorm topic alongside Phase 1.1 work. Incorporate findings into constraint and context awareness.
+- **Tools available + user asked**: Dispatch `galeharness-cli:slack-researcher` with a brief summary of the brainstorm topic alongside Phase 1.1 work. Incorporate findings into constraint and context awareness.
 - **Tools available + user didn't ask**: Note in output: "Slack tools detected. Ask me to search Slack for organizational context at any point, or include it in your next prompt."
 - **No tools + user asked**: Note in output: "Slack context was requested but no Slack tools are available. Install and authenticate the Slack plugin to enable organizational context search."
 
@@ -233,6 +240,13 @@ Before generating approaches, challenge the request to catch misframing. Match d
 **Deep** — Standard questions plus:
 - What durable capability should this create in 6-12 months?
 - Does this move the product toward that, or is it only a local patch?
+
+**Deep — product** — Deep questions plus:
+- What's the single sharpest user outcome this earns, and what evidence or assumption supports that outcome?
+- What adjacent product could we accidentally build instead, and why is that the wrong one?
+- What would have to be true in the world for this to fail?
+
+These questions force an explicit product thesis and feed the Scope Boundaries subsections ("Deferred for later" and "Outside this product's identity") and Dependencies / Assumptions in the requirements document.
 
 #### 1.3 Collaborative Dialogue
 
@@ -259,6 +273,8 @@ Present approaches first, then evaluate. Let the user see all options before hea
 
 When useful, include one deliberately higher-upside alternative:
 - Identify what adjacent addition or reframing would most increase usefulness, compounding value, or durability without disproportionate carrying cost. Present it as a challenger option alongside the baseline, not as the default. Omit it when the work is already obviously over-scoped or the baseline request is clearly the right move.
+
+At product tier, alternatives should differ on *what* is built (product shape, actor set, positioning), not *how* it is built. Implementation-variant alternatives belong at feature tier.
 
 For each approach, provide:
 - Brief description (2-3 sentences)
@@ -292,14 +308,6 @@ Write or update a requirements document only when the conversation produced dura
 **Document Language**: When `language: zh-CN` (or default), write all prose content in Chinese. Keep section headers (`## Problem Frame`, `## Requirements`, etc.) and YAML frontmatter keys in English. Translate paragraphs, list items, and table content. Do NOT translate code blocks, inline code, file paths, or URLs.
 
 For **Lightweight** brainstorms, keep the document compact. Skip document creation when the user only needs brief alignment and no durable decisions need to be preserved.
-
-### Phase 3.5: Document Review
-
-When a requirements document was created or updated, run the `document-review` skill on it before presenting handoff options. Pass the document path as the argument.
-
-If document-review returns findings that were auto-applied, note them briefly when presenting handoff options. If residual P0/P1 findings were surfaced, mention them so the user can decide whether to address them before proceeding.
-
-When document-review returns "Review complete", proceed to Phase 4.
 
 <!-- HKT-PATCH:phase-3.3 -->
 ### Phase 3.3: HKTMemory Store

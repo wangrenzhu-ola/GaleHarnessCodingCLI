@@ -49,7 +49,7 @@ Returns a JSON object with three keys:
 
 | Key | Contents | Has file/line? | Resolvable? |
 |-----|----------|---------------|-------------|
-| `review_threads` | Unresolved, non-outdated inline code review threads | Yes | Yes (GraphQL) |
+| `review_threads` | Unresolved inline code review threads (includes outdated; each carries its `isOutdated` flag so the resolver can account for line drift) | Yes | Yes (GraphQL) |
 | `pr_comments` | Top-level PR conversation comments (excludes PR author) | No | No |
 | `review_bodies` | Review submission bodies with non-empty text (excludes PR author) | No | No |
 
@@ -72,7 +72,9 @@ Before processing, classify each piece of feedback as **new** or **already handl
 
 The distinction is about content, not who posted what. A deferral from a teammate, a previous skill run, or a manual reply all count. Similarly, actionability is about content -- bot feedback that requests a specific code change is actionable; a bot's boilerplate header wrapping those requests is not.
 
-If there are no new items across all feedback types, skip steps 3-8 and go straight to step 9.
+**Silent drop.** Non-actionable items are dropped without narration. Do not announce, list, or count dropped items in conversation, the task list, or the step 10 summary. Review-bot wrappers from CodeRabbit, Codex, Gemini Code Assist, and Copilot (bodies like "Here are some automated review suggestions...") commonly appear here -- recognize them by their boilerplate content, drop silently. Only CI/status bot summaries (Codecov) are pre-filtered at the script level; everything else relies on this content-aware check so bot format changes cannot silently hide actionable findings.
+
+If there are no new items across all feedback types, skip steps 3-9 and go straight to step 10.
 
 ### 3. Cluster Analysis (Gated)
 
@@ -141,20 +143,21 @@ Previously-resolved threads (from `cross_invocation.resolved_threads`) participa
 
 #### Individual dispatch (default)
 
-**For review threads** (`review_threads`): Spawn a `galeharness-cli:workflow:pr-comment-resolver` agent for each new thread that is NOT already assigned to a cluster from step 3. Clustered threads are handled by cluster dispatch below -- do not dispatch them individually.
+**For review threads** (`review_threads`): Spawn a `galeharness-cli:pr-comment-resolver` agent for each new thread that is NOT already assigned to a cluster from step 3. Clustered threads are handled by cluster dispatch below -- do not dispatch them individually.
 
 Each agent receives:
 - The thread ID
-- The file path and line number
+- The file path and location fields: `line`, `originalLine`, `startLine`, `originalStartLine` (any can be null; outdated and file-level threads often have `line == null` and must fall back to `originalLine`)
 - The full comment text (all comments in the thread)
 - The PR number (for context)
 - The feedback type (`review_thread`)
+- The `isOutdated` flag from the thread node (tells the agent the reported line may have drifted)
 
-**For PR comments and review bodies** (`pr_comments`, `review_bodies`): These lack file/line context. Spawn a `galeharness-cli:workflow:pr-comment-resolver` agent for each actionable non-clustered item. The agent receives the comment ID, body text, PR number, and feedback type (`pr_comment` or `review_body`). The agent must identify the relevant files from the comment text and the PR diff.
+**For PR comments and review bodies** (`pr_comments`, `review_bodies`): These lack file/line context. Spawn a `galeharness-cli:pr-comment-resolver` agent for each actionable non-clustered item. The agent receives the comment ID, body text, PR number, and feedback type (`pr_comment` or `review_body`). The agent must identify the relevant files from the comment text and the PR diff.
 
 #### Cluster dispatch
 
-For each cluster identified in step 3, dispatch ONE `galeharness-cli:workflow:pr-comment-resolver` agent that receives:
+For each cluster identified in step 3, dispatch ONE `galeharness-cli:pr-comment-resolver` agent that receives:
 - The `<cluster-brief>` XML block
 - All thread details for threads in the cluster (IDs, file paths, line numbers, comment text)
 - The PR number
@@ -359,7 +362,7 @@ This fetches thread IDs and their first comment IDs (minimal fields, no bodies) 
 
 ### 2. Fix, Reply, Resolve
 
-Spawn a single `galeharness-cli:workflow:pr-comment-resolver` agent for the thread. Then follow the same commit -> push -> reply -> resolve flow as Full Mode steps 6-7.
+Spawn a single `galeharness-cli:pr-comment-resolver` agent for the thread. Then follow the same commit -> push -> reply -> resolve flow as Full Mode steps 6-7.
 
 ---
 

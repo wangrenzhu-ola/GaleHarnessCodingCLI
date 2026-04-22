@@ -278,14 +278,15 @@ function rewriteClaudePaths(body: string): string {
  */
 export function transformSkillContentForOpenCode(body: string): string {
   let result = rewriteClaudePaths(body)
-  // Rewrite 3-segment FQ agent refs: plugin:category:agent-name -> agent-name.
-  // Boundary assertions prevent partial matching on 4+ segment names
-  // (e.g. `a:b:c:d` would otherwise produce `c:d` or `a:d`).
+  // Rewrite 3-segment FQ agent refs: plugin:category:agent-name -> agent-name. 
+  // Now that agents are flattened, we must also rewrite 2-segment FQ agent refs: plugin:agent-name -> agent-name.
+  // We explicitly match our known agent suffixes so we don't accidentally
+  // rewrite skill references like `galeharness-cli:document-review`
   // The `/` in the lookbehind prevents rewriting slash commands like
   // `/team:ops:deploy` — agent names are never preceded by `/`.
   result = result.replace(
-    /(?<![a-z0-9:/-])[a-z][a-z0-9-]*:[a-z][a-z0-9-]*:([a-z][a-z0-9-]*)(?![a-z0-9:-])/g,
-    "$1",
+    /(?<![a-z0-9:/-])[a-z][a-z0-9-]*:(?:[a-z][a-z0-9-]*:)?([a-z][a-z0-9-]*(?:-agent|-reviewer|-researcher|-analyst|-specialist|-oracle|-sentinel|-guardian|-strategist|comment-resolver|history-analyzer|design-sync|readme-writer|iterator|detector))(?![a-z0-9:-])/g,
+    "$1"
   )
   return result
 }

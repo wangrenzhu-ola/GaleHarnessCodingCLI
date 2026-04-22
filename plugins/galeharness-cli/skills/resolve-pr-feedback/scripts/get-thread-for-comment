@@ -36,8 +36,12 @@ query($owner: String!, $repo: String!, $pr: Int!) {
         nodes {
           id
           isResolved
-          path
+          isOutdated
           line
+          originalLine
+          startLine
+          originalStartLine
+          path
           comments(first: 100) {
             nodes {
               id

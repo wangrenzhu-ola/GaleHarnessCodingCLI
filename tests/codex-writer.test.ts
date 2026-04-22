@@ -325,13 +325,13 @@ description: Planning workflow
 
 Run these research agents:
 
-- Task galeharness-cli:research:repo-research-analyst(feature_description)
-- Task galeharness-cli:research:learnings-researcher(feature_description)
+- Task galeharness-cli:repo-research-analyst(feature_description)
+- Task galeharness-cli:learnings-researcher(feature_description)
 
 Also run bare agents:
 
 - Task best-practices-researcher(topic)
-- Task galeharness-cli:review:code-simplicity-reviewer()
+- Task galeharness-cli:code-simplicity-reviewer()
 `,
     )
 

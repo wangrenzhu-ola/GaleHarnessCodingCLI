@@ -102,7 +102,7 @@ function convertCommandToSkill(
 export function transformContentForCopilot(body: string): string {
   let result = body
 
-  // 1. Transform Task agent calls (supports namespaced names like galeharness-cli:research:agent-name)
+  // 1. Transform Task agent calls (supports namespaced names like galeharness-cli:agent-name)
   const taskPattern = /^(\s*-?\s*)Task\s+([a-z][a-z0-9:-]*)\(([^)]*)\)/gm
   result = result.replace(taskPattern, (_match, prefix: string, agentName: string, args: string) => {
     const finalSegment = agentName.includes(":") ? agentName.split(":").pop()! : agentName

@@ -16,7 +16,7 @@ describe("ce-review contract", () => {
     expect(content).toContain("mode:report-only")
     expect(content).toContain("mode:headless")
     expect(content).toContain(".context/galeharness-cli/gh-review/<run-id>/")
-    expect(content).toContain("Do not create residual todos or `.context` artifacts.")
+    expect(content).toContain("Do not write `.context` artifacts.")
     expect(content).toContain(
       "Do not start a mutating review round concurrently with browser testing on the same checkout.",
     )
@@ -47,8 +47,8 @@ describe("ce-review contract", () => {
       "Not safe for concurrent use on a shared checkout.",
     )
 
-    // Writes artifacts but no todos, no commit/push/PR
-    expect(content).toContain("Do not create todo files.")
+    // Writes artifacts but no externalized work, no commit/push/PR
+    expect(content).toContain("Do not file tickets or externalize work.")
     expect(content).toContain(
       "Never commit, push, or create a PR",
     )
@@ -80,10 +80,12 @@ describe("ce-review contract", () => {
     expect(content).toContain(
       "If no `gated_auto` or `manual` findings remain after safe fixes, skip the policy question entirely",
     )
+    // Autofix-mode residual handoff is the run artifact (file-based todo system removed).
     expect(content).toContain(
-      "In autofix mode, create durable todo files only for unresolved actionable findings whose final owner is `downstream-resolver`.",
+      "In autofix mode, the run artifact is the handoff.",
     )
-    expect(content).toContain("If only advisory outputs remain, create no todos.")
+    expect(content).not.toContain("todo-create")
+    expect(content).not.toContain("create durable todo files")
     expect(content).toContain("**On the resolved review base/default branch:**")
     expect(content).toContain("git push --set-upstream origin HEAD")
     expect(content).not.toContain("**On main/master:**")
@@ -127,13 +129,8 @@ describe("ce-review contract", () => {
     expect(schema.properties.findings.items.properties.requires_verification.type).toBe("boolean")
     expect(schema._meta.confidence_thresholds.suppress).toContain("0.60")
 
-    const fileTodos = await readRepoFile("plugins/galeharness-cli/skills/todo-create/SKILL.md")
-    expect(fileTodos).toContain("/gh:review mode:autofix")
-    expect(fileTodos).toContain("/todo-resolve")
-
-    const resolveTodos = await readRepoFile("plugins/galeharness-cli/skills/todo-resolve/SKILL.md")
-    expect(resolveTodos).toContain("gh:review mode:autofix")
-    expect(resolveTodos).toContain("safe_auto")
+    // File-based todo skills removed in upstream sync patch 0010.
+    // No durable todo handoff from gh:review autofix mode.
   })
 
   test("documents stack-specific conditional reviewers for the JSON pipeline", async () => {
@@ -143,11 +140,11 @@ describe("ce-review contract", () => {
     )
 
     for (const agent of [
-      "galeharness-cli:review:dhh-rails-reviewer",
-      "galeharness-cli:review:gale-rails-reviewer",
-      "galeharness-cli:review:gale-python-reviewer",
-      "galeharness-cli:review:gale-typescript-reviewer",
-      "galeharness-cli:review:julik-frontend-races-reviewer",
+      "galeharness-cli:dhh-rails-reviewer",
+      "galeharness-cli:gale-rails-reviewer",
+      "galeharness-cli:gale-python-reviewer",
+      "galeharness-cli:gale-typescript-reviewer",
+      "galeharness-cli:julik-frontend-races-reviewer",
     ]) {
       expect(content).toContain(agent)
       expect(catalog).toContain(agent)
@@ -160,23 +157,23 @@ describe("ce-review contract", () => {
   test("stack-specific reviewer agents follow the structured findings contract", async () => {
     const reviewers = [
       {
-        path: "plugins/galeharness-cli/agents/review/dhh-rails-reviewer.md",
+        path: "plugins/galeharness-cli/agents/dhh-rails-reviewer.md",
         reviewer: "dhh-rails",
       },
       {
-        path: "plugins/galeharness-cli/agents/review/gale-rails-reviewer.md",
+        path: "plugins/galeharness-cli/agents/gale-rails-reviewer.md",
         reviewer: "gale-rails",
       },
       {
-        path: "plugins/galeharness-cli/agents/review/gale-python-reviewer.md",
+        path: "plugins/galeharness-cli/agents/gale-python-reviewer.md",
         reviewer: "gale-python",
       },
       {
-        path: "plugins/galeharness-cli/agents/review/gale-typescript-reviewer.md",
+        path: "plugins/galeharness-cli/agents/gale-typescript-reviewer.md",
         reviewer: "gale-typescript",
       },
       {
-        path: "plugins/galeharness-cli/agents/review/julik-frontend-races-reviewer.md",
+        path: "plugins/galeharness-cli/agents/julik-frontend-races-reviewer.md",
         reviewer: "julik-frontend-races",
       },
     ]
@@ -200,7 +197,7 @@ describe("ce-review contract", () => {
 
   test("leaves data-migration-expert as the unstructured review format", async () => {
     const content = await readRepoFile(
-      "plugins/galeharness-cli/agents/review/data-migration-expert.md",
+      "plugins/galeharness-cli/agents/data-migration-expert.md",
     )
 
     expect(content).toContain("## Reviewer Checklist")
@@ -236,14 +233,14 @@ describe("ce-review contract", () => {
 
   test("orchestration callers pass explicit mode flags", async () => {
     const lfg = await readRepoFile("plugins/galeharness-cli/skills/lfg/SKILL.md")
-    expect(lfg).toContain("/gh:review mode:autofix")
+    expect(lfg).toMatch(/gh-review[^\n]*mode:autofix/)
 
   })
 })
 
 describe("testing-reviewer contract", () => {
   test("includes behavioral-changes-with-no-test-additions check", async () => {
-    const content = await readRepoFile("plugins/galeharness-cli/agents/review/testing-reviewer.md")
+    const content = await readRepoFile("plugins/galeharness-cli/agents/testing-reviewer.md")
 
     // New check exists in "What you're hunting for" section
     expect(content).toContain("Behavioral changes with no test additions")

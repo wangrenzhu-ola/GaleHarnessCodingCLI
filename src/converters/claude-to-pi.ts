@@ -94,7 +94,7 @@ function convertAgent(agent: ClaudeAgent, usedNames: Set<string>): PiGeneratedSk
 export function transformContentForPi(body: string): string {
   let result = body
 
-  // Task repo-research-analyst(feature_description) or Task galeharness-cli:research:repo-research-analyst(args)
+  // Task repo-research-analyst(feature_description) or Task galeharness-cli:repo-research-analyst(args)
   // -> Run subagent with agent="repo-research-analyst" and task="feature_description"
   const taskPattern = /^(\s*-?\s*)Task\s+([a-z][a-z0-9:-]*)\(([^)]*)\)/gm
   result = result.replace(taskPattern, (_match, prefix: string, agentName: string, args: string) => {
@@ -108,8 +108,14 @@ export function transformContentForPi(body: string): string {
 
   // Claude-specific tool references
   result = result.replace(/\bAskUserQuestion\b/g, "ask_user_question")
-  result = result.replace(/\bTodoWrite\b/g, "file-based todos (todos/ + /skill:todo-create)")
-  result = result.replace(/\bTodoRead\b/g, "file-based todos (todos/ + /skill:todo-create)")
+  // Claude Code task-tracking primitives: current Task* API (TaskCreate/TaskUpdate/TaskList/TaskGet/TaskStop/TaskOutput)
+  // plus the deprecated legacy pair (TodoWrite/TodoRead). All map to the platform's task-tracking primitive.
+  result = result.replace(
+    /\bTask(?:Create|Update|List|Get|Stop|Output)\b/g,
+    "the platform's task-tracking primitive",
+  )
+  result = result.replace(/\bTodoWrite\b/g, "the platform's task-tracking primitive")
+  result = result.replace(/\bTodoRead\b/g, "the platform's task-tracking primitive")
 
   // /command-name or /workflows:command-name -> /workflows-command-name
   const slashCommandPattern = /(?<![:\w])\/([a-z][a-z0-9_:-]*?)(?=[\s,."')\]}`]|$)/gi

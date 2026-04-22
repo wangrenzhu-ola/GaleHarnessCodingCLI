@@ -511,8 +511,8 @@ Task best-practices-researcher(topic)`
   test("transforms namespaced Task agent calls using final segment", () => {
     const input = `Run agents:
 
-- Task galeharness-cli:research:repo-research-analyst(feature_description)
-- Task galeharness-cli:review:security-reviewer(code_diff)`
+- Task galeharness-cli:repo-research-analyst(feature_description)
+- Task galeharness-cli:security-reviewer(code_diff)`
 
     const result = transformContentForWindsurf(input)
     expect(result).toContain("Use the @repo-research-analyst skill: feature_description")
@@ -521,7 +521,7 @@ Task best-practices-researcher(topic)`
   })
 
   test("transforms zero-argument Task calls", () => {
-    const input = `- Task galeharness-cli:review:code-simplicity-reviewer()`
+    const input = `- Task galeharness-cli:code-simplicity-reviewer()`
 
     const result = transformContentForWindsurf(input)
     expect(result).toContain("Use the @code-simplicity-reviewer skill")

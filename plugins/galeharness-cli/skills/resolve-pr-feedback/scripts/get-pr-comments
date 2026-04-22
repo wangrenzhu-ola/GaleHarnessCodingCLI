@@ -45,6 +45,9 @@ query FetchPRFeedback($owner: String!, $repo: String!, $pr: Int!) {
             isOutdated
             path
             line
+            originalLine
+            startLine
+            originalStartLine
             comments(first: 10) {
               nodes {
                 id
@@ -79,9 +82,15 @@ query FetchPRFeedback($owner: String!, $repo: String!, $pr: Int!) {
     }
   }
 }' | jq '.data.repository.pullRequest as $pr |
-  # Unresolved threads (existing behavior, unchanged)
+  # Structurally non-actionable bot output; always dropped.
+  ["codecov"] as $ci_bot_logins |
+  # Unresolved threads. `isOutdated` means the diff hunk around the comment
+  # has shifted since the thread was opened -- not that the reviewer concern
+  # was addressed. Resolution state is the only authoritative signal; outdated
+  # threads are still surfaced (with their isOutdated flag intact) so the
+  # resolver can factor in that the referenced line may have moved.
   [$pr.reviewThreads.edges[]
-    | select(.node.isResolved == false and .node.isOutdated == false)] as $unresolved |
+    | select(.node.isResolved == false)] as $unresolved |
   # Resolved threads for cross-invocation awareness (last 10 by most recent comment)
   [$pr.reviewThreads.edges[]
     | select(.node.isResolved == true)
@@ -93,10 +102,16 @@ query FetchPRFeedback($owner: String!, $repo: String!, $pr: Int!) {
   review_threads: $unresolved,
   pr_comments: [$pr.comments.nodes[]
     | select(.author.login != $pr.author.login)
+    | select(
+        .author.login as $l | $ci_bot_logins | index($l) | not
+      )
     | select(.body | test("^\\s*$") | not)],
   review_bodies: [$pr.reviews.nodes[]
     | select(.body != null and .body != "")
-    | select(.author.login != $pr.author.login)],
+    | select(.author.login != $pr.author.login)
+    | select(
+        .author.login as $l | $ci_bot_logins | index($l) | not
+      )],
   cross_invocation: {
     signal: (($resolved | length) > 0 and ($unresolved | length) > 0),
     resolved_threads: $resolved

@@ -71,31 +71,47 @@ For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/RE
 | `git-commit-push-pr` | Commit, push, and open a PR with an adaptive description; also update an existing PR description (delegates title/body generation to `gh:pr-description`) |
 | `git-worktree` | Manage Git worktrees for parallel development |
 
+### Upstream Sync Workflow
+
+GaleHarnessCLI maintains a local per-commit upstream sync workflow for bringing changes over from the reference upstream repo without collapsing everything into one giant diff.
+
+Repository entry points:
+
+```bash
+bash scripts/upstream-sync/generate-batch.sh --upstream-repo /path/to/upstream-checkout
+bash scripts/upstream-sync/apply-patch-to-worktree.sh .context/galeharness-cli/upstream-sync/<date>/adapted/<patch>.patch
+```
+
+What this workflow records:
+- `commit-range.txt` records the batch start commit, end commit, and `next_baseline_candidate`
+- `README.md` in the batch directory records the patch table and recommended worktree flow
+- `.upstream-ref` remains the durable baseline and should be updated manually to the batch `next_baseline_candidate` only after the whole batch has landed
+
+Recommended operating model:
+- Generate one dated batch from `.upstream-ref` -> upstream HEAD
+- Process one adapted patch per isolated worktree
+- Open one PR per adapted patch
+- After all PRs land, write the batch `end_commit` / `next_baseline_candidate` into `.upstream-ref`
+
 ### Workflow Utilities
 
 | Skill | Description |
 |-------|-------------|
-| `/changelog` | Create engaging changelogs for recent merges |
 | `/gh-demo-reel` | Capture a visual demo reel (GIF demos, terminal recordings, screenshots) for PRs with project-type-aware tier selection |
 | `/report-bug-ce` | Report a bug in the compound-engineering plugin |
 | `/resolve-pr-feedback` | Resolve PR review feedback in parallel |
 | `/sync` | Sync Claude Code config across machines |
 | `/test-browser` | Run browser tests on PR-affected pages |
 | `/test-xcode` | Build and test iOS apps on simulator using XcodeBuildMCP |
-| `/onboarding` | Generate `ONBOARDING.md` to help new contributors understand the codebase |
 | `/gh:setup` | Diagnose environment, install missing tools, and bootstrap project config |
 | `/gh:update` | Check compound-engineering plugin version and fix stale cache (Claude Code only) |
-| `/todo-resolve` | Resolve todos in parallel |
-| `/todo-triage` | Triage and prioritize pending todos |
 
 ### Development Frameworks
 
 | Skill | Description |
 |-------|-------------|
 | `agent-native-architecture` | Build AI agents using prompt-native architecture |
-| `andrew-kane-gem-writer` | Write Ruby gems following Andrew Kane's patterns |
 | `dhh-rails-style` | Write Ruby/Rails code in DHH's 37signals style |
-| `dspy-ruby` | Build type-safe LLM applications with DSPy.rb |
 | `frontend-design` | Create production-grade frontend interfaces |
 
 ### Review & Quality
@@ -108,9 +124,7 @@ For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/RE
 
 | Skill | Description |
 |-------|-------------|
-| `every-style-editor` | Review copy for Every's style guide compliance |
 | `proof` | Create, edit, and share documents via Proof collaborative editor |
-| `todo-create` | File-based todo tracking system |
 
 ### Automation & Tools
 
@@ -157,6 +171,7 @@ Agents are specialized subagents invoked by skills — you typically don't call 
 | `schema-drift-detector` | Detect unrelated schema.rb changes in PRs |
 | `security-reviewer` | Exploitable vulnerabilities with confidence calibration |
 | `security-sentinel` | Security audits and vulnerability assessments |
+| `swift-ios-reviewer` | Swift and iOS code review -- SwiftUI state, retain cycles, concurrency, Core Data threading, accessibility |
 | `testing-reviewer` | Test coverage gaps, weak assertions |
 | `project-standards-reviewer` | CLAUDE.md and AGENTS.md compliance |
 | `adversarial-reviewer` | Construct failure scenarios to break implementations across component boundaries |

@@ -273,20 +273,23 @@ describe("gh:plan remains neutral during gh:work-beta rollout", () => {
 })
 
 describe("gh:brainstorm review contract", () => {
-  test("requires document review before handoff", async () => {
+  test("exposes document review as an opt-in handoff option", async () => {
     const content = await readRepoFile("plugins/galeharness-cli/skills/gh-brainstorm/SKILL.md")
+    const handoff = await readRepoFile("plugins/galeharness-cli/skills/gh-brainstorm/references/handoff.md")
 
-    // Phase 3.5 exists and runs document-review
-    expect(content).toContain("### Phase 3.5: Document Review")
-    expect(content).toContain("`document-review` skill")
+    // Document review is no longer a forced Phase 3.5 step. Users opt in from the Phase 4 menu.
+    expect(content).not.toContain("Phase 3.5")
 
     // Phase 3 and Phase 4 are extracted to references for token optimization
     expect(content).toContain("`references/requirements-capture.md`")
     expect(content).toContain("`references/handoff.md`")
 
-    // Handoff option is for additional passes, not the first review (now in extracted reference)
-    const handoff = await readRepoFile("plugins/galeharness-cli/skills/gh-brainstorm/references/handoff.md")
-    expect(handoff).toContain("another document review")
+    // Phase 4 menu exposes agent review as a first-class option and routes to document-review
+    expect(handoff).toContain("Agent review of requirements doc with `document-review`")
+    expect(handoff).toContain("Load the `document-review` skill")
+
+    // Subsequent-round residual findings are surfaced as a prose nudge, not a separate menu option
+    expect(handoff).toContain("Post-review nudge")
     expect(handoff).not.toContain("**Review and refine**")
   })
 })
@@ -348,6 +351,53 @@ describe("gh:plan review contract", () => {
     // No conditional ordering based on plan depth (review already ran)
     expect(content).not.toContain("**Options when document-review is recommended:**")
     expect(content).not.toContain("**Options for Standard or Lightweight plans:**")
+  })
+})
+
+describe("document-review contract", () => {
+  test("findings schema enforces discrete confidence anchors", async () => {
+    const schema = JSON.parse(
+      await readRepoFile("plugins/galeharness-cli/skills/document-review/references/findings-schema.json")
+    )
+    const confidence = schema.properties.findings.items.properties.confidence
+
+    // Anchored integer enum, not continuous float
+    expect(confidence.type).toBe("integer")
+    expect(confidence.enum).toEqual([0, 25, 50, 75, 100])
+
+    // No stale continuous-range properties
+    expect(confidence.minimum).toBeUndefined()
+    expect(confidence.maximum).toBeUndefined()
+
+    // Rubric text embedded in the description so persona agents see it
+    expect(confidence.description).toContain("Absolutely certain")
+    expect(confidence.description).toContain("Highly confident")
+    expect(confidence.description).toContain("Moderately confident")
+    expect(confidence.description).toContain("double-checked")
+    expect(confidence.description).toContain("evidence directly confirms")
+  })
+
+  test("subagent template embeds anchor rubric and bans float confidence", async () => {
+    const template = await readRepoFile(
+      "plugins/galeharness-cli/skills/document-review/references/subagent-template.md"
+    )
+
+    // Rubric section embedded verbatim in the persona-facing template
+    expect(template).toContain("Confidence rubric")
+    expect(template).toContain("`0`")
+    expect(template).toContain("`25`")
+    expect(template).toContain("`50`")
+    expect(template).toContain("`75`")
+    expect(template).toContain("`100`")
+
+    // Example finding uses anchor, not float
+    expect(template).toContain('"confidence": 100')
+    expect(template).not.toMatch(/"confidence":\s*0\.\d+/)
+
+    // Advisory observations route to anchor 50, not to a 0.40-0.59 band
+    expect(template).toContain("`confidence: 50`")
+    expect(template).not.toContain("0.40–0.59 LOW/Advisory band")
+    expect(template).not.toContain("0.40-0.59 LOW/Advisory band")
   })
 })
 

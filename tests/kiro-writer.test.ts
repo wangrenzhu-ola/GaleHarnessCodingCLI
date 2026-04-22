@@ -112,9 +112,9 @@ description: Planning workflow
 
 Run these research agents:
 
-- Task galeharness-cli:research:repo-research-analyst(feature_description)
-- Task galeharness-cli:research:learnings-researcher(feature_description)
-- Task galeharness-cli:review:code-simplicity-reviewer()
+- Task galeharness-cli:repo-research-analyst(feature_description)
+- Task galeharness-cli:learnings-researcher(feature_description)
+- Task galeharness-cli:code-simplicity-reviewer()
 `,
     )
 

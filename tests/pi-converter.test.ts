@@ -82,7 +82,7 @@ describe("convertClaudeToPi", () => {
     expect(parsedPrompt.body).toContain("ask_user_question")
     expect(parsedPrompt.body).toContain("/workflows-work")
     expect(parsedPrompt.body).toContain("/todo-resolve")
-    expect(parsedPrompt.body).toContain("file-based todos (todos/ + /skill:todo-create)")
+    expect(parsedPrompt.body).toContain("the platform's task-tracking primitive")
   })
 
   test("transforms namespaced Task agent calls using final segment", () => {
@@ -96,8 +96,8 @@ describe("convertClaudeToPi", () => {
           description: "Planning with namespaced agents",
           body: [
             "Run agents:",
-            "- Task galeharness-cli:research:repo-research-analyst(feature_description)",
-            "- Task galeharness-cli:review:security-reviewer(code_diff)",
+            "- Task galeharness-cli:repo-research-analyst(feature_description)",
+            "- Task galeharness-cli:security-reviewer(code_diff)",
           ].join("\n"),
           sourcePath: "/tmp/plugin/commands/plan.md",
         },
@@ -128,7 +128,7 @@ describe("convertClaudeToPi", () => {
         {
           name: "review",
           description: "Review code",
-          body: "- Task galeharness-cli:review:code-simplicity-reviewer()",
+          body: "- Task galeharness-cli:code-simplicity-reviewer()",
           sourcePath: "/tmp/plugin/commands/review.md",
         },
       ],

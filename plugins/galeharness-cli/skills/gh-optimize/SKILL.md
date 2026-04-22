@@ -257,7 +257,7 @@ Before searching prior learnings, query the vector memory database for related o
 
 ### 0.4 Search Prior Learnings
 
-Dispatch `galeharness-cli:research:learnings-researcher` to search for prior optimization work on similar topics. If relevant learnings exist, incorporate them into the approach.
+Dispatch `galeharness-cli:learnings-researcher` to search for prior optimization work on similar topics. If relevant learnings exist, incorporate them into the approach.
 
 ### 0.5 Run Identity Detection
 
@@ -412,7 +412,7 @@ Read the code within `scope.mutable` to understand:
 - Obvious improvement opportunities
 - Constraints and dependencies between components
 
-Optionally dispatch `galeharness-cli:research:repo-research-analyst` for deeper codebase analysis if the scope is large or unfamiliar.
+Optionally dispatch `galeharness-cli:repo-research-analyst` for deeper codebase analysis if the scope is large or unfamiliar.
 
 ### 2.2 Generate Hypothesis List
 

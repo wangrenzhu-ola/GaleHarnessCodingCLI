@@ -31,7 +31,7 @@ export function transformContentForCodex(
 
   const taskPattern = /^(\s*-?\s*)Task\s+([a-z][a-z0-9:-]*)\(([^)]*)\)/gm
   result = result.replace(taskPattern, (_match, prefix: string, agentName: string, args: string) => {
-    // For namespaced calls like "galeharness-cli:research:repo-research-analyst",
+    // For namespaced calls like "galeharness-cli:repo-research-analyst",
     // use only the final segment as the skill name.
     const finalSegment = agentName.includes(":") ? agentName.split(":").pop()! : agentName
     const skillName = normalizeCodexName(finalSegment)

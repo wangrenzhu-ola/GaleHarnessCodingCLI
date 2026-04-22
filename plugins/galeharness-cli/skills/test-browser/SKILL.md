@@ -220,14 +220,12 @@ When a test fails:
    Console errors: [if any]
 
    How to proceed?
-   1. Fix now - I'll help debug and fix
-   2. Create todo - Add a todo for later (using the todo-create skill)
-   3. Skip - Continue testing other pages
+   1. Fix now - debug and fix the failing test
+   2. Skip - continue testing other pages
    ```
 
 3. **If "Fix now":** investigate, propose a fix, apply, re-run the failing test
-4. **If "Create todo":** load the `todo-create` skill and create a todo with priority p1 and description `browser-test-{description}`, continue
-5. **If "Skip":** log as skipped, continue
+4. **If "Skip":** log as skipped, continue
 
 ### 10. Test Summary
 
@@ -257,9 +255,6 @@ After all tests complete, present a summary:
 
 ### Failures: [count]
 - `/dashboard` - [issue description]
-
-### Created Todos: [count]
-- `005-pending-p1-browser-test-dashboard-error.md`
 
 ### Result: [PASS / FAIL / PARTIAL]
 ```

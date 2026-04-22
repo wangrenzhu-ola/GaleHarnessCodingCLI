@@ -181,8 +181,8 @@ Task best-practices-researcher(topic)`,
           description: "Planning with namespaced agents",
           body: `Run agents:
 
-- Task galeharness-cli:research:repo-research-analyst(feature_description)
-- Task galeharness-cli:review:security-reviewer(code_diff)`,
+- Task galeharness-cli:repo-research-analyst(feature_description)
+- Task galeharness-cli:security-reviewer(code_diff)`,
           sourcePath: "/tmp/plugin/commands/plan.md",
         },
       ],
@@ -209,7 +209,7 @@ Task best-practices-researcher(topic)`,
         {
           name: "review",
           description: "Review code",
-          body: `- Task galeharness-cli:review:code-simplicity-reviewer()`,
+          body: `- Task galeharness-cli:code-simplicity-reviewer()`,
           sourcePath: "/tmp/plugin/commands/review.md",
         },
       ],

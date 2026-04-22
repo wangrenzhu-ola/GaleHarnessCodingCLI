@@ -20,7 +20,7 @@ This file contains the shipping workflow (Phase 3-4). Load it only when all Phas
 
    Every change gets reviewed before shipping. The depth scales with the change's risk profile, but review itself is never skipped.
 
-   **Tier 2: Full review (default)** -- REQUIRED unless Tier 1 criteria are explicitly met. Invoke the `gh:review` skill with `mode:autofix` to run specialized reviewer agents, auto-apply safe fixes, and surface residual work as todos. When the plan file path is known, pass it as `plan:<path>`. This is the mandatory default -- proceed to Tier 1 only after confirming every criterion below.
+   **Tier 2: Full review (default)** -- REQUIRED unless Tier 1 criteria are explicitly met. Invoke the `gh:review` skill with `mode:autofix` to run specialized reviewer agents, auto-apply safe fixes, and record residual downstream work in the per-run artifact. When the plan file path is known, pass it as `plan:<path>`. This is the mandatory default -- proceed to Tier 1 only after confirming every criterion below.
 
    **Tier 1: Inline self-review** -- A lighter alternative permitted only when **all four** criteria are true. Before choosing Tier 1, explicitly state which criteria apply and why. If any criterion is uncertain, use Tier 2.
    - Purely additive (new files only, no existing behavior modified)
@@ -103,7 +103,7 @@ Before creating PR, verify:
 
 Every change gets reviewed. The tier determines depth, not whether review happens.
 
-**Tier 2 (full review)** -- REQUIRED default. Invoke `gh:review mode:autofix` with `plan:<path>` when available. Safe fixes are applied automatically; residual work surfaces as todos. Always use this tier unless all four Tier 1 criteria are explicitly confirmed.
+**Tier 2 (full review)** -- REQUIRED default. Invoke `gh:review mode:autofix` with `plan:<path>` when available. Safe fixes are applied automatically; residual work is recorded in the run artifact for downstream routing. Always use this tier unless all four Tier 1 criteria are explicitly confirmed.
 
 **Tier 1 (inline self-review)** -- permitted only when all four are true (state each explicitly before choosing):
 - Purely additive (new files only, no existing behavior modified)

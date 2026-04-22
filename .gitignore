@@ -9,6 +9,8 @@ todos/
 .worktrees
 .context/
 .claude/worktrees/
+__pycache__/
+*.pyc
 
 # Local-only scripts (not committed — contain upstream sync tooling)
 .local/
