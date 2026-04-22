@@ -68,22 +68,24 @@ def main():
         sys.exit(0)
 
     try:
-        from config.loader import ConfigLoader
-        from layers.manager_v5 import LayerManagerV5
+        from scripts.hkt_memory_v5 import HKTMv5
 
-        config = ConfigLoader(_ROOT).load()
-        layers = LayerManagerV5(Path(memory_dir), config=config)
+        memory = HKTMv5(memory_dir=memory_dir)
+        top_k = memory.config.get("automation", {}).get("auto_recall", {}).get("top_k", 5)
+        mode = os.environ.get("HKT_RECALL_MODE", "implement")
+        result = memory.orchestrate_recall(
+            query=query,
+            mode=mode,
+            limit=top_k,
+            session_id=os.environ.get("HKT_SESSION_ID"),
+            task_id=os.environ.get("HKT_TASK_ID"),
+            project=os.environ.get("HKT_PROJECT"),
+            branch=os.environ.get("HKT_BRANCH"),
+            pr_id=os.environ.get("HKT_PR_ID"),
+            token_budget=max_tokens,
+        )
 
-        top_k = config.get("automation", {}).get("auto_recall", {}).get("top_k", 5)
-        results_by_layer = layers.retrieve(query=query, layer="all", limit=top_k)
-
-        flat: list = []
-        for layer_name, items in results_by_layer.items():
-            if layer_name == "debug":
-                continue
-            for item in items:
-                item["_layer"] = layer_name
-                flat.append(item)
+        flat = result.get("results", [])
 
         flat = _truncate_to_tokens(flat, max_tokens)
 
@@ -94,8 +96,12 @@ def main():
         for m in flat:
             title = m.get("title", m.get("id", "记忆"))
             content = m.get("summary", m.get("content", ""))[:300]
-            layer = m.get("_layer", "")
-            lines.append(f"- **{title}** [{layer}]\n  {content}\n")
+            source = m.get("source", "")
+            layer = m.get("layer", "")
+            badge = layer or source
+            why = m.get("why", "")
+            detail = f"\n  原因: {why}" if why else ""
+            lines.append(f"- **{title}** [{badge}]\n  {content}{detail}\n")
 
         print("".join(lines), end="")
 

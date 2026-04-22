@@ -4,6 +4,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -34,32 +35,29 @@ def test_soft_delete_restore_and_hard_delete(tmp_path):
     soft_deleted = memory.forget(memory_id=memory_id)
     assert soft_deleted["success"] is True
     assert soft_deleted["status"] == "disabled"
-    assert soft_deleted["aggregate_rebuild"]["rebuilt"] == 0
 
-    after_soft_delete = memory.retrieve(query="staging", layer="L2", limit=10)
+    after_soft_delete = memory.retrieve(query="staging", layer="all", limit=10)
     assert all(item["id"] != memory_id for item in after_soft_delete["L2"])
-    assert not l1_topic_file.exists() or memory_id not in l1_topic_file.read_text(encoding="utf-8")
-    assert not l0_topic_file.exists() or memory_id not in l0_topic_file.read_text(encoding="utf-8")
+    assert all(item.get("source_l2") != memory_id for item in after_soft_delete.get("L1", []))
+    assert all(item.get("source_l2") != memory_id for item in after_soft_delete.get("L0", []))
 
     restored = memory.restore(memory_id=memory_id)
     assert restored["success"] is True
     assert restored["status"] == "active"
-    assert restored["aggregate_rebuild"]["rebuilt"] == 1
 
-    after_restore = memory.retrieve(query="staging", layer="L2", limit=10)
+    after_restore = memory.retrieve(query="staging", layer="all", limit=10)
     assert any(item["id"] == memory_id for item in after_restore["L2"])
-    assert memory_id in l1_topic_file.read_text(encoding="utf-8")
-    assert memory_id in l0_topic_file.read_text(encoding="utf-8")
+    assert any(item.get("source_l2") == memory_id for item in after_restore.get("L1", []))
+    assert any(item.get("source_l2") == memory_id for item in after_restore.get("L0", []))
 
     hard_deleted = memory.forget(memory_id=memory_id, force=True)
     assert hard_deleted["success"] is True
     assert hard_deleted["removed_from_l2"] is True
-    assert hard_deleted["aggregate_rebuild"]["rebuilt"] == 0
 
-    after_hard_delete = memory.retrieve(query="staging", layer="L2", limit=10)
+    after_hard_delete = memory.retrieve(query="staging", layer="all", limit=10)
     assert all(item["id"] != memory_id for item in after_hard_delete["L2"])
-    assert not l1_topic_file.exists() or memory_id not in l1_topic_file.read_text(encoding="utf-8")
-    assert not l0_topic_file.exists() or memory_id not in l0_topic_file.read_text(encoding="utf-8")
+    assert all(item.get("source_l2") != memory_id for item in after_hard_delete.get("L1", []))
+    assert all(item.get("source_l2") != memory_id for item in after_hard_delete.get("L0", []))
 
 
 def test_cleanup_and_prune(monkeypatch, tmp_path):
@@ -104,6 +102,117 @@ def test_cleanup_and_prune(monkeypatch, tmp_path):
 
     remaining_events = lifecycle.events_path.read_text(encoding="utf-8")
     assert old_event["timestamp"] not in remaining_events
+
+
+def test_session_transcript_index_tracks_forget_restore_and_hard_delete(tmp_path):
+    memory = HKTMv5(memory_dir=str(tmp_path / "memory"), llm_provider="zhipu")
+    memory.layers.vector_store = SimpleNamespace(
+        add=lambda **kwargs: True,
+        delete=lambda *args, **kwargs: True,
+    )
+
+    stored = memory.layers.store_session_transcript(
+        content="之前这个问题怎么修过：先补 transcript metadata 再补 MCP 路由",
+        session_id="session-history",
+        task_id="task-history",
+        project="hktmemory",
+        branch="feat/session-search",
+        pr_id="201",
+    )
+    memory_id = stored["L2"]
+
+    assert memory.layers.session_transcript_index.get_stats()["total_documents"] == 1
+    assert memory.layers.session_search(query="transcript metadata", project="hktmemory", limit=5)["results"][0]["id"] == memory_id
+
+    soft_deleted = memory.forget(memory_id=memory_id)
+    assert soft_deleted["success"] is True
+    assert soft_deleted["removed_from_session_transcript_index"] is True
+    assert memory.layers.session_transcript_index.get_stats()["total_documents"] == 0
+    assert memory.layers.session_search(query="transcript metadata", project="hktmemory", limit=5)["count"] == 0
+
+    restored = memory.restore(memory_id=memory_id)
+    assert restored["success"] is True
+    assert restored["restored_to_session_transcript_index"] is True
+    assert memory.layers.session_transcript_index.get_stats()["total_documents"] == 1
+    assert memory.layers.session_search(query="transcript metadata", project="hktmemory", limit=5)["results"][0]["id"] == memory_id
+
+    hard_deleted = memory.forget(memory_id=memory_id, force=True)
+    assert hard_deleted["success"] is True
+    assert hard_deleted["removed_from_session_transcript_index"] is True
+    assert memory.layers.session_transcript_index.get_stats()["total_documents"] == 0
+
+
+def test_session_transcript_index_stays_consistent_after_prune_and_rebuild(monkeypatch, tmp_path):
+    monkeypatch.setenv("HKT_MEMORY_MAX_ENTRIES_PER_SCOPE", "1")
+    monkeypatch.setenv("HKT_MEMORY_PRUNE_MODE", "archive")
+    memory = HKTMv5(memory_dir=str(tmp_path / "memory"), llm_provider="zhipu")
+    memory.layers.vector_store = SimpleNamespace(
+        add=lambda **kwargs: True,
+        delete=lambda *args, **kwargs: True,
+    )
+
+    memory.layers.store_session_transcript(
+        content="第一条 transcript 记录的是旧的回放链路",
+        session_id="session-prune",
+        task_id="task-prune",
+        project="hktmemory",
+        branch="feat/session-search",
+        pr_id="202",
+    )
+    time.sleep(0.01)
+    latest = memory.layers.store_session_transcript(
+        content="第二条 transcript 记录的是新的独立索引链路",
+        session_id="session-prune",
+        task_id="task-prune",
+        project="hktmemory",
+        branch="feat/session-search",
+        pr_id="202",
+    )
+
+    assert memory.layers.session_transcript_index.get_stats()["total_documents"] == 1
+    assert memory.layers.session_search(query="旧的回放链路", project="hktmemory", limit=5)["count"] == 0
+    assert memory.layers.session_search(query="独立索引链路", project="hktmemory", limit=5)["results"][0]["id"] == latest["L2"]
+
+    rebuild = memory.rebuild()
+    session_index = rebuild["session_transcript_index"]
+    assert session_index["success"] is True
+    assert session_index["source_entries"] == 1
+    assert session_index["indexed"] == 1
+    assert memory.layers.session_transcript_index.get_stats()["total_documents"] == 1
+
+
+def test_session_transcript_redacts_secrets_before_store(tmp_path):
+    memory = HKTMv5(memory_dir=str(tmp_path / "memory"), llm_provider="zhipu")
+    memory.layers.vector_store = SimpleNamespace(
+        add=lambda **kwargs: True,
+        delete=lambda *args, **kwargs: True,
+    )
+
+    stored = memory.layers.store_session_transcript(
+        content=(
+            "调试记录：Bearer sk-secret-token-value "
+            "curl https://example.com/debug?token=plain-secret "
+            "rm -rf /tmp/hktmemory-cache"
+        ),
+        session_id="session-safety",
+        task_id="task-safety",
+        project="hktmemory",
+        branch="feat/safety",
+        pr_id="203",
+    )
+    entry = memory.layers.l2.get_entry(stored["L2"])
+
+    assert stored["redacted_before_store"] is True
+    assert entry is not None
+    assert "sk-secret-token-value" not in entry["content"]
+    assert "plain-secret" not in entry["content"]
+    assert "[REDACTED]" in entry["content"]
+    assert "[REDACTED_HIGH_RISK_COMMAND]" in entry["content"]
+    safety = entry["metadata"]["safety"]
+    assert safety["allow_store"] is True
+    assert safety["allow_raw_display"] is False
+    assert "secret" in safety["risks"]
+    assert "high_risk_command" in safety["risks"]
 
 
 def test_pin_importance_feedback_and_rebuild(tmp_path):

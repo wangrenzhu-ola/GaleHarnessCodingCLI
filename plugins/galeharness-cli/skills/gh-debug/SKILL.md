@@ -80,6 +80,31 @@ Before Phase 1, query the vector memory database for related bugs and debug expe
 - Past debugging strategies for comparable symptoms
 <!-- /HKT-PATCH:phase-0.4 -->
 
+<!-- HKT-PATCH:phase-0.4b -->
+#### 0.4b HKTMemory Session Search
+
+In addition to vector retrieval, query related historical debug session records:
+
+1. Build a search query from the current error message, bug description, or debugging target
+
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py session-search \
+     --query "<error message or bug description summary>" \
+     --limit 5
+   ```
+
+3. If results returned, prepare a context block for the triage phase:
+   ```
+   ## Historical Debug Session Records
+   Source: session record search. Supplementary context for root cause analysis.
+   [results list]
+   ```
+
+4. If no results or command error, proceed silently without blocking subsequent triage.
+
+<!-- /HKT-PATCH:phase-0.4b -->
+
 Then proceed to Phase 1.
 
 **Everything else** (stack traces, test paths, error messages, descriptions of broken behavior): Proceed directly to Phase 1.

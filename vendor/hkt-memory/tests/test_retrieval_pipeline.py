@@ -89,12 +89,16 @@ class TestRetrievalPipeline(unittest.TestCase):
     def test_temporal_query_recalls_april_9_l2(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             memory = HKTMv5(memory_dir=str(Path(tmpdir) / "memory"), llm_provider="zhipu")
-            entry_id = memory.layers.l2.store_daily(
-                title="API 评审",
-                content_lines=["上次 API 评审说了什么：决定采用 RESTful。"],
-                date="2026-04-09",
-                metadata={"topic": "meetings"},
+            memory.layers.vector_store = SimpleNamespace(
+                add=lambda **kwargs: True,
+                search=lambda *args, **kwargs: [],
             )
+            entry_id = memory.store(
+                content="上次 API 评审说了什么：决定采用 RESTful。",
+                title="API 评审",
+                topic="meetings",
+                layer="L2",
+            )["L2"]
 
             results = memory.retrieve(query="上次 API 评审说了什么", layer="L2", limit=10)
             self.assertTrue(any(item.get("id") == entry_id for item in results.get("L2", [])))

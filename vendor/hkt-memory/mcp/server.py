@@ -46,6 +46,8 @@ class MemoryMCPServer:
         # Tool routing
         tool_map = {
             "memory_recall": self.tools.memory_recall,
+            "memory_orchestrate_recall": self.tools.memory_orchestrate_recall,
+            "memory_session_search": self.tools.memory_session_search,
             "memory_store": self.tools.memory_store,
             "memory_forget": self.tools.memory_forget,
             "memory_restore": self.tools.memory_restore,
@@ -107,6 +109,41 @@ class MemoryMCPServer:
                         "query": {"type": "string", "required": True},
                         "layer": {"type": "string", "default": "all"},
                         "limit": {"type": "integer", "default": 5}
+                    }
+                },
+                {
+                    "name": "memory_orchestrate_recall",
+                    "description": "Runtime recall orchestration across recent, session, and long-term memory",
+                    "parameters": {
+                        "query": {"type": "string", "default": ""},
+                        "mode": {"type": "string", "default": "implement"},
+                        "topic": {"type": "string"},
+                        "limit": {"type": "integer", "default": 5},
+                        "entity": {"type": "string"},
+                        "session_id": {"type": "string"},
+                        "task_id": {"type": "string"},
+                        "project": {"type": "string"},
+                        "branch": {"type": "string"},
+                        "pr": {"type": "string"},
+                        "pr_id": {"type": "string"},
+                        "include_recent": {"type": "boolean"},
+                        "include_session": {"type": "boolean"},
+                        "include_long_term": {"type": "boolean"},
+                        "token_budget": {"type": "integer"}
+                    }
+                },
+                {
+                    "name": "memory_session_search",
+                    "description": "Search session transcripts or list recent sessions when query is empty",
+                    "parameters": {
+                        "query": {"type": "string", "default": ""},
+                        "limit": {"type": "integer", "default": 5},
+                        "session_id": {"type": "string"},
+                        "task_id": {"type": "string"},
+                        "project": {"type": "string"},
+                        "branch": {"type": "string"},
+                        "pr": {"type": "string"},
+                        "pr_id": {"type": "string"}
                     }
                 },
                 {
@@ -269,6 +306,7 @@ class MemoryMCPServer:
                 caps["endpoints"] = {
                     "POST /store": "memory_store",
                     "POST /recall": "memory_recall",
+                    "POST /orchestrate-recall": "memory_orchestrate_recall",
                     "POST /forget": "memory_forget",
                     "GET /stats": "memory_stats",
                     "POST /tools/<tool_name>": "Direct tool invocation",
@@ -286,6 +324,12 @@ class MemoryMCPServer:
             def recall_endpoint():
                 params = request.get_json() or {}
                 response = self.handle_request({"tool": "memory_recall", "params": params})
+                return jsonify(response)
+
+            @app.route('/orchestrate-recall', methods=['POST'])
+            def orchestrate_recall_endpoint():
+                params = request.get_json() or {}
+                response = self.handle_request({"tool": "memory_orchestrate_recall", "params": params})
                 return jsonify(response)
 
             @app.route('/forget', methods=['POST'])

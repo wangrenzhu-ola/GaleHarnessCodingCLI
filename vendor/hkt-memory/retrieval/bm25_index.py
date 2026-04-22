@@ -6,13 +6,11 @@ BM25 Full-Text Search Index
 """
 
 import json
-import os
 import sqlite3
-import re
 from contextlib import closing
 from pathlib import Path
-from typing import List, Dict, Optional, Any, Tuple
-from datetime import datetime
+from typing import List, Dict, Optional, Any
+from datetime import datetime, timezone
 
 
 class BM25Index:
@@ -35,7 +33,7 @@ class BM25Index:
     def _check_jieba(self) -> bool:
         """检查是否安装了jieba"""
         try:
-            import jieba
+            __import__("jieba")
             return True
         except ImportError:
             return False
@@ -170,7 +168,7 @@ class BM25Index:
                     scope,
                     agent_id,
                     project_id,
-                    datetime.utcnow().isoformat()
+                    datetime.now(timezone.utc).isoformat()
                 ))
                 conn.commit()
             return True
@@ -345,13 +343,25 @@ class BM25Index:
                     UPDATE documents
                     SET content = ?, metadata = ?, updated_at = ?
                     WHERE id = ?
-                """, (new_content, json.dumps(new_metadata), datetime.utcnow().isoformat(), doc_id))
+                """, (new_content, json.dumps(new_metadata), datetime.now(timezone.utc).isoformat(), doc_id))
 
                 conn.commit()
             return True
 
         except Exception as e:
             print(f"Error updating document: {e}")
+            return False
+
+    def reset(self) -> bool:
+        """清空索引中的全部文档，供重建流程使用"""
+        try:
+            with closing(sqlite3.connect(self.db_path)) as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM documents")
+                conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error resetting BM25 index: {e}")
             return False
     
     def get_stats(self) -> Dict[str, Any]:

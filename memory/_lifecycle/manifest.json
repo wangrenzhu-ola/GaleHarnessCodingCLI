@@ -67,9 +67,9 @@
     "source_path": "memory/L2-Full/daily/2026-04-17.md",
     "status": "active",
     "created_at": "2026-04-17T13:12:46.189973+00:00",
-    "updated_at": "2026-04-20T09:20:44.007740+00:00",
-    "last_accessed": "2026-04-20T09:20:44.007740+00:00",
-    "access_count": 3,
+    "updated_at": "2026-04-22T04:24:50.949968+00:00",
+    "last_accessed": "2026-04-22T04:24:50.949968+00:00",
+    "access_count": 28,
     "helpful_count": 0,
     "feedback_stats": {
       "useful": 0,
@@ -96,9 +96,9 @@
     "source_path": "memory/L2-Full/daily/2026-04-20.md",
     "status": "active",
     "created_at": "2026-04-20T07:58:14.714032+00:00",
-    "updated_at": "2026-04-20T07:58:14.714032+00:00",
-    "last_accessed": "2026-04-20T07:58:14.714032+00:00",
-    "access_count": 0,
+    "updated_at": "2026-04-22T04:24:50.949968+00:00",
+    "last_accessed": "2026-04-22T04:24:50.949968+00:00",
+    "access_count": 25,
     "helpful_count": 0,
     "feedback_stats": {
       "useful": 0,
@@ -172,6 +172,64 @@
       "pr_id": null,
       "topic": "developer-experience",
       "id": "2026-04-20-172528-002"
+    }
+  },
+  "2026-04-22-100817-438": {
+    "memory_id": "2026-04-22-100817-438",
+    "title": "HKTMemory PR #2 升级与集成改进",
+    "topic": "hktmemory-integration",
+    "scope": "topic:hktmemory-integration",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-22.md",
+    "status": "active",
+    "created_at": "2026-04-22T02:08:19.738918+00:00",
+    "updated_at": "2026-04-22T02:08:19.738918+00:00",
+    "last_accessed": "2026-04-22T02:08:19.738918+00:00",
+    "access_count": 0,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "19f32416918701be56c30b52b6f028dce8abad94",
+      "pr_id": null,
+      "topic": "hktmemory-integration",
+      "id": "2026-04-22-100817-438"
+    }
+  },
+  "2026-04-22-110518-120": {
+    "memory_id": "2026-04-22-110518-120",
+    "title": "HKTMemory PR #2 升级集成：vendor 同步、session_search 增量集成与 gale-task 打通设计",
+    "topic": "integration-issues",
+    "scope": "topic:integration-issues",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-22.md",
+    "status": "active",
+    "created_at": "2026-04-22T04:05:48.251020+00:00",
+    "updated_at": "2026-04-22T04:05:48.251020+00:00",
+    "last_accessed": "2026-04-22T04:05:48.251020+00:00",
+    "access_count": 0,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "78c89792e322cc8476e71f0b94b891fa47570a28",
+      "pr_id": null,
+      "topic": "integration-issues",
+      "id": "2026-04-22-110518-120"
     }
   }
 }

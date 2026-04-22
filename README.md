@@ -13,7 +13,7 @@
   - [场景四：知识归档与复用](#场景四知识归档与复用)
   - [场景五：代码优化](#场景五代码优化)
   - [场景六：研究现有代码](#场景六研究现有代码)
-  - [场景七：并行开发（Worktree 隔离）](#场景七并行开发worktree-隔离)
+  - [场景七：一人十线 —— 并行开发（Worktree 隔离）](#场景七一人十线--并行开发worktree-隔离)
   - [场景八：探索改进机会](#场景八探索改进机会)
 - [系统架构](#系统架构)
 - [核心工作流时序图](#核心工作流时序图)
@@ -146,37 +146,70 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
 /gh:slack-research "团队对微服务拆分的讨论"
 ```
 
-### 场景七：并行开发（Worktree 隔离）
+### 场景七：一人十线 —— 并行开发（Worktree 隔离）
 
-多个需求可以同时推进，互不影响。每个 worktree 拥有独立的文件目录和分支，共享 Git 对象，创建速度快、占用空间小。
+**一个工程师同时驱动 10+ 条需求流水线**。每条流水线在独立 worktree 中运行，共享代码库和知识库，互不阻塞、互不干扰。
 
-```bash
-# 开需求1
-/gh:brainstorm "实现用户登录"
-# → 选择 Option 2: Use a worktree → 自动创建 brainstorm/user-login 分支和 worktree
+```mermaid
+flowchart TB
+    Lead["🎯 技术负责人\n1 人"]
 
-# 开需求2（同时进行，互不干扰）
-/gh:brainstorm "接入支付系统"
-# → 选择 Option 2: Use a worktree → 自动创建 brainstorm/payment 分支和 worktree
+    Lead --> W1["Worktree 1\nbrainstorm/user-auth\n需求探索中"]
+    Lead --> W2["Worktree 2\nfeat/payment\n编码实现中"]
+    Lead --> W3["Worktree 3\nfix/email-bug\n审查中"]
+    Lead --> W4["Worktree 4\nfeat/search\n规划中"]
+    Lead --> W5["Worktree 5\nbrainstorm/analytics\n需求探索中"]
+    Lead --> Wn["Worktree N\n...\n并行推进"]
 
-# 查看所有进行中的工作
-# git worktree list 或使用 git-worktree skill
+    W1 --> HKT["🧠 HKTMemory\n共享知识库"]
+    W2 --> HKT
+    W3 --> HKT
+    W4 --> HKT
+    W5 --> HKT
+    Wn --> HKT
+
+    W1 --> R1["PR #37"]
+    W2 --> R2["PR #38"]
+    W3 --> R3["PR #39"]
+    W4 --> R4["PR #40"]
+    W5 --> R5["PR #41"]
+    Wn --> Rn["PR #N"]
 ```
 
-**跨阶段复用**：从 `gh:brainstorm` 进入 `gh:work` 时，系统检测到已在 feature 分支，直接沿用，不会重复创建 worktree 或分支。如需调整分支名风格（如 `brainstorm/xxx` → `feat/xxx`），会提示 rename。
+**为什么能做到？**
+
+| 传统模式 | GaleHarness 并行模式 |
+|----------|---------------------|
+| 1 人 = 1 个分支 = 串行切换 | 1 人 = N 个 worktree = 并行推进 |
+| 切换分支需要 stash / commit | 每条线独立目录，直接 cd 切换 |
+| 知识靠记忆和文档搜索 | HKTMemory 向量检索，跨流水线复用经验 |
+| 代码审查排队等待 | AI 代理即时审查，置信度门控 |
+| 每次从零开始 | 每条流水线自动检索历史方案 |
+
+**跨阶段无缝衔接**：`gh:brainstorm` → `gh:work` 时自动检测已在 feature 分支，直接沿用 worktree，不重复创建。分支名风格不匹配时提示 rename（如 `brainstorm/xxx` → `feat/xxx`）。
 
 ```bash
-# brainstorm 阶段已创建 worktree + brainstorm/feature-a 分支
-/gh:work docs/plans/feature-a-plan.md
+# 第 1 条线：启动需求探索
+/gh:brainstorm "实现用户登录"
+# → 选择 worktree → brainstorm/user-auth 分支 + 隔离工作目录
+
+# 第 2 条线：同步启动另一个需求（互不干扰）
+/gh:brainstorm "接入支付系统"
+# → 选择 worktree → brainstorm/payment 分支 + 隔离工作目录
+
+# ... 第 N 条线
+
+# 任意一条线从 brainstorm 进入 work，无缝衔接
+/gh:work docs/plans/user-auth-plan.md
 # → 检测到已在 feature 分支 → 沿用，不重复创建
 ```
 
 | 操作 | 命令 |
 |------|------|
-| 创建 worktree | `/gh:brainstorm` 或 `/gh:work` 中选择 worktree 选项 |
-| 查看所有 worktree | `git worktree list` 或 `/git-worktree` skill |
-| 切换 worktree | `/git-worktree` skill |
-| 清理完成的 worktree | `/git-worktree` skill |
+| 启动新流水线 | `/gh:brainstorm` 或 `/gh:work` 中选择 worktree |
+| 查看所有进行中的流水线 | `git worktree list` 或 `/git-worktree` |
+| 切换到某条流水线 | `/git-worktree` skill |
+| 完成一条线并清理 | `/git-worktree` cleanup → 开出 PR |
 
 ### 场景八：探索改进机会
 

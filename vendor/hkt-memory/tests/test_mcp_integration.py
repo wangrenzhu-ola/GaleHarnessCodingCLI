@@ -130,6 +130,75 @@ def test_memory_recall_empty_query(tmp_path):
     assert "success" in result
 
 
+def test_memory_session_search_recent_mode_groups_by_session(tmp_path):
+    tools = _make_tools(tmp_path)
+    tools.layers.store_session_transcript(
+        content="先排查 memory_session_search 的 recent mode 行为",
+        session_id="session-a",
+        task_id="task-1",
+        project="hktmemory",
+        branch="feat/a",
+        pr_id="101",
+    )
+    tools.layers.store_session_transcript(
+        content="继续补 recent mode 的 MCP 返回结构",
+        session_id="session-a",
+        task_id="task-1",
+        project="hktmemory",
+        branch="feat/a",
+        pr_id="101",
+    )
+    tools.layers.store_session_transcript(
+        content="另一个会话在处理 recall orchestrator",
+        session_id="session-b",
+        task_id="task-2",
+        project="hktmemory",
+        branch="feat/b",
+        pr_id="102",
+    )
+
+    result = tools.memory_session_search(query="", project="hktmemory", limit=10)
+    assert result["success"] is True
+    assert result["mode"] == "recent"
+    assert result["count"] == 2
+    session_ids = {item["session_id"] for item in result["results"]}
+    assert session_ids == {"session-a", "session-b"}
+    session_a = next(item for item in result["results"] if item["session_id"] == "session-a")
+    assert session_a["entry_count"] == 2
+    assert session_a["task_id"] == "task-1"
+
+
+def test_memory_session_search_keyword_search_supports_filters(tmp_path):
+    tools = _make_tools(tmp_path)
+    tools.layers.store_session_transcript(
+        content="修复 vector store add false 导致 recall 查不到新记忆的问题",
+        session_id="session-fix",
+        task_id="task-fix",
+        project="hktmemory",
+        branch="fix/vector-store",
+        pr_id="103",
+    )
+    tools.layers.store_session_transcript(
+        content="整理 Hermes session memory 的背景文档",
+        session_id="session-docs",
+        task_id="task-docs",
+        project="docs",
+        branch="docs/hermes",
+        pr_id="104",
+    )
+
+    result = tools.memory_session_search(
+        query="vector store recall",
+        project="hktmemory",
+        limit=10,
+    )
+    assert result["success"] is True
+    assert result["mode"] == "search"
+    assert result["count"] >= 1
+    assert result["results"][0]["session_id"] == "session-fix"
+    assert "vector store" in result["results"][0]["content"]
+
+
 # ---------------------------------------------------------------------------
 # memory_forget (soft delete semantics)
 # ---------------------------------------------------------------------------
@@ -303,8 +372,65 @@ def test_server_capabilities_version():
         tool_names = {t["name"] for t in caps["tools"]}
         assert "memory_cleanup" in tool_names
         required = {
-            "memory_store", "memory_recall", "memory_forget",
+            "memory_store", "memory_recall", "memory_orchestrate_recall", "memory_session_search", "memory_forget",
             "memory_restore", "memory_stats", "memory_list",
             "self_improvement_log", "self_improvement_extract_skill",
         }
         assert required <= tool_names
+
+
+def test_mcp_server_memory_session_search_tool(tmp_path):
+    from mcp.server import MemoryMCPServer
+
+    server = MemoryMCPServer(str(tmp_path / "memory"))
+    server.tools.layers.store_session_transcript(
+        content="之前这个问题怎么修过：先补 session transcript metadata",
+        session_id="session-history",
+        task_id="task-history",
+        project="hktmemory",
+        branch="feat/session-search",
+        pr_id="105",
+    )
+
+    response = server.handle_request(
+        {
+            "tool": "memory_session_search",
+            "params": {"query": "怎么修过", "project": "hktmemory", "limit": 5},
+        }
+    )
+
+    assert response["success"] is True
+    assert response["tool"] == "memory_session_search"
+    assert response["result"]["success"] is True
+    assert response["result"]["count"] >= 1
+
+
+def test_mcp_server_memory_orchestrate_recall_tool(tmp_path):
+    from mcp.server import MemoryMCPServer
+
+    server = MemoryMCPServer(str(tmp_path / "memory"))
+    server.tools.layers.store_session_transcript(
+        content="上次排查这个问题时，debug 模式优先回放 transcript，再看构建日志。",
+        session_id="session-orchestrator",
+        task_id="task-orchestrator",
+        project="hktmemory",
+        branch="feat/orchestrator",
+        pr_id="106",
+    )
+
+    response = server.handle_request(
+        {
+            "tool": "memory_orchestrate_recall",
+            "params": {
+                "query": "上次排查这个问题怎么做",
+                "mode": "debug",
+                "project": "hktmemory",
+                "limit": 5,
+            },
+        }
+    )
+
+    assert response["success"] is True
+    assert response["tool"] == "memory_orchestrate_recall"
+    assert response["result"]["success"] is True
+    assert response["result"]["sources"][0]["source"] == "session"

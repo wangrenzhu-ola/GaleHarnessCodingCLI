@@ -165,7 +165,7 @@ class MemoryLifecycleManager:
     def get_status(self, memory_id: str) -> str:
         entry = self._manifest.get(memory_id)
         if not entry:
-            return "active"
+            return "deleted"
         return entry.get("status", "active")
 
     def forget(self, memory_id: str, force: bool = False) -> Dict[str, Any]:
@@ -665,7 +665,7 @@ class MemoryLifecycleManager:
             "path": str(path),
             "error": str(error),
         }
-        print(f"⚠️ Lifecycle IO degraded during {operation}: {path} ({error})")
+        print(f"[WARN] Lifecycle IO degraded during {operation}: {path} ({error})")
 
     def _with_persistence_status(self, result: Dict[str, Any], persisted: bool) -> Dict[str, Any]:
         enriched = dict(result)

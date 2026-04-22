@@ -89,6 +89,31 @@ Before Phase 1, query the vector memory database for related execution context:
 
 <!-- /HKT-PATCH:phase-0.6 -->
 
+<!-- HKT-PATCH:phase-0.6b -->
+#### 0.6b HKTMemory Session Search
+
+In addition to vector retrieval, query related historical work session records:
+
+1. Build a search query from the current task title and skill name
+
+2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py session-search \
+     --query "<skill name: gh:work — task title or feature description>" \
+     --limit 5
+   ```
+
+3. If results returned, prepare a context block for later phases:
+   ```
+   ## Related Historical Work Sessions
+   Source: session record search. Supplementary context only, not primary evidence.
+   [results list]
+   ```
+
+4. If no results or command error, proceed silently without blocking Phase 1.
+
+<!-- /HKT-PATCH:phase-0.6b -->
+
 ### Phase 1: Quick Start
 
 1. **Read Plan and Clarify** _(skip if arriving from Phase 0 with a bare prompt)_
