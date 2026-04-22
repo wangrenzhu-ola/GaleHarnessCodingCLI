@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.13.0...cli-v1.13.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* remove command substitution from pre-resolved shell blocks ([#40](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/40)) ([41030e4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/41030e472849afba0e50306e913c103e190f0c83))
+
 ## [1.13.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.12.0...cli-v1.13.0) (2026-04-22)
 
 
