@@ -1,15 +1,15 @@
 # Windows Compatibility Scan Report
 
-Generated: 2026-04-22T03:40:19.294Z
+Generated: 2026-04-22T09:26:17.472Z
 
 ## Summary
 
 | Severity | Count |
 |----------|-------|
 | 🔴 Error | 91 |
-| 🟡 Warn  | 144 |
+| 🟡 Warn  | 146 |
 | ℹ️ Info  | 3 |
-| **Total** | **238** |
+| **Total** | **240** |
 
 **Bash scripts found:** 17
 
@@ -138,14 +138,14 @@ Generated: 2026-04-22T03:40:19.294Z
 - **Line:** `#!/bin/bash`
 - **Suggestion:** Windows PowerShell cannot execute bash scripts. Consider adding a PowerShell equivalent (.ps1) or using Bun/Node.js for cross-platform scripting.
 
-### plugins/galeharness-cli/skills/git-worktree/scripts/worktree-manager.sh:120
+### plugins/galeharness-cli/skills/git-worktree/scripts/worktree-manager.sh:126
 - **Rule:** `command-v`
 - **Line:** `if command -v mise &>/dev/null; then`
 - **Suggestion:** `command -v` is a bash builtin. On PowerShell use `Get-Command`. In Bun/Node.js use `which` from a cross-platform package.
 
 ### plugins/galeharness-cli/skills/git-worktree/scripts/worktree-manager.sh:139
 - **Rule:** `command-v`
-- **Line:** `if command -v direnv &>/dev/null; then`
+- **Line:** `if command -v direnv &>/dev/null && [[ -f "$worktree_path/.envrc" ]]; then`
 - **Suggestion:** `command -v` is a bash builtin. On PowerShell use `Get-Command`. In Bun/Node.js use `which` from a cross-platform package.
 
 ### plugins/galeharness-cli/skills/gh-polish-beta/scripts/resolve-port.sh:1
@@ -695,6 +695,11 @@ Generated: 2026-04-22T03:40:19.294Z
 - **Line:** `add on (verb), add-on (noun, adjective), back end (noun), back-end (adjective), `
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
+### plugins/galeharness-cli/skills/document-review/references/review-output-template.md:120
+- **Rule:** `source-bash`
+- **Line:** `- **Count invariant.** The `Findings` column in Coverage continues to equal Auto`
+- **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
+
 ### plugins/galeharness-cli/skills/gh-debug/SKILL.md:70
 - **Rule:** `source-bash`
 - **Line:** `Read the relevant source files. Follow the execution path from entry point to wh`
@@ -735,14 +740,19 @@ Generated: 2026-04-22T03:40:19.294Z
 - **Line:** `- **Findings organized by topic** with source channels and dates`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
-### plugins/galeharness-cli/skills/git-worktree/scripts/worktree-manager.sh:232
+### plugins/galeharness-cli/skills/git-worktree/scripts/worktree-manager.sh:62
+- **Rule:** `source-bash`
+- **Line:** `for source in "$GIT_ROOT"/.env*; do`
+- **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
+
+### plugins/galeharness-cli/skills/git-worktree/scripts/worktree-manager.sh:179
 - **Rule:** `mkdir-p`
 - **Line:** `mkdir -p "$WORKTREE_DIR"`
 - **Suggestion:** `mkdir -p` is a Unix idiom. In PowerShell use `New-Item -ItemType Directory -Force`. In Bun/Node.js use `fs.mkdirSync(dir, { recursive: true })`.
 
-### plugins/galeharness-cli/skills/git-worktree/SKILL.md:105
+### plugins/galeharness-cli/skills/git-worktree/SKILL.md:54
 - **Rule:** `source-bash`
-- **Line:** `- direnv auto-allow is skipped on non-trusted bases because `.envrc` can source `
+- **Line:** `- **Other branches** (feature branches, PR review branches): configs are compare`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
 ### plugins/galeharness-cli/skills/gh-compound/SKILL.md:268
@@ -770,7 +780,7 @@ Generated: 2026-04-22T03:40:19.294Z
 - **Line:** `- **Mermaid** (default) for simple flows — 5-15 nodes, no in-box annotations, st`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
-### plugins/galeharness-cli/skills/gh-brainstorm/SKILL.md:205
+### plugins/galeharness-cli/skills/gh-brainstorm/SKILL.md:212
 - **Rule:** `source-bash`
 - **Line:** `1. **Verify before claiming** — When the brainstorm touches checkable infrastruc`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
@@ -800,12 +810,12 @@ Generated: 2026-04-22T03:40:19.294Z
 - **Line:** `If multiple source documents match, ask which one to use using the platform's bl`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
-### plugins/galeharness-cli/skills/gh-plan/SKILL.md:129
+### plugins/galeharness-cli/skills/gh-plan/SKILL.md:130
 - **Rule:** `source-bash`
 - **Line:** `4. Use the source document as the primary input to planning and research`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
-### plugins/galeharness-cli/skills/gh-plan/SKILL.md:131
+### plugins/galeharness-cli/skills/gh-plan/SKILL.md:132
 - **Rule:** `source-bash`
 - **Line:** `6. Do not silently omit source content — if the origin document discussed it, th`
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
