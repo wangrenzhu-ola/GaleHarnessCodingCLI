@@ -14,6 +14,7 @@ import { convertClaudeToKimi } from "../converters/claude-to-kimi"
 import { convertClaudeToQoder } from "../converters/claude-to-qoder"
 import { convertClaudeToTrae } from "../converters/claude-to-trae"
 import { convertClaudeToCursor } from "../converters/claude-to-cursor"
+import { convertClaudeToKilo } from "../converters/claude-to-kilo"
 import { writeOpenCodeBundle } from "./opencode"
 import { writeCodexBundle } from "./codex"
 import { writeDroidBundle } from "./droid"
@@ -29,6 +30,7 @@ import { writeKimiBundle } from "./kimi"
 import { writeQoderBundle } from "./qoder"
 import { writeTraeBundle } from "./trae"
 import { writeCursorBundle } from "./cursor"
+import { writeKiloBundle } from "./kilo"
 
 export type TargetScope = "global" | "workspace"
 
@@ -159,5 +161,12 @@ export const targets: Record<string, TargetHandler> = {
     implemented: true,
     convert: convertClaudeToCursor as TargetHandler["convert"],
     write: writeCursorBundle as TargetHandler["write"],
+  },
+  kilo: {
+    name: "kilo",
+    implemented: true,
+    defaultScope: "workspace",
+    convert: convertClaudeToKilo as TargetHandler["convert"],
+    write: writeKiloBundle as TargetHandler["write"],
   },
 }

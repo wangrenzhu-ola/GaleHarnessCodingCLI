@@ -5,6 +5,7 @@ import { syncToCodex } from "./codex"
 import { syncToCopilot } from "./copilot"
 import { syncToDroid } from "./droid"
 import { syncToGemini } from "./gemini"
+import { syncToKilo } from "./kilo"
 import { syncToKimi } from "./kimi"
 import { syncToKiro } from "./kiro"
 import { syncToOpenClaw } from "./openclaw"
@@ -35,6 +36,7 @@ export type SyncTargetName =
   | "openclaw"
   | "kimi"
   | "qoder"
+  | "kilo"
 
 export type SyncTargetDefinition = {
   name: SyncTargetName
@@ -135,6 +137,16 @@ export const syncTargets: SyncTargetDefinition[] = [
     detectPaths: (home) => [path.join(home, ".qoder")],
     resolveOutputRoot: (home) => path.join(home, ".qoder"),
     sync: syncToQoder,
+  },
+  {
+    name: "kilo",
+    detectPaths: (home, cwd) => [
+      path.join(home, ".config", "kilo"),
+      path.join(home, ".kilo"),
+      path.join(cwd, ".kilo"),
+    ],
+    resolveOutputRoot: (home) => path.join(home, ".config", "kilo"),
+    sync: syncToKilo,
   },
 ]
 

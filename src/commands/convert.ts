@@ -25,7 +25,7 @@ export default defineCommand({
     to: {
       type: "string",
       default: "opencode",
-      description: "Target format (claude | opencode | codex | droid | cursor | pi | copilot | gemini | kiro | windsurf | openclaw | qwen | all)",
+      description: "Target format (claude | opencode | codex | droid | cursor | pi | copilot | gemini | kiro | windsurf | openclaw | qwen | kilo | all)",
     },
     output: {
       type: "string",
@@ -56,6 +56,11 @@ export default defineCommand({
       type: "string",
       alias: "qwen-home",
       description: "Write Qwen output to this Qwen extensions root (ex: ~/.qwen/extensions)",
+    },
+    kiloHome: {
+      type: "string",
+      alias: "kilo-home",
+      description: "Write Kilo output to this Kilo root (ex: ~/.kilo)",
     },
     scope: {
       type: "string",
@@ -98,6 +103,7 @@ export default defineCommand({
     const openclawHome = resolveTargetHome(args.openclawHome, path.join(os.homedir(), ".openclaw", "extensions"))
     const qwenHome = resolveTargetHome(args.qwenHome, path.join(os.homedir(), ".qwen", "extensions"))
     const qoderHome = resolveTargetHome(args.qoderHome, path.join(os.homedir(), ".qoder"))
+    const kiloHome = resolveTargetHome(args.kiloHome, path.join(os.homedir(), ".kilo"))
 
     const options: ClaudeToOpenCodeOptions = {
       agentMode: String(args.agentMode) === "primary" ? "primary" : "subagent",
@@ -139,6 +145,7 @@ export default defineCommand({
           openclawHome,
           qwenHome,
           qoderHome,
+          kiloHome,
           pluginName: plugin.manifest.name,
           plugin,
           hasExplicitOutput,
@@ -173,6 +180,7 @@ export default defineCommand({
       openclawHome,
       qwenHome,
       qoderHome,
+      kiloHome,
       pluginName: plugin.manifest.name,
       plugin,
       hasExplicitOutput,
@@ -212,6 +220,7 @@ export default defineCommand({
         openclawHome,
         qwenHome,
         qoderHome,
+        kiloHome,
         pluginName: plugin.manifest.name,
         plugin,
         hasExplicitOutput,

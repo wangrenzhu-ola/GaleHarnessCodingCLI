@@ -607,6 +607,81 @@ describe("CLI", () => {
     expect(json.permission).not.toBeNull()
   })
 
+  test("convert supports --kilo-home for kilo output", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-kilo-home-"))
+    const kiloRoot = path.join(tempRoot, ".kilo")
+    const fixtureRoot = path.join(import.meta.dir, "fixtures", "sample-plugin")
+
+    const proc = Bun.spawn([
+      "bun",
+      "run",
+      "src/index.ts",
+      "convert",
+      fixtureRoot,
+      "--to",
+      "kilo",
+      "--kilo-home",
+      kiloRoot,
+    ], {
+      cwd: path.join(import.meta.dir, ".."),
+      stdout: "pipe",
+      stderr: "pipe",
+    })
+
+    const exitCode = await proc.exited
+    const stdout = await new Response(proc.stdout).text()
+    const stderr = await new Response(proc.stderr).text()
+
+    if (exitCode !== 0) {
+      throw new Error(`CLI failed (exit ${exitCode}).\nstdout: ${stdout}\nstderr: ${stderr}`)
+    }
+
+    expect(stdout).toContain("Converted galeharness-cli")
+    expect(stdout).toContain(kiloRoot)
+    expect(await exists(path.join(kiloRoot, "agents", "repo-research-analyst.md"))).toBe(true)
+    expect(await exists(path.join(kiloRoot, "command", "workflows-review.md"))).toBe(true)
+    expect(await exists(path.join(kiloRoot, "skills", "skill-one", "SKILL.md"))).toBe(true)
+  })
+
+  test("install supports --also with kilo output", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-also-kilo-"))
+    const fixtureRoot = path.join(import.meta.dir, "fixtures", "sample-plugin")
+    const kiloRoot = path.join(tempRoot, ".kilo")
+
+    const proc = Bun.spawn([
+      "bun",
+      "run",
+      "src/index.ts",
+      "install",
+      fixtureRoot,
+      "--to",
+      "opencode",
+      "--also",
+      "kilo",
+      "--kilo-home",
+      kiloRoot,
+      "--output",
+      tempRoot,
+    ], {
+      cwd: path.join(import.meta.dir, ".."),
+      stdout: "pipe",
+      stderr: "pipe",
+    })
+
+    const exitCode = await proc.exited
+    const stdout = await new Response(proc.stdout).text()
+    const stderr = await new Response(proc.stderr).text()
+
+    if (exitCode !== 0) {
+      throw new Error(`CLI failed (exit ${exitCode}).\nstdout: ${stdout}\nstderr: ${stderr}`)
+    }
+
+    expect(stdout).toContain("Installed galeharness-cli")
+    expect(stdout).toContain(kiloRoot)
+    expect(await exists(path.join(kiloRoot, "agents", "repo-research-analyst.md"))).toBe(true)
+    expect(await exists(path.join(kiloRoot, "skills", "skill-one", "SKILL.md"))).toBe(true)
+  })
+
   test("sync --target all detects new sync targets and ignores stale cursor directories", async () => {
     const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "cli-sync-home-"))
     const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "cli-sync-cwd-"))
@@ -653,6 +728,7 @@ describe("CLI", () => {
     await fs.mkdir(path.join(tempHome, ".openclaw"), { recursive: true })
     await fs.mkdir(path.join(tempHome, ".kimi"), { recursive: true })
     await fs.mkdir(path.join(tempHome, ".qoder"), { recursive: true })
+    await fs.mkdir(path.join(tempHome, ".config", "kilo"), { recursive: true })
     await fs.mkdir(path.join(tempCwd, ".cursor"), { recursive: true })
 
     const proc = Bun.spawn([
@@ -692,6 +768,7 @@ describe("CLI", () => {
     expect(stdout).toContain("Synced to gemini")
     expect(stdout).toContain("Synced to kimi")
     expect(stdout).toContain("Synced to qoder")
+    expect(stdout).toContain("Synced to kilo")
     expect(stdout).not.toContain("cursor")
 
     expect(await exists(path.join(tempHome, ".config", "opencode", "commands", "workflows", "plan.md"))).toBe(true)
@@ -711,5 +788,7 @@ describe("CLI", () => {
     expect(await exists(path.join(tempHome, ".gemini", "settings.json"))).toBe(true)
     expect(await exists(path.join(tempHome, ".gemini", "commands", "workflows", "plan.toml"))).toBe(true)
     expect(await exists(path.join(tempHome, ".openclaw", "skills", "skill-one"))).toBe(true)
+    expect(await exists(path.join(tempHome, ".config", "kilo", "command", "workflows-plan.md"))).toBe(true)
+    expect(await exists(path.join(tempHome, ".config", "kilo", "kilo.json"))).toBe(true)
   })
 })

@@ -156,4 +156,27 @@ describe("resolveTargetOutputRoot", () => {
     })
     expect(result).toBe("/custom/trae")
   })
+
+  test("kilo defaults to cwd/.kilo", () => {
+    const result = resolveTargetOutputRoot({ ...baseOptions, targetName: "kilo" })
+    expect(result).toBe(path.join(process.cwd(), ".kilo"))
+  })
+
+  test("kilo with explicit output uses outputRoot/.kilo", () => {
+    const result = resolveTargetOutputRoot({
+      ...baseOptions,
+      targetName: "kilo",
+      hasExplicitOutput: true,
+    })
+    expect(result).toBe("/tmp/output/.kilo")
+  })
+
+  test("kilo with kiloHome override", () => {
+    const result = resolveTargetOutputRoot({
+      ...baseOptions,
+      targetName: "kilo",
+      kiloHome: "/custom/kilo",
+    })
+    expect(result).toBe("/custom/kilo")
+  })
 })

@@ -6,6 +6,7 @@ import { convertClaudeToCodex } from "../converters/claude-to-codex"
 import { convertClaudeToCopilot } from "../converters/claude-to-copilot"
 import { convertClaudeToDroid } from "../converters/claude-to-droid"
 import { convertClaudeToGemini } from "../converters/claude-to-gemini"
+import { convertClaudeToKilo } from "../converters/claude-to-kilo"
 import { convertClaudeToKiro } from "../converters/claude-to-kiro"
 import { convertClaudeToOpenCode, type ClaudeToOpenCodeOptions } from "../converters/claude-to-opencode"
 import { convertClaudeToPi } from "../converters/claude-to-pi"
@@ -148,6 +149,19 @@ export async function syncKiroCommands(
   const bundle = convertClaudeToKiro(plugin, DEFAULT_SYNC_OPTIONS)
   for (const skill of bundle.generatedSkills) {
     await writeText(path.join(outputRoot, "skills", sanitizePathName(skill.name), "SKILL.md"), skill.content + "\n")
+  }
+}
+
+export async function syncKiloCommands(
+  config: ClaudeHomeConfig,
+  outputRoot: string,
+): Promise<void> {
+  if (!hasCommands(config)) return
+
+  const plugin = buildClaudeHomePlugin(config)
+  const bundle = convertClaudeToKilo(plugin, DEFAULT_SYNC_OPTIONS)
+  for (const cmd of bundle.commandFiles) {
+    await writeText(path.join(outputRoot, "command", `${sanitizePathName(cmd.name)}.md`), cmd.content + "\n")
   }
 }
 
