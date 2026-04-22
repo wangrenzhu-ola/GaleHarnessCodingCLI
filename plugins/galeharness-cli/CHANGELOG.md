@@ -9,6 +9,13 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.13.0...galeharness-cli-v1.13.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* remove command substitution from pre-resolved shell blocks ([#40](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/40)) ([41030e4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/41030e472849afba0e50306e913c103e190f0c83))
+
 ## [1.13.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.12.0...galeharness-cli-v1.13.0) (2026-04-22)
 
 
