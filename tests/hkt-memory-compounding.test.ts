@@ -74,12 +74,14 @@ function extractPhaseContext(content: string, patchName: string): string {
 
 function extractBashBlock(content: string, subcommand: "retrieve" | "store" | "session-search"): string | null {
   // Closing ``` may be indented (e.g. "    ````") so we use \s* in the trailing part
+  // Matches both the new `hkt-memory` command and the legacy `hkt_memory_v5.py` path
+  const hktCmd = /(?:hkt-memory|uv run [^\s]+hkt_memory_v5\.py)/
   const pattern =
     subcommand === "retrieve"
-      ? /```bash\s*\n([\s\S]*?hkt_memory_v5\.py retrieve[\s\S]*?)\n\s*```/
+      ? new RegExp("```bash\\s*\\n([\\s\\S]*?" + hktCmd.source + " retrieve[\\s\\S]*?)\\n\\s*```")
       : subcommand === "store"
-        ? /```bash\s*\n([\s\S]*?hkt_memory_v5\.py store[\s\S]*?)\n\s*```/
-        : /```bash\s*\n([\s\S]*?hkt_memory_v5\.py session-search[\s\S]*?)\n\s*```/
+        ? new RegExp("```bash\\s*\\n([\\s\\S]*?" + hktCmd.source + " store[\\s\\S]*?)\\n\\s*```")
+        : new RegExp("```bash\\s*\\n([\\s\\S]*?" + hktCmd.source + " session-search[\\s\\S]*?)\\n\\s*```")
   const match = content.match(pattern)
   return match ? match[1].trim() : null
 }

@@ -47,7 +47,7 @@ jobs:
           for file in \${{ steps.changes.outputs.files }}; do
             if [ -f "$file" ]; then
               echo "Indexing: $file"
-              uv run vendor/hkt-memory/scripts/hkt_memory_v5.py ingest-artifact --content-file "$file" --source-mode governed --artifact-type spec --title "$file"
+              hkt-memory ingest-artifact --content-file "$file" --source-mode governed --artifact-type spec --title "$file"
             fi
           done
 

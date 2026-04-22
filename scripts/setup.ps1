@@ -376,7 +376,7 @@ if ($CI_MODE) {
   gale-knowledge resolve-path --type solutions
     -> 期望: 输出全局知识仓库路径
 
-  uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats
+  hkt-memory stats
     -> 期望: HKTMemory 统计信息
 
   bun test

@@ -47,11 +47,46 @@ else
 fi
 
 echo
+echo "Installing hkt-memory wrapper to PATH..."
+
+# Determine vendor root (install.sh lives in vendor/hkt-memory/)
+VENDOR_ROOT="$(cd "$(dirname "$0")" && pwd)"
+WRAPPER="$VENDOR_ROOT/bin/hkt-memory"
+
+if [ ! -f "$WRAPPER" ]; then
+  echo "⚠ Wrapper script not found at $WRAPPER, skipping PATH install"
+else
+  # Prefer ~/.bun/bin (Bun), then ~/.local/bin (XDG), then ~/bin
+  INSTALL_DIR=""
+  for candidate in "$HOME/.bun/bin" "$HOME/.local/bin" "$HOME/bin"; do
+    if [ -d "$candidate" ] && echo "$PATH" | grep -q "$candidate"; then
+      INSTALL_DIR="$candidate"
+      break
+    fi
+  done
+
+  if [ -z "$INSTALL_DIR" ]; then
+    # Default to ~/.local/bin and create it
+    INSTALL_DIR="$HOME/.local/bin"
+    mkdir -p "$INSTALL_DIR"
+    echo "  Created $INSTALL_DIR — add it to PATH if not already present"
+  fi
+
+  ln -sf "$WRAPPER" "$INSTALL_DIR/hkt-memory"
+  echo "✓ hkt-memory -> $INSTALL_DIR/hkt-memory"
+
+  if ! command -v hkt-memory >/dev/null 2>&1; then
+    echo "  Note: 'hkt-memory' not yet on PATH. Restart your shell or run:"
+    echo "    export PATH=\"$INSTALL_DIR:\$PATH\""
+  fi
+fi
+
+echo
 echo "======================================"
 echo "Installation Complete"
 echo "======================================"
 echo
 echo "Quick start:"
-echo "  uv run scripts/hkt_memory_v5.py store --content 'Test memory' --title 'Test' --layer all"
-echo "  uv run scripts/hkt_memory_v5.py retrieve --query 'test' --layer all"
-echo "  uv run scripts/hkt_memory_v5.py stats"
+echo "  hkt-memory store --content 'Test memory' --title 'Test' --layer all"
+echo "  hkt-memory retrieve --query 'test' --layer all"
+echo "  hkt-memory stats"

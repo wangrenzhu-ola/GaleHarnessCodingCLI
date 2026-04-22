@@ -194,7 +194,7 @@ Before Phase 1, query the vector memory database for related plans and requireme
 
 2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+   hkt-memory retrieve \
      --query "<extracted query>" \
      --layer all --limit 10 --min-similarity 0.35 \
      --vector-weight 0.7 --bm25-weight 0.3
@@ -893,7 +893,7 @@ After the plan file is finalized and document review has run:
 2. Extract `title` and `type` values from its YAML frontmatter
 3. Run:
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
+   hkt-memory store \
      --content "<summary + repo-relative file path>" \
      --title "<frontmatter title>" \
      --topic "<frontmatter type or 'plan'>" \

@@ -316,7 +316,7 @@ ${BOLD}  自检清单 — 配置生效后，依次运行以下命令验证:${NC}
   ${CYAN}gale-knowledge resolve-path --type solutions${NC}
     → 期望: 输出全局知识仓库路径
 
-  ${CYAN}uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats${NC}
+  ${CYAN}hkt-memory stats${NC}
     → 期望: HKTMemory 统计信息
 
   ${CYAN}bun test${NC}

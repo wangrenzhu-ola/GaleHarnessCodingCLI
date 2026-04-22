@@ -61,7 +61,7 @@ Before Phase 1, query the vector memory database for related bugs and debug expe
 1. Extract a 1-2 sentence search query from: the bug description, error messages, component names, symptoms observed
 2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+   hkt-memory retrieve \
      --query "<extracted query>" \
      --layer all --limit 10 --min-similarity 0.35 \
      --vector-weight 0.7 --bm25-weight 0.3
@@ -89,7 +89,7 @@ In addition to vector retrieval, query related historical debug session records:
 
 2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py session-search \
+   hkt-memory session-search \
      --query "<error message or bug description summary>" \
      --limit 5
    ```
@@ -239,7 +239,7 @@ After successfully fixing the bug (or completing diagnosis if Phase 3 was skippe
 1. Compose a concise summary (2-4 sentences) covering: the bug, the root cause, the fix applied, and key file paths involved
 2. Run:
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
+   hkt-memory store \
      --content "<summary with repo-relative file paths>" \
      --title "<bug title or short description>" \
      --topic "debug" \

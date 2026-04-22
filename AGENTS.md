@@ -37,7 +37,7 @@ HKT_MEMORY_MODEL=embedding-3
 
 Quick test:
 ```bash
-uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats
+hkt-memory stats
 ```
 
 ### SKILL Naming

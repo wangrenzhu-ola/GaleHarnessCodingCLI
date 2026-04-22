@@ -59,7 +59,7 @@ describe("setupCi", () => {
     expect(content).toContain("astral-sh/setup-uv@v3")
     expect(content).toContain("github.event.before")
     expect(content).toContain("HKT_MEMORY_API_KEY")
-    expect(content).toContain("hkt_memory_v5.py ingest-artifact")
+    expect(content).toContain("hkt-memory ingest-artifact")
     expect(content).toContain(".last-rebuild-commit")
   })
 

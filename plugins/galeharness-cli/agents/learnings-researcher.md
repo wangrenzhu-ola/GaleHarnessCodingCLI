@@ -13,7 +13,7 @@ You are an expert institutional knowledge researcher specializing in efficiently
 Before any grep operations, retrieve semantically relevant memories from the vector database:
 
 ```bash
-uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+hkt-memory retrieve \
   --query "<feature/task description in 1-2 sentences>" \
   --layer all --limit 10 --min-similarity 0.35 \
   --vector-weight 0.7 --bm25-weight 0.3

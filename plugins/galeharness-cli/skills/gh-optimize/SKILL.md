@@ -236,7 +236,7 @@ Before searching prior learnings, query the vector memory database for related o
 1. Extract a 1-2 sentence search query from: the optimization goal, target metric, component names, approach being considered
 2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py retrieve \
+   hkt-memory retrieve \
      --query "<extracted query>" \
      --layer all --limit 10 --min-similarity 0.35 \
      --vector-weight 0.7 --bm25-weight 0.3
@@ -693,7 +693,7 @@ After the wrap-up summary is presented:
 1. Compose a concise summary (2-4 sentences) covering: the optimization goal, the winning strategy, key metric improvements (baseline -> final), and the spec name
 2. Run:
    ```bash
-   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py store \
+   hkt-memory store \
      --content "<summary with key metrics>" \
      --title "<spec-name> optimization" \
      --topic "optimize" \

@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# hkt-memory — Path-resolving wrapper for vendor/hkt-memory/scripts/hkt_memory_v5.py
+#
+# Problem: Skills reference `uv run vendor/hkt-memory/scripts/hkt_memory_v5.py`,
+# which only works when CWD is the GaleHarnessCodingCLI repo root.  This wrapper
+# locates the script through multiple strategies and forwards all arguments.
+#
+# Search order:
+#   1. Relative to git repo root (vendor/hkt-memory/scripts/hkt_memory_v5.py)
+#   2. Relative to this script's own location (../scripts/hkt_memory_v5.py)
+#   3. Absolute path via HKT_MEMORY_SCRIPT env var
+#   4. System PATH lookup (hkt_memory_v5.py as a standalone command)
+#
+# Exit codes:
+#   0  — command succeeded
+#   1  — command failed (passed through from hkt_memory_v5.py)
+#   2  — script not found
+
+set -euo pipefail
+
+# --- Locate hkt_memory_v5.py ---
+hkt_script=""
+
+# Strategy 1: Git repo root + vendor path
+if repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+  candidate="$repo_root/vendor/hkt-memory/scripts/hkt_memory_v5.py"
+  if [ -f "$candidate" ]; then
+    hkt_script="$candidate"
+  fi
+fi
+
+# Strategy 2: Relative to this wrapper's own location
+if [ -z "$hkt_script" ]; then
+  # Resolve symlink if needed
+  self="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+  if [ -L "$self" ]; then
+    self="$(readlink "$self")"
+    # If readlink gives a relative path, resolve it
+    if [ "${self:0:1}" != "/" ]; then
+      self="$(cd "$(dirname "$0")" && pwd)/$self"
+    fi
+  fi
+  candidate="$(dirname "$(dirname "$self")")/scripts/hkt_memory_v5.py"
+  if [ -f "$candidate" ]; then
+    hkt_script="$candidate"
+  fi
+fi
+
+# Strategy 3: Explicit env var
+if [ -z "$hkt_script" ] && [ -n "${HKT_MEMORY_SCRIPT:-}" ]; then
+  if [ -f "$HKT_MEMORY_SCRIPT" ]; then
+    hkt_script="$HKT_MEMORY_SCRIPT"
+  fi
+fi
+
+# Strategy 4: System PATH
+if [ -z "$hkt_script" ]; then
+  if command -v hkt_memory_v5.py >/dev/null 2>&1; then
+    hkt_script="$(command -v hkt_memory_v5.py)"
+  fi
+fi
+
+# --- Not found ---
+if [ -z "$hkt_script" ]; then
+  echo "Warning: hkt-memory: hkt_memory_v5.py not found. Searched:" >&2
+  echo "  1. Git repo root vendor/ path" >&2
+  echo "  2. Relative to wrapper script" >&2
+  echo "  3. HKT_MEMORY_SCRIPT env var" >&2
+  echo "  4. System PATH" >&2
+  echo "Install via: bash vendor/hkt-memory/install.sh" >&2
+  exit 2
+fi
+
+# --- Execute ---
+if command -v uv >/dev/null 2>&1; then
+  exec uv run "$hkt_script" "$@"
+else
+  exec python3 "$hkt_script" "$@"
+fi

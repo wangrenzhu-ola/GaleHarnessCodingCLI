@@ -463,7 +463,7 @@ uv --version                     # 期望: uv x.x.x
 gale-harness --help              # 期望: 显示 CLI 帮助
 gale-knowledge init              # 初始化知识仓库
 gale-knowledge resolve-home      # 期望: ~/.galeharness/knowledge/
-uv run vendor/hkt-memory/scripts/hkt_memory_v5.py stats  # 期望: 统计信息
+hkt-memory stats                   # 期望: 统计信息
 bun test                         # 期望: 测试通过
 ```
 

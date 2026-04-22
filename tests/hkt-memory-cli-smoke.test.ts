@@ -380,7 +380,7 @@ describe("HKTMemory CLI Smoke Tests", () => {
       expect(typeof available).toBe("boolean")
     })
 
-    test("HKT script exists at vendor/hkt-memory/scripts/hkt_memory_v5.py", async () => {
+    test("HKT script exists (vendor/hkt-memory/scripts/hkt_memory_v5.py)", async () => {
       const present = await isHktScriptPresent()
       expect(present).toBe(true)
     })
