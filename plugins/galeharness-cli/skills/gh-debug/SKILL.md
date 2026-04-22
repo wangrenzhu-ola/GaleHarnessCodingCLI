@@ -80,6 +80,31 @@ Before Phase 1, query the vector memory database for related bugs and debug expe
 - Past debugging strategies for comparable symptoms
 <!-- /HKT-PATCH:phase-0.4 -->
 
+<!-- HKT-PATCH:phase-0.4b -->
+#### 0.4b HKTMemory Session Search
+
+在向量检索之外，查询相关的历史调试会话记录：
+
+1. 从当前错误信息、bug 描述或调试目标构建搜索查询
+
+2. 运行（需要环境变量 HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL）：
+   ```bash
+   uv run vendor/hkt-memory/scripts/hkt_memory_v5.py session_search \
+     --query "<错误信息或 bug 描述摘要>" \
+     --limit 5
+   ```
+
+3. 如果返回结果，准备上下文块供 triage 阶段参考：
+   ```
+   ## 历史调试会话记录
+   来源：会话记录搜索。辅助 root cause 分析的补充上下文。
+   [结果列表]
+   ```
+
+4. 如果无结果或命令报错，静默继续，不阻塞后续 triage。
+
+<!-- /HKT-PATCH:phase-0.4b -->
+
 Then proceed to Phase 1.
 
 **Everything else** (stack traces, test paths, error messages, descriptions of broken behavior): Proceed directly to Phase 1.

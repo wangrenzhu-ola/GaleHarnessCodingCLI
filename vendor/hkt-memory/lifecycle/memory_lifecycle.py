@@ -165,7 +165,7 @@ class MemoryLifecycleManager:
     def get_status(self, memory_id: str) -> str:
         entry = self._manifest.get(memory_id)
         if not entry:
-            return "active"
+            return "deleted"
         return entry.get("status", "active")
 
     def forget(self, memory_id: str, force: bool = False) -> Dict[str, Any]:

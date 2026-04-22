@@ -65,15 +65,18 @@ def _capture(layers, session_id: str, topic: str, cfg: dict):
     if len(content) > max_chars:
         content = content[:max_chars]
 
-    scope = f"session:{session_id}"
-    result = layers.store(
+    result = layers.store_session_transcript(
         content=content,
-        title="",
+        session_id=session_id,
         topic=topic,
-        layer="L2",
-        metadata={"scope": scope, "source": "auto_capture"},
-        auto_extract=False,
+        task_id=os.environ.get("HKT_TASK_ID"),
+        project=os.environ.get("HKT_PROJECT"),
+        branch=os.environ.get("HKT_BRANCH"),
+        pr_id=os.environ.get("HKT_PR_ID"),
+        source="auto_capture",
+        source_mode=os.environ.get("HKT_SOURCE_MODE", "direct"),
     )
+
     # 将 filter 信息写到 stderr 供调试
     if result.get("filtered"):
         sys.stderr.write(f"[auto_capture] filtered: {result.get('reason')}\n")

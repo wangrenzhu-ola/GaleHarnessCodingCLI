@@ -9,6 +9,7 @@ Layer Manager v5.0 - 自动分层存储
 """
 
 import sys
+import json
 import re
 import hashlib
 from pathlib import Path
@@ -32,7 +33,9 @@ from filters.noise_filter import NoiseFilter
 from graph.entity_index import EntityIndex
 from retrieval.intent import detect_intent
 from retrieval.expansion import expand_query
+from retrieval.bm25_index import BM25Index
 from retrieval.dedup import dedup_results, compiled_truth_guarantee
+from runtime.safety import MemorySafetyGate
 
 
 class LayerManagerV5:
@@ -81,7 +84,17 @@ class LayerManagerV5:
         self.learnings = LearningTracker(self.base_path / "governance")
         self.errors = ErrorTracker(self.base_path / "governance")
         self.noise_filter = NoiseFilter()
+        self.safety_gate = MemorySafetyGate(
+            self.config.get("automation", {}).get("safety", {})
+        )
         self.entity_index = EntityIndex(self.base_path / "entity_index.db")
+        self.session_transcript_index = None
+        self._session_transcript_index_error: Optional[str] = None
+        try:
+            self.session_transcript_index = BM25Index(str(self.base_path / "session_transcript_index.db"))
+        except Exception as e:
+            self._session_transcript_index_error = str(e)
+            print(f"⚠️ Session transcript index unavailable: {e}")
         
         # 触发器（延迟加载，避免循环导入）
         self._trigger = None
@@ -192,6 +205,364 @@ class LayerManagerV5:
             if metadata.get("artifact_ingest_key") == dedupe_key:
                 return memory_id
         return None
+
+    def _session_transcript_index_available(self) -> bool:
+        return self.session_transcript_index is not None
+
+    def _build_session_transcript_index_content(self, entry: Dict[str, Any]) -> str:
+        metadata = entry.get("metadata", {}) or {}
+        searchable_metadata = {
+            "session_id": self._extract_session_field(entry, "session_id"),
+            "task_id": self._extract_session_field(entry, "task_id"),
+            "project": self._extract_session_field(entry, "project"),
+            "branch": self._extract_session_field(entry, "branch"),
+            "pr_id": self._extract_session_field(entry, "pr_id"),
+            "scope": entry.get("scope") or metadata.get("scope"),
+            "source": metadata.get("source"),
+            "source_mode": metadata.get("source_mode"),
+        }
+        return "\n".join(
+            [
+                str(entry.get("title", "")),
+                str(entry.get("content", "")),
+                json.dumps(searchable_metadata, ensure_ascii=False),
+            ]
+        )
+
+    def _sync_session_transcript_index_entry(self, entry: Optional[Dict[str, Any]]) -> bool:
+        if not self._session_transcript_index_available() or not entry or not self._is_session_transcript_entry(entry):
+            return False
+        metadata = entry.get("metadata", {}) or {}
+        return bool(
+            self.session_transcript_index.add_document(
+                doc_id=str(entry.get("id")),
+                content=self._build_session_transcript_index_content(entry),
+                metadata={
+                    "session_id": self._extract_session_field(entry, "session_id"),
+                    "task_id": self._extract_session_field(entry, "task_id"),
+                    "project": self._extract_session_field(entry, "project"),
+                    "branch": self._extract_session_field(entry, "branch"),
+                    "pr_id": self._extract_session_field(entry, "pr_id"),
+                    "scope": entry.get("scope") or metadata.get("scope"),
+                    "title": entry.get("title"),
+                    "timestamp": entry.get("timestamp"),
+                },
+                scope=str(entry.get("scope") or metadata.get("scope") or "global"),
+                agent_id=self._extract_session_field(entry, "session_id"),
+                project_id=self._extract_session_field(entry, "project"),
+            )
+        )
+
+    def _remove_session_transcript_index_entry(self, memory_id: Optional[str]) -> bool:
+        if not self._session_transcript_index_available() or not memory_id:
+            return False
+        return bool(self.session_transcript_index.delete_document(str(memory_id)))
+
+    def _sync_session_transcript_index_memory(self, memory_id: Optional[str], include_archived: bool = False) -> bool:
+        if not self._session_transcript_index_available() or not memory_id:
+            return False
+        entry = self.l2.get_entry(str(memory_id))
+        if not entry or not self._is_session_transcript_entry(entry):
+            return self._remove_session_transcript_index_entry(memory_id)
+        if not self.lifecycle.is_visible(str(memory_id), include_archived=include_archived):
+            return self._remove_session_transcript_index_entry(memory_id)
+        return self._sync_session_transcript_index_entry(entry)
+
+    def _rebuild_session_transcript_index(self, include_archived: bool = False) -> Dict[str, Any]:
+        if not self._session_transcript_index_available():
+            return {
+                "enabled": False,
+                "success": False,
+                "error": self._session_transcript_index_error or "session transcript index unavailable",
+            }
+        if not self.session_transcript_index.reset():
+            return {
+                "enabled": True,
+                "success": False,
+                "error": "failed to reset session transcript index",
+            }
+        entries = [
+            entry
+            for entry in self.l2.iter_entries(scope="all")
+            if self._is_session_transcript_entry(entry)
+            and self.lifecycle.is_visible(entry.get("id"), include_archived=include_archived)
+        ]
+        indexed = 0
+        failed: List[str] = []
+        for entry in entries:
+            if self._sync_session_transcript_index_entry(entry):
+                indexed += 1
+            else:
+                failed.append(str(entry.get("id")))
+        return {
+            "enabled": True,
+            "success": not failed,
+            "source_entries": len(entries),
+            "indexed": indexed,
+            "failed": failed,
+            "include_archived": include_archived,
+            "stats": self.session_transcript_index.get_stats(),
+        }
+
+    def store_session_transcript(
+        self,
+        content: str,
+        session_id: str,
+        title: str = "",
+        topic: str = "session",
+        task_id: Optional[str] = None,
+        project: Optional[str] = None,
+        branch: Optional[str] = None,
+        pr_id: Optional[str] = None,
+        source: str = "auto_capture",
+        source_mode: str = "direct",
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, str]:
+        safety_analysis = self.safety_gate.sanitize_for_storage(content)
+        transcript_metadata = dict(metadata or {})
+        transcript_metadata.update(
+            {
+                "scope": transcript_metadata.get("scope") or f"session:{session_id}",
+                "artifact_type": "session_transcript",
+                "session_id": session_id,
+                "task_id": task_id,
+                "project": project,
+                "branch": branch,
+                "pr_id": pr_id,
+                "source": source,
+                "source_mode": source_mode,
+                "safety": self.safety_gate.summarize_for_metadata(safety_analysis),
+            }
+        )
+        result = self.store(
+            content=safety_analysis["content"],
+            title=title or f"Session transcript: {session_id}",
+            layer="L2",
+            topic=topic,
+            metadata=transcript_metadata,
+            auto_extract=False,
+        )
+        result["safety"] = transcript_metadata["safety"]
+        result["redacted_before_store"] = bool(safety_analysis.get("redactions"))
+        return result
+
+    def _is_session_transcript_entry(self, entry: Dict[str, Any]) -> bool:
+        metadata = entry.get("metadata", {}) or {}
+        scope = str(entry.get("scope") or metadata.get("scope") or "")
+        if metadata.get("artifact_type") == "session_transcript":
+            return True
+        if metadata.get("source") == "auto_capture" and scope.startswith("session:"):
+            return True
+        return False
+
+    def _extract_session_field(self, entry: Dict[str, Any], field: str) -> Optional[str]:
+        metadata = entry.get("metadata", {}) or {}
+        value = entry.get(field)
+        if value in (None, ""):
+            value = metadata.get(field)
+        if value in (None, "") and field == "session_id":
+            scope = str(entry.get("scope") or metadata.get("scope") or "")
+            if scope.startswith("session:"):
+                value = scope.split(":", 1)[1]
+        if value in (None, ""):
+            return None
+        return str(value)
+
+    def _matches_session_filters(
+        self,
+        entry: Dict[str, Any],
+        session_id: Optional[str] = None,
+        task_id: Optional[str] = None,
+        project: Optional[str] = None,
+        branch: Optional[str] = None,
+        pr_id: Optional[str] = None,
+    ) -> bool:
+        filters = {
+            "session_id": session_id,
+            "task_id": task_id,
+            "project": project,
+            "branch": branch,
+            "pr_id": pr_id,
+        }
+        for field, expected in filters.items():
+            if expected in (None, ""):
+                continue
+            if self._extract_session_field(entry, field) != str(expected):
+                return False
+        return True
+
+    def _build_recent_session_results(self, entries: List[Dict[str, Any]], limit: int) -> List[Dict[str, Any]]:
+        grouped: Dict[str, Dict[str, Any]] = {}
+        for entry in entries:
+            resolved_session_id = self._extract_session_field(entry, "session_id") or entry.get("id")
+            timestamp = str(entry.get("timestamp") or "")
+            existing = grouped.get(resolved_session_id)
+            if existing is None or timestamp > existing["latest_timestamp"]:
+                entry_count = (existing or {}).get("entry_count", 0) + 1
+                grouped[resolved_session_id] = {
+                    "session_id": resolved_session_id,
+                    "scope": entry.get("scope") or f"session:{resolved_session_id}",
+                    "task_id": self._extract_session_field(entry, "task_id"),
+                    "project": self._extract_session_field(entry, "project"),
+                    "branch": self._extract_session_field(entry, "branch"),
+                    "pr_id": self._extract_session_field(entry, "pr_id"),
+                    "latest_timestamp": timestamp,
+                    "latest_memory_id": entry.get("id"),
+                    "summary": str(entry.get("content", ""))[:240],
+                    "title": entry.get("title"),
+                    "entry_count": entry_count,
+                    "metadata": entry.get("metadata", {}),
+                }
+            else:
+                existing["entry_count"] += 1
+        results = sorted(grouped.values(), key=lambda item: item.get("latest_timestamp", ""), reverse=True)
+        return results[:limit]
+
+    def session_search(
+        self,
+        query: str = "",
+        limit: int = 5,
+        session_id: Optional[str] = None,
+        task_id: Optional[str] = None,
+        project: Optional[str] = None,
+        branch: Optional[str] = None,
+        pr: Optional[str] = None,
+        pr_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        resolved_pr_id = pr_id or pr
+        session_entries: List[Dict[str, Any]] = []
+        for entry in self.l2.iter_entries(scope="all"):
+            memory_id = entry.get("id")
+            if memory_id and not self.lifecycle.is_visible(memory_id):
+                continue
+            if not self._is_session_transcript_entry(entry):
+                continue
+            if not self._matches_session_filters(
+                entry,
+                session_id=session_id,
+                task_id=task_id,
+                project=project,
+                branch=branch,
+                pr_id=resolved_pr_id,
+            ):
+                continue
+            session_entries.append(entry)
+        session_entries_by_id = {
+            str(entry.get("id")): entry
+            for entry in session_entries
+            if entry.get("id")
+        }
+
+        normalized_query = (query or "").strip()
+        if not normalized_query:
+            recent_results = self._build_recent_session_results(session_entries, limit)
+            touched_ids = [item["latest_memory_id"] for item in recent_results if item.get("latest_memory_id")]
+            if touched_ids:
+                self.lifecycle.touch(touched_ids, event_type="recent")
+            return {
+                "success": True,
+                "mode": "recent",
+                "count": len(recent_results),
+                "results": recent_results,
+            }
+
+        if self._session_transcript_index_available():
+            indexed_results = self.session_transcript_index.search(
+                query=normalized_query,
+                top_k=max(limit * 10, 50),
+                scopes=[f"session:{session_id}"] if session_id else None,
+                agent_id=session_id,
+                project_id=project,
+            )
+            if indexed_results:
+                results: List[Dict[str, Any]] = []
+                for indexed in indexed_results:
+                    entry = session_entries_by_id.get(str(indexed.get("id")))
+                    if entry is None:
+                        continue
+                    combined = self._build_session_transcript_index_content(entry)
+                    results.append(
+                        {
+                            "id": entry.get("id"),
+                            "session_id": self._extract_session_field(entry, "session_id"),
+                            "task_id": self._extract_session_field(entry, "task_id"),
+                            "project": self._extract_session_field(entry, "project"),
+                            "branch": self._extract_session_field(entry, "branch"),
+                            "pr_id": self._extract_session_field(entry, "pr_id"),
+                            "scope": entry.get("scope"),
+                            "timestamp": entry.get("timestamp"),
+                            "title": entry.get("title"),
+                            "content": entry.get("content", ""),
+                            "preview": self.l2._extract_preview(combined, normalized_query),
+                            "metadata": entry.get("metadata", {}),
+                            "_match_score": float(indexed.get("score", 0.0)),
+                            "_bm25_score": float(indexed.get("score", 0.0)),
+                            "_debug_match": {
+                                "matched": True,
+                                "backend": "session_transcript_index",
+                                "score": float(indexed.get("score", 0.0)),
+                            },
+                        }
+                    )
+                results.sort(key=lambda item: (item.get("_match_score", 0.0), item.get("timestamp", "")), reverse=True)
+                limited = results[:limit]
+                touched_ids = [item["id"] for item in limited if item.get("id")]
+                if touched_ids:
+                    self.lifecycle.touch(touched_ids, event_type="session_search")
+                return {
+                    "success": True,
+                    "mode": "search",
+                    "count": len(limited),
+                    "results": limited,
+                }
+
+        haystacks = []
+        for entry in session_entries:
+            metadata = entry.get("metadata", {}) or {}
+            haystacks.append(
+                "\n".join(
+                    [
+                        str(entry.get("title", "")),
+                        str(entry.get("content", "")),
+                        json.dumps(metadata, ensure_ascii=False),
+                    ]
+                )
+            )
+        matches = match_query_corpus(normalized_query, haystacks)
+        results: List[Dict[str, Any]] = []
+        for entry, combined, match in zip(session_entries, haystacks, matches):
+            if not match.get("matched"):
+                continue
+            results.append(
+                {
+                    "id": entry.get("id"),
+                    "session_id": self._extract_session_field(entry, "session_id"),
+                    "task_id": self._extract_session_field(entry, "task_id"),
+                    "project": self._extract_session_field(entry, "project"),
+                    "branch": self._extract_session_field(entry, "branch"),
+                    "pr_id": self._extract_session_field(entry, "pr_id"),
+                    "scope": entry.get("scope"),
+                    "timestamp": entry.get("timestamp"),
+                    "title": entry.get("title"),
+                    "content": entry.get("content", ""),
+                    "preview": self.l2._extract_preview(combined, normalized_query),
+                    "metadata": entry.get("metadata", {}),
+                    "_match_score": match.get("score", 0.0),
+                    "_bm25_score": match.get("bm25_score", 0.0),
+                    "_debug_match": match,
+                }
+            )
+        results.sort(key=lambda item: (item.get("_match_score", 0.0), item.get("timestamp", "")), reverse=True)
+        limited = results[:limit]
+        touched_ids = [item["id"] for item in limited if item.get("id")]
+        if touched_ids:
+            self.lifecycle.touch(touched_ids, event_type="session_search")
+        return {
+            "success": True,
+            "mode": "search",
+            "count": len(limited),
+            "results": limited,
+        }
     
     def store(self,
               content: str,
@@ -341,6 +712,14 @@ class LayerManagerV5:
 
         result = {"L2": l2_id}
         self._attach_lifecycle_status(result, lifecycle_result, prune_result)
+        if entry and self._is_session_transcript_entry(entry):
+            sync_ok = self._sync_session_transcript_index_memory(l2_id)
+            if not sync_ok:
+                print(f"⚠️ Session transcript index sync failed for {l2_id}")
+        for pruned_id in prune_result.get("pruned", []):
+            removed_ok = self._remove_session_transcript_index_entry(pruned_id)
+            if not removed_ok:
+                print(f"⚠️ Session transcript index removal failed for {pruned_id}")
         if prune_result.get("triggered"):
             result["pruned"] = prune_result.get("pruned", [])
         return result
@@ -505,6 +884,14 @@ class LayerManagerV5:
             queries = self._expand_query_sync(retrieval_query, debug_info)
         if debug_info is not None:
             debug_info["queries"] = queries
+            if not vector_store_available:
+                self._vector_retrieve_l2(
+                    query=queries[0] if queries else retrieval_query,
+                    topic=topic,
+                    limit=inner_limit,
+                    min_similarity=hybrid_options["min_similarity"],
+                    debug_info=debug_info,
+                )
 
         keyword_results = self.l2.search(query=queries[0], scope="all") if queries[0] else []
         if topic:
@@ -513,20 +900,22 @@ class LayerManagerV5:
         vector_lists: List[List[Dict[str, Any]]] = []
         query_embedding = None
         if vector_store_available:
-            for q in queries:
+            for index, q in enumerate(queries):
                 vector_lists.append(
                     self._vector_retrieve_l2(
                         query=q,
                         topic=topic,
                         limit=inner_limit,
                         min_similarity=hybrid_options["min_similarity"],
-                        debug_info=None,
+                        debug_info=debug_info if index == 0 else None,
                     )
                 )
             query_embedding = self._get_query_embedding(queries[0])
 
         retrieval_config = self.config.get("retrieval", {}) if isinstance(self.config, dict) else {}
         fusion_method = str(retrieval_config.get("fusion_method", "rrf")).strip().lower()
+        if vector_weight is not None or bm25_weight is not None:
+            fusion_method = "weighted"
         if not vector_store_available:
             fusion_method = "weighted"
         if debug_info is not None:
@@ -833,36 +1222,58 @@ class LayerManagerV5:
         vector_stats["add_failures"] = self._vector_store_add_failures
         if self._vector_store_last_add_failure is not None:
             vector_stats["last_add_failure"] = dict(self._vector_store_last_add_failure)
+        transcript_index_stats = (
+            self.session_transcript_index.get_stats()
+            if self._session_transcript_index_available()
+            else {
+                "enabled": False,
+                "reason": self._session_transcript_index_error or "session transcript index unavailable",
+            }
+        )
+        if self._session_transcript_index_available():
+            transcript_index_stats["enabled"] = True
         
         return {
             'L0': l0_stats,
             'L1': l1_stats,
             'L2': l2_stats,
             'vector_store': vector_stats,
+            'session_transcript_index': transcript_index_stats,
             'lifecycle': self.lifecycle.get_stats(),
         }
 
     def forget(self, memory_id: str, force: bool = False) -> Dict[str, Any]:
+        entry = self.l2.get_entry(memory_id)
+        is_session_transcript = bool(entry and self._is_session_transcript_entry(entry))
         result = self.lifecycle.forget(memory_id=memory_id, force=force)
         if not result.get("success"):
             return result
         if force:
             removed = self.l2.delete_entry(memory_id)
             vector_removed = self.vector_store.delete(memory_id) if self.vector_store is not None else False
+            transcript_removed = self._remove_session_transcript_index_entry(memory_id) if is_session_transcript else False
             self.lifecycle.delete_manifest_entry(memory_id)
             return {
                 **result,
                 "removed_from_l2": removed,
                 "removed_from_vector_store": vector_removed,
-                "aggregate_rebuild": self.rebuild_aggregates(),
+                "removed_from_session_transcript_index": transcript_removed,
             }
-        return {**result, "aggregate_rebuild": self.rebuild_aggregates()}
+        transcript_removed = self._remove_session_transcript_index_entry(memory_id) if is_session_transcript else False
+        return {
+            **result,
+            "removed_from_session_transcript_index": transcript_removed,
+        }
 
     def restore(self, memory_id: str) -> Dict[str, Any]:
         result = self.lifecycle.restore(memory_id)
         if not result.get("success"):
             return result
-        return {**result, "aggregate_rebuild": self.rebuild_aggregates()}
+        transcript_reindexed = self._sync_session_transcript_index_memory(memory_id)
+        return {
+            **result,
+            "restored_to_session_transcript_index": transcript_reindexed,
+        }
 
     def cleanup(self, dry_run: bool = False, scope: Optional[str] = None) -> Dict[str, Any]:
         return self.lifecycle.cleanup_events(dry_run=dry_run, scope=scope)
@@ -926,7 +1337,12 @@ class LayerManagerV5:
         ]
         result = self.trigger.rebuild_from_entries(entries)
         lifecycle_persisted = self.lifecycle.mark_rebuild()
-        payload = {**result, "source_entries": len(entries), "include_archived": include_archived}
+        payload = {
+            **result,
+            "source_entries": len(entries),
+            "include_archived": include_archived,
+            "session_transcript_index": self._rebuild_session_transcript_index(include_archived=include_archived),
+        }
         if not lifecycle_persisted:
             payload["lifecycle_persisted"] = False
             payload["lifecycle_error"] = "lifecycle state persistence failed"

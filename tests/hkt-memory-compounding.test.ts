@@ -386,3 +386,50 @@ describe("HKTMemory Compounding — Loop Completeness", () => {
     })
   }
 })
+
+// Session search patches: phase-0.Xb (补充在 retrieve 后)
+const SESSION_SEARCH_PATCHES: Partial<Record<CompoundingSkill | "gh-debug" | "gh-optimize", string>> = {
+  "gh-work": "phase-0.6b",
+  "gh-debug": "phase-0.4b",
+}
+
+describe("HKTMemory Session Search Integration", () => {
+  for (const [skill, patchName] of Object.entries(SESSION_SEARCH_PATCHES)) {
+    describe(skill, () => {
+      test(`SKILL.md contains ${patchName} session_search patch`, async () => {
+        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf-8")
+        const patches = parseHktPatches(content)
+        const found = patches.find(p => p.name === patchName)
+        expect(found).toBeDefined()
+      })
+
+      test(`${patchName} contains session_search command with --query and --limit`, async () => {
+        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf-8")
+        const ctx = extractPhaseContext(content, patchName)
+        expect(ctx).toContain("session_search")
+        expect(ctx).toContain("--query")
+        expect(ctx).toContain("--limit")
+      })
+
+      test(`${patchName} appears after retrieve patch`, async () => {
+        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf-8")
+        const patches = parseHktPatches(content)
+        // Get the retrieve patch for this skill
+        const retrievePatch = patches.find(p => isRetrievePatch(p.name))
+        const sessionPatch = patches.find(p => p.name === patchName)
+        expect(retrievePatch).toBeDefined()
+        expect(sessionPatch).toBeDefined()
+        if (retrievePatch && sessionPatch) {
+          expect(sessionPatch.line).toBeGreaterThan(retrievePatch.line)
+        }
+      })
+
+      test(`${patchName} has non-blocking fallback`, async () => {
+        const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf-8")
+        const ctx = extractPhaseContext(content, patchName)
+        // Should mention silent continuation or non-blocking behavior
+        expect(ctx).toMatch(/静默继续|不阻塞|silently|proceed|continue/)
+      })
+    })
+  }
+})

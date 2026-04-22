@@ -24,9 +24,23 @@ class MemoryTools:
         from governance.errors import ErrorTracker
         from governance.learnings import LearningTracker
         from layers.manager_v5 import LayerManagerV5
+        from runtime.orchestrator import RecallOrchestrator, RecallRequest
+        from runtime.provider import LocalMemoryProvider
 
         config = ConfigLoader(self.memory_dir.parent).load()
         self.layers = LayerManagerV5(self.memory_dir, config=config)
+        automation_config = config.get("automation", {})
+        orchestrator_config = {
+            **automation_config.get("orchestrator", {}),
+            "safety": automation_config.get("safety", {}),
+        }
+        self.provider = LocalMemoryProvider(
+            self.layers,
+            cache_ttl_seconds=orchestrator_config.get("prefetch_ttl_seconds", 300),
+            cache_max_entries=orchestrator_config.get("prefetch_cache_entries", 32),
+        )
+        self.orchestrator = RecallOrchestrator(self.provider, config=orchestrator_config)
+        self._recall_request_cls = RecallRequest
         self.learnings = LearningTracker(self.memory_dir / "governance")
         self.errors = ErrorTracker(self.memory_dir / "governance")
     
@@ -65,6 +79,71 @@ class MemoryTools:
                     "count": len(results),
                     "results": results
                 }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def memory_session_search(
+        self,
+        query: str = "",
+        limit: int = 5,
+        session_id: str = None,
+        task_id: str = None,
+        project: str = None,
+        branch: str = None,
+        pr: str = None,
+        pr_id: str = None,
+    ) -> Dict[str, Any]:
+        try:
+            return self.layers.session_search(
+                query=query,
+                limit=limit,
+                session_id=session_id,
+                task_id=task_id,
+                project=project,
+                branch=branch,
+                pr=pr,
+                pr_id=pr_id,
+            )
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def memory_orchestrate_recall(
+        self,
+        query: str = "",
+        mode: str = "implement",
+        topic: str = None,
+        limit: int = 5,
+        entity: str = None,
+        session_id: str = None,
+        task_id: str = None,
+        project: str = None,
+        branch: str = None,
+        pr: str = None,
+        pr_id: str = None,
+        include_recent: bool = None,
+        include_session: bool = None,
+        include_long_term: bool = None,
+        token_budget: int = None,
+    ) -> Dict[str, Any]:
+        try:
+            request = self._recall_request_cls(
+                query=query,
+                mode=mode,
+                topic=topic,
+                limit=limit,
+                entity=entity,
+                session_id=session_id,
+                task_id=task_id,
+                project=project,
+                branch=branch,
+                pr=pr,
+                pr_id=pr_id,
+                include_recent=include_recent,
+                include_session=include_session,
+                include_long_term=include_long_term,
+                token_budget=token_budget,
+            )
+            return self.orchestrator.orchestrate(request)
         except Exception as e:
             return {"success": False, "error": str(e)}
     

@@ -39,10 +39,11 @@ HKT-Memory v5.0 - 自动分层存储系统
 """
 
 import argparse
+import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 
 # 添加项目路径
 SCRIPT_DIR = Path(__file__).parent.parent.absolute()
@@ -51,6 +52,8 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from layers.manager_v5 import LayerManagerV5
 from config.loader import ConfigLoader
+from runtime.orchestrator import RecallOrchestrator, RecallRequest
+from runtime.provider import LocalMemoryProvider
 
 
 class HKTMv5:
@@ -67,6 +70,17 @@ class HKTMv5:
             llm_provider=llm_provider or os.getenv("L1_EXTRACTOR_PROVIDER", "zhipu"),
             config=self.config
         )
+        automation_config = self.config.get("automation", {})
+        orchestrator_config = {
+            **automation_config.get("orchestrator", {}),
+            "safety": automation_config.get("safety", {}),
+        }
+        self.provider = LocalMemoryProvider(
+            self.layers,
+            cache_ttl_seconds=orchestrator_config.get("prefetch_ttl_seconds", 300),
+            cache_max_entries=orchestrator_config.get("prefetch_cache_entries", 32),
+        )
+        self.orchestrator = RecallOrchestrator(self.provider, config=orchestrator_config)
     
     def store(self, 
               content: str, 
@@ -117,6 +131,91 @@ class HKTMv5:
             debug=debug,
             entity=entity,
         )
+
+    def list_recent(
+        self,
+        limit: int = 5,
+        session_id: str = None,
+        task_id: str = None,
+        project: str = None,
+        branch: str = None,
+        pr: str = None,
+        pr_id: str = None,
+    ) -> Dict[str, Any]:
+        return self.provider.list_recent(
+            limit=limit,
+            session_id=session_id,
+            task_id=task_id,
+            project=project,
+            branch=branch,
+            pr=pr,
+            pr_id=pr_id,
+        )
+
+    def prefetch(
+        self,
+        query: str = "",
+        mode: str = "implement",
+        topic: str = None,
+        limit: int = 5,
+        entity: str = None,
+        session_id: str = None,
+        task_id: str = None,
+        project: str = None,
+        branch: str = None,
+        pr: str = None,
+        pr_id: str = None,
+    ) -> Dict[str, Any]:
+        return self.provider.prefetch(
+            query=query,
+            mode=mode,
+            topic=topic,
+            limit=limit,
+            entity=entity,
+            session_id=session_id,
+            task_id=task_id,
+            project=project,
+            branch=branch,
+            pr=pr,
+            pr_id=pr_id,
+        )
+
+    def orchestrate_recall(
+        self,
+        query: str = "",
+        mode: str = "implement",
+        topic: str = None,
+        limit: int = 5,
+        entity: str = None,
+        session_id: str = None,
+        task_id: str = None,
+        project: str = None,
+        branch: str = None,
+        pr: str = None,
+        pr_id: str = None,
+        include_recent: bool = None,
+        include_session: bool = None,
+        include_long_term: bool = None,
+        token_budget: int = None,
+    ) -> Dict[str, Any]:
+        request = RecallRequest(
+            query=query,
+            mode=mode,
+            topic=topic,
+            limit=limit,
+            entity=entity,
+            session_id=session_id,
+            task_id=task_id,
+            project=project,
+            branch=branch,
+            pr=pr,
+            pr_id=pr_id,
+            include_recent=include_recent,
+            include_session=include_session,
+            include_long_term=include_long_term,
+            token_budget=token_budget,
+        )
+        return self.orchestrator.orchestrate(request)
     
     def sync(self, full: bool = False, rebuild_index: bool = False):
         """同步各层"""
@@ -262,6 +361,55 @@ def main():
     retrieve_parser.add_argument("--debug", action="store_true", help="输出命中解释与召回细节")
     retrieve_parser.add_argument("--entity", help="按实体名过滤检索")
 
+    recent_parser = subparsers.add_parser("list-recent", help="列出 recent session 摘要")
+    recent_parser.add_argument("--limit", "-n", type=int, default=5, help="数量限制")
+    recent_parser.add_argument("--session-id", help="session 过滤")
+    recent_parser.add_argument("--task-id", help="task 过滤")
+    recent_parser.add_argument("--project", help="project 过滤")
+    recent_parser.add_argument("--branch", help="branch 过滤")
+    recent_parser.add_argument("--pr", help="PR 过滤")
+    recent_parser.add_argument("--pr-id", help="PR ID 过滤")
+
+    prefetch_parser = subparsers.add_parser("prefetch", help="预取 orchestrator 依赖的 memory sources")
+    prefetch_parser.add_argument("--query", "-q", default="", help="预取 query")
+    prefetch_parser.add_argument(
+        "--mode",
+        choices=["task_start", "implement", "debug", "review"],
+        default="implement",
+        help="预取场景",
+    )
+    prefetch_parser.add_argument("--topic", help="主题过滤")
+    prefetch_parser.add_argument("--limit", "-n", type=int, default=5, help="数量限制")
+    prefetch_parser.add_argument("--entity", help="实体过滤")
+    prefetch_parser.add_argument("--session-id", help="session 过滤")
+    prefetch_parser.add_argument("--task-id", help="task 过滤")
+    prefetch_parser.add_argument("--project", help="project 过滤")
+    prefetch_parser.add_argument("--branch", help="branch 过滤")
+    prefetch_parser.add_argument("--pr", help="PR 过滤")
+    prefetch_parser.add_argument("--pr-id", help="PR ID 过滤")
+
+    orchestrator_parser = subparsers.add_parser("orchestrate-recall", help="按场景编排注入上下文")
+    orchestrator_parser.add_argument("--query", "-q", default="", help="用户 query")
+    orchestrator_parser.add_argument(
+        "--mode",
+        choices=["task_start", "implement", "debug", "review"],
+        default="implement",
+        help="工作模式",
+    )
+    orchestrator_parser.add_argument("--topic", help="主题过滤")
+    orchestrator_parser.add_argument("--limit", "-n", type=int, default=5, help="结果数量")
+    orchestrator_parser.add_argument("--entity", help="实体过滤")
+    orchestrator_parser.add_argument("--session-id", help="session 过滤")
+    orchestrator_parser.add_argument("--task-id", help="task 过滤")
+    orchestrator_parser.add_argument("--project", help="project 过滤")
+    orchestrator_parser.add_argument("--branch", help="branch 过滤")
+    orchestrator_parser.add_argument("--pr", help="PR 过滤")
+    orchestrator_parser.add_argument("--pr-id", help="PR ID 过滤")
+    orchestrator_parser.add_argument("--token-budget", type=int, help="注入 token 预算")
+    orchestrator_parser.add_argument("--no-recent", action="store_true", help="禁用 recent source")
+    orchestrator_parser.add_argument("--no-session", action="store_true", help="禁用 transcript source")
+    orchestrator_parser.add_argument("--no-long-term", action="store_true", help="禁用长期记忆 source")
+
     # Sync command
     sync_parser = subparsers.add_parser("sync", help="同步各层")
     sync_parser.add_argument(
@@ -338,7 +486,7 @@ def main():
     conflict_parser.add_argument("--output", help="输出路径，默认 <memory-dir>/MEMORY_CONFLICT.md")
     
     # Test command
-    test_parser = subparsers.add_parser("test", help="测试存储和检索")
+    subparsers.add_parser("test", help="测试存储和检索")
 
     # Serve command
     serve_parser = subparsers.add_parser("serve", help="启动 MCP HTTP 服务器")
@@ -457,6 +605,57 @@ def main():
                     print(f"   filtered_by_similarity: {filtered}")
             for layer_name, info in debug_info.get("layers", {}).items():
                 print(f"   {layer_name} candidates={info.get('candidate_count', 0)}")
+
+    elif args.command == "list-recent":
+        result = memory.list_recent(
+            limit=args.limit,
+            session_id=args.session_id,
+            task_id=args.task_id,
+            project=args.project,
+            branch=args.branch,
+            pr=args.pr,
+            pr_id=args.pr_id,
+        )
+        print("🕘 Recent Sessions\n")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+
+    elif args.command == "prefetch":
+        result = memory.prefetch(
+            query=args.query,
+            mode=args.mode,
+            topic=args.topic,
+            limit=args.limit,
+            entity=args.entity,
+            session_id=args.session_id,
+            task_id=args.task_id,
+            project=args.project,
+            branch=args.branch,
+            pr=args.pr,
+            pr_id=args.pr_id,
+        )
+        print("⚡ Prefetch Result\n")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+
+    elif args.command == "orchestrate-recall":
+        result = memory.orchestrate_recall(
+            query=args.query,
+            mode=args.mode,
+            topic=args.topic,
+            limit=args.limit,
+            entity=args.entity,
+            session_id=args.session_id,
+            task_id=args.task_id,
+            project=args.project,
+            branch=args.branch,
+            pr=args.pr,
+            pr_id=args.pr_id,
+            include_recent=False if args.no_recent else None,
+            include_session=False if args.no_session else None,
+            include_long_term=False if args.no_long_term else None,
+            token_budget=args.token_budget,
+        )
+        print("🧭 Orchestrated Recall\n")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
     
     elif args.command == "sync":
         print("🔄 同步各层...")
