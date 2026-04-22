@@ -1,15 +1,15 @@
 # Windows Compatibility Scan Report
 
-Generated: 2026-04-22T09:42:18.457Z
+Generated: 2026-04-22T09:45:50.525Z
 
 ## Summary
 
 | Severity | Count |
 |----------|-------|
 | 🔴 Error | 91 |
-| 🟡 Warn  | 146 |
+| 🟡 Warn  | 142 |
 | ℹ️ Info  | 3 |
-| **Total** | **240** |
+| **Total** | **236** |
 
 **Bash scripts found:** 17
 
@@ -663,26 +663,6 @@ Generated: 2026-04-22T09:42:18.457Z
 ### plugins/galeharness-cli/skills/todo-triage/SKILL.md:4
 - **Rule:** `source-bash`
 - **Line:** `argument-hint: "[findings list or source type]"`
-- **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
-
-### plugins/galeharness-cli/skills/andrew-kane-gem-writer/references/testing-patterns.md:76
-- **Rule:** `source-bash`
-- **Line:** `source "https://rubygems.org"`
-- **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
-
-### plugins/galeharness-cli/skills/andrew-kane-gem-writer/references/testing-patterns.md:85
-- **Rule:** `source-bash`
-- **Line:** `source "https://rubygems.org"`
-- **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
-
-### plugins/galeharness-cli/skills/every-style-editor/references/EVERY_WRITE_STYLE.md:245
-- **Rule:** `source-bash`
-- **Line:** `Use hyphens in compound adjectives, with the exception of adverbs (words ending `
-- **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
-
-### plugins/galeharness-cli/skills/every-style-editor/references/EVERY_WRITE_STYLE.md:529
-- **Rule:** `source-bash`
-- **Line:** `add on (verb), add-on (noun, adjective), back end (noun), back-end (adjective), `
 - **Suggestion:** `source` is a bash command. In PowerShell use `. .\file.ps1`. In Bun/Node.js use `import` or `require`.
 
 ### plugins/galeharness-cli/skills/gale-style-editor/references/EVERY_WRITE_STYLE.md:245

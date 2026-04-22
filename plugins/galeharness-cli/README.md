@@ -97,7 +97,6 @@ Recommended operating model:
 
 | Skill | Description |
 |-------|-------------|
-| `/changelog` | Create engaging changelogs for recent merges |
 | `/gh-demo-reel` | Capture a visual demo reel (GIF demos, terminal recordings, screenshots) for PRs with project-type-aware tier selection |
 | `/report-bug-ce` | Report a bug in the compound-engineering plugin |
 | `/resolve-pr-feedback` | Resolve PR review feedback in parallel |
@@ -115,9 +114,7 @@ Recommended operating model:
 | Skill | Description |
 |-------|-------------|
 | `agent-native-architecture` | Build AI agents using prompt-native architecture |
-| `andrew-kane-gem-writer` | Write Ruby gems following Andrew Kane's patterns |
 | `dhh-rails-style` | Write Ruby/Rails code in DHH's 37signals style |
-| `dspy-ruby` | Build type-safe LLM applications with DSPy.rb |
 | `frontend-design` | Create production-grade frontend interfaces |
 
 ### Review & Quality
@@ -130,7 +127,6 @@ Recommended operating model:
 
 | Skill | Description |
 |-------|-------------|
-| `every-style-editor` | Review copy for Every's style guide compliance |
 | `proof` | Create, edit, and share documents via Proof collaborative editor |
 | `todo-create` | File-based todo tracking system |
 

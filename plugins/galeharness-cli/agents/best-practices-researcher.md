@@ -24,11 +24,11 @@ Before going online, check if curated knowledge already exists in skills:
 
 2. **Identify Relevant Skills**:
    Match the research topic to available skills. Common mappings:
-   - Rails/Ruby → `dhh-rails-style`, `andrew-kane-gem-writer`, `dspy-ruby`
+   - Rails/Ruby → `dhh-rails-style`
    - Frontend/Design → `frontend-design`, `swiss-design`
    - TypeScript/React → `react-best-practices`
    - AI/Agents → `agent-native-architecture`
-  - Documentation → `gh:compound`, `every-style-editor`
+  - Documentation → `gh:compound`
    - File operations → `rclone`, `git-worktree`
    - Image generation → `gemini-imagegen`
 
