@@ -491,6 +491,18 @@ gale-harness install ./plugins/galeharness-cli --to kimi
 alias ghc='claude --plugin-dir /path/to/GaleHarnessCodingCLI/plugins/galeharness-cli'
 ```
 
+**VS Code Copilot Agent Plugins：**
+
+1. 在 VS Code 命令面板运行 `Chat: Install Plugin from Source`
+2. 输入仓库 `wangrenzhu-ola/GaleHarnessCodingCLI`
+3. 选择 `galeharness-cli` 插件安装
+
+**Copilot CLI：**
+
+```bash
+gale-harness install ./plugins/galeharness-cli --to copilot
+```
+
 ### 项目初始化
 
 ```bash
