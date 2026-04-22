@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.12.0...cli-v1.13.0) (2026-04-22)
+
+
+### Features
+
+* **hktmemory:** integrate HKTMemory PR [#2](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/2) — vendor sync, session_search, and smoke tests ([#37](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/37)) ([580f94a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/580f94a5bd5494d9ca012d729f20ebe2a14a23c7))
+
 ## [1.12.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.11.0...cli-v1.12.0) (2026-04-21)
 
 
