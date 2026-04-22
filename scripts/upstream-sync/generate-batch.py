@@ -9,6 +9,7 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import List, Optional
 
 
 @dataclass
@@ -20,7 +21,7 @@ class CommitMetadata:
     filename: str
 
 
-def run_command(cmd: list[str], cwd: Path) -> str:
+def run_command(cmd: List[str], cwd: Path) -> str:
     result = subprocess.run(
         cmd,
         cwd=str(cwd),
@@ -47,7 +48,7 @@ def sanitize_subject(subject: str) -> str:
     return slug[:64] or "change"
 
 
-def resolve_target_repo(value: str | None) -> Path:
+def resolve_target_repo(value: Optional[str]) -> Path:
     if value:
         return Path(value).resolve()
     current = Path.cwd()
@@ -55,7 +56,7 @@ def resolve_target_repo(value: str | None) -> Path:
     return Path(repo_root)
 
 
-def resolve_upstream_repo(target_repo: Path, explicit: str | None) -> Path:
+def resolve_upstream_repo(target_repo: Path, explicit: Optional[str]) -> Path:
     if explicit:
         upstream_path = Path(explicit).expanduser().resolve()
     else:
@@ -88,7 +89,7 @@ def ensure_commit_exists(repo: Path, sha: str) -> None:
     git(repo, "rev-parse", "--verify", f"{sha}^{{commit}}")
 
 
-def discover_commits(upstream_repo: Path, baseline_sha: str) -> list[str]:
+def discover_commits(upstream_repo: Path, baseline_sha: str) -> List[str]:
     output = git(upstream_repo, "rev-list", "--reverse", f"{baseline_sha}..HEAD")
     commits = [line.strip() for line in output.splitlines() if line.strip()]
     return commits
@@ -107,7 +108,7 @@ def write_commit_range(
     generated_at: str,
     upstream_repo: Path,
     baseline_sha: str,
-    commits: list[CommitMetadata],
+    commits: List[CommitMetadata],
 ) -> None:
     start_commit = commits[0]
     end_commit = commits[-1]
@@ -138,9 +139,9 @@ def write_readme(
     batch_dir: Path,
     generated_at: str,
     baseline_sha: str,
-    commits: list[CommitMetadata],
+    commits: List[CommitMetadata],
     status: str,
-    failure_reason: str | None = None,
+    failure_reason: Optional[str] = None,
 ) -> None:
     end_commit = commits[-1].sha if commits else "n/a"
     lines = [
@@ -277,7 +278,7 @@ def main() -> int:
     raw_dir.mkdir(parents=True, exist_ok=True)
     adapted_dir.mkdir(parents=True, exist_ok=True)
 
-    exported_commits: list[CommitMetadata] = []
+    exported_commits: List[CommitMetadata] = []
 
     try:
         for index, sha in enumerate(commits, start=1):
