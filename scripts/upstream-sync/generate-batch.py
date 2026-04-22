@@ -126,7 +126,7 @@ def write_commit_range(
     ]
     for commit in commits:
         lines.append(f"  - {commit.filename} {commit.sha} {commit.subject}")
-    (batch_dir / "commit-range.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (batch_dir / "commit-range.txt").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def suggested_worktree_name(batch_dir: Path, commit: CommitMetadata) -> str:
@@ -216,13 +216,13 @@ def write_readme(
         ]
     )
 
-    (batch_dir / "README.md").write_text("\n".join(lines), encoding="utf-8")
+    (batch_dir / "README.md").write_text("\n".join(lines), encoding="utf-8", newline="\n")
 
 
 def run_adaptation(raw_patch: Path, adapted_patch: Path, rules_path: Path) -> None:
     # Use standard python3 rather than sys.executable to avoid virtualenv mismatch if run from bash
     result = subprocess.run(
-        ["python3", str(Path(__file__).with_name("adapt-patch.py")), "--input", str(raw_patch), "--output", str(adapted_patch), "--rules", str(rules_path)],
+        [sys.executable, str(Path(__file__).with_name("adapt-patch.py")), "--input", str(raw_patch), "--output", str(adapted_patch), "--rules", str(rules_path)],
         text=True,
         capture_output=True,
         check=False,
@@ -286,7 +286,7 @@ def main() -> int:
             raw_patch_path = raw_dir / filename
             adapted_patch_path = adapted_dir / filename
 
-            raw_patch_path.write_text(format_patch(upstream_repo, sha), encoding="utf-8")
+            raw_patch_path.write_text(format_patch(upstream_repo, sha), encoding="utf-8", newline="\n")
             run_adaptation(raw_patch_path, adapted_patch_path, rules_path)
 
             exported_commits.append(
