@@ -28,7 +28,7 @@ export default defineCommand({
     to: {
       type: "string",
       default: "opencode",
-      description: "Target format (claude | opencode | codex | droid | cursor | pi | copilot | gemini | kiro | windsurf | openclaw | qwen | kimi | qoder | trae | all)",
+      description: "Target format (claude | opencode | codex | droid | cursor | pi | copilot | gemini | kiro | windsurf | openclaw | qwen | kimi | qoder | trae | kilo | all)",
     },
     output: {
       type: "string",
@@ -64,6 +64,11 @@ export default defineCommand({
       type: "string",
       alias: "qoder-home",
       description: "Write Qoder output to this Qoder root (ex: ~/.qoder)",
+    },
+    kiloHome: {
+      type: "string",
+      alias: "kilo-home",
+      description: "Write Kilo output to this Kilo root (ex: ~/.kilo)",
     },
     scope: {
       type: "string",
@@ -114,6 +119,7 @@ export default defineCommand({
       const openclawHome = resolveTargetHome(args.openclawHome, path.join(os.homedir(), ".openclaw", "extensions"))
       const qwenHome = resolveTargetHome(args.qwenHome, path.join(os.homedir(), ".qwen", "extensions"))
       const qoderHome = resolveTargetHome(args.qoderHome, path.join(os.homedir(), ".qoder"))
+      const kiloHome = resolveTargetHome(args.kiloHome, path.join(os.homedir(), ".kilo"))
       const kimiHome = path.join(os.homedir(), ".kimi")
 
       const options: ClaudeToOpenCodeOptions = {
@@ -156,6 +162,7 @@ export default defineCommand({
             openclawHome,
             qwenHome,
             qoderHome,
+            kiloHome,
             kimiHome,
             pluginName: plugin.manifest.name,
             plugin,
@@ -194,6 +201,7 @@ export default defineCommand({
         openclawHome,
         qwenHome,
         qoderHome,
+        kiloHome,
         kimiHome,
         pluginName: plugin.manifest.name,
         plugin,
@@ -229,6 +237,7 @@ export default defineCommand({
           openclawHome,
           qwenHome,
           qoderHome,
+          kiloHome,
           kimiHome,
           pluginName: plugin.manifest.name,
           plugin,
