@@ -1,7 +1,6 @@
 import path from "path"
 import type { ClaudeHomeConfig } from "../parsers/claude-home"
-import type { ClaudeMcpServer } from "../types/claude"
-import type { KiloMcpServer } from "../types/kilo"
+import { convertMcp } from "../converters/claude-to-kilo"
 import { syncKiloCommands } from "./commands"
 import { mergeJsonConfigAtKey } from "./json-config"
 import { syncSkills } from "./skills"
@@ -17,33 +16,7 @@ export async function syncToKilo(
     await mergeJsonConfigAtKey({
       configPath: path.join(outputRoot, "kilo.json"),
       key: "mcpServers",
-      incoming: convertMcpForKilo(config.mcpServers),
+      incoming: convertMcp(config.mcpServers),
     })
   }
-}
-
-function convertMcpForKilo(
-  servers: Record<string, ClaudeMcpServer>,
-): Record<string, KiloMcpServer> {
-  const result: Record<string, KiloMcpServer> = {}
-
-  for (const [name, server] of Object.entries(servers)) {
-    if (server.command) {
-      result[name] = {
-        command: server.command,
-        args: server.args,
-        env: server.env,
-      }
-      continue
-    }
-
-    if (server.url) {
-      result[name] = {
-        url: server.url,
-        headers: server.headers,
-      }
-    }
-  }
-
-  return result
 }

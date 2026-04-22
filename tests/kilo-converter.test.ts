@@ -237,4 +237,16 @@ describe("transformContentForKilo", () => {
     const input = "Use the Bash tool to run commands."
     expect(transformContentForKilo(input)).toBe(input)
   })
+
+  test("rewrites .claude/ paths after punctuation like parentheses", () => {
+    const result = transformContentForKilo("See (.claude/config) and [~/.claude/settings].")
+    expect(result).toContain("(.kilo/config)")
+    expect(result).toContain("[~/.config/kilo/settings]")
+    expect(result).not.toContain(".claude/")
+  })
+
+  test("does not rewrite my.claude/ as a false positive", () => {
+    const input = "Visit my.claude/page for info."
+    expect(transformContentForKilo(input)).toBe(input)
+  })
 })

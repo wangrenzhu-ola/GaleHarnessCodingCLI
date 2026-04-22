@@ -90,7 +90,7 @@ function convertCommands(commands: ClaudeCommand[]): KiloCommandFile[] {
     })
 }
 
-function convertMcp(
+export function convertMcp(
   servers: Record<string, ClaudeMcpServer>,
 ): Record<string, KiloMcpServer> {
   const result: Record<string, KiloMcpServer> = {}
@@ -137,8 +137,8 @@ export function transformContentForKilo(body: string): string {
   let result = body
 
   // Rewrite .claude/ paths to .kilo/
-  result = result.replace(/(?<=^|\s|["'`])~\/\.claude\//gm, "~/.config/kilo/")
-  result = result.replace(/(?<=^|\s|["'`])\.claude\//gm, ".kilo/")
+  result = result.replace(/(?<!\w|\.)(~\/\.claude\/)/gm, "~/.config/kilo/")
+  result = result.replace(/(?<!\w|\.)(\.claude\/)/gm, ".kilo/")
 
   return result
 }

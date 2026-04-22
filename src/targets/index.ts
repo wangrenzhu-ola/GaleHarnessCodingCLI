@@ -165,6 +165,7 @@ export const targets: Record<string, TargetHandler> = {
   kilo: {
     name: "kilo",
     implemented: true,
+    defaultScope: "workspace",
     convert: convertClaudeToKilo as TargetHandler["convert"],
     write: writeKiloBundle as TargetHandler["write"],
   },

@@ -148,7 +148,7 @@ describe("writeKiloBundle", () => {
     expect(content.mcpServers.newServer.command).toBe("new-cmd")
   })
 
-  test("mcp.json fresh write when no existing file", async () => {
+  test("kilo.json fresh write when no existing file", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "kilo-fresh-"))
     const bundle: KiloBundle = {
       ...emptyBundle,
