@@ -341,6 +341,7 @@ Before Phase 1, query the vector memory database for related execution context:
    - Note any blockers or unexpected discoveries
    - Create new tasks if scope expands
    - Keep user informed of major milestones
+   - When the plan or origin document carries stable R-IDs (and optionally A/F/AE IDs), reference them in blockers, deferred-work notes, task summaries, and final verification — not routine status updates. This preserves traceability back to requirements without burying signal under noise.
 
 ### Phase 3-4: Quality Check and Ship It
 
