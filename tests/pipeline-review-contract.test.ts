@@ -350,3 +350,28 @@ describe("gh:plan review contract", () => {
     expect(content).not.toContain("**Options for Standard or Lightweight plans:**")
   })
 })
+
+describe("skill compatibility contract", () => {
+  test("skills do not use inline pre-resolved shell with command substitution", async () => {
+    const files = [
+      "plugins/galeharness-cli/skills/gh-brainstorm/SKILL.md",
+      "plugins/galeharness-cli/skills/gh-plan/SKILL.md",
+      "plugins/galeharness-cli/skills/gh-ideate/SKILL.md",
+      "plugins/galeharness-cli/skills/gh-compound/SKILL.md",
+      "plugins/galeharness-cli/skills/gh-compound-refresh/SKILL.md",
+      "plugins/galeharness-cli/skills/document-review/SKILL.md",
+      "plugins/galeharness-cli/skills/gh-work-beta/SKILL.md",
+      "plugins/galeharness-cli/skills/gh-sessions/SKILL.md",
+    ]
+
+    for (const file of files) {
+      const content = await readRepoFile(file)
+      // Check for !` followed by anything containing $(
+      const match = content.match(/!`[^`]*\$\(/)
+      expect(match).toBeNull()
+      
+      // Should not contain the old unresolved command string instruction
+      expect(content).not.toContain("unresolved command string")
+    }
+  })
+})

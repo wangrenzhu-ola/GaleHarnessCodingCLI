@@ -16,11 +16,12 @@ Search your session history.
 
 ## Pre-resolved context
 
-**Repo name (pre-resolved):** !`common=$(git rev-parse --git-common-dir 2>/dev/null); if [ "$common" = ".git" ]; then basename "$(git rev-parse --show-toplevel 2>/dev/null)"; else basename "$(dirname "$common")"; fi`
+**Repo and Branch Context:**
+Determine the current repository name and active git branch before dispatching. You can use native tools or simple safe commands (like `git rev-parse --abbrev-ref HEAD`) to find them. Do not use complex chained shell substitutions.
+- For repo name: resolve the basename of the repository root (handle worktrees appropriately).
+- For branch: resolve the current active branch.
 
-**Git branch (pre-resolved):** !`git rev-parse --abbrev-ref HEAD 2>/dev/null`
-
-If the lines above resolved to plain values (a folder name like `my-repo` and a branch name like `feat/my-branch`), they are ready to pass to the agent. If they still contain backtick command strings or are empty, they did not resolve — omit them from the dispatch and let the agent derive them at runtime.
+If you cannot quickly determine these values, omit them from the dispatch and let the agent derive them at runtime.
 
 ## Execution
 

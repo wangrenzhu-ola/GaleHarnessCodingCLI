@@ -30,11 +30,11 @@ If the input is present but unclear or underspecified, do not abandon — ask on
 
 **IMPORTANT: All file references in the plan document must use repo-relative paths (e.g., `src/models/user.rb`), never absolute paths (e.g., `/Users/name/Code/project/src/models/user.rb`). This applies everywhere — implementation unit file lists, pattern references, origin document links, and prose mentions. Absolute paths break portability across machines, worktrees, and teammates.**
 
-**Config (pre-resolved):**
-!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+**Config:**
+At the start of execution, use your native file-read tool to read `.compound-engineering/config.local.yaml` from the repository root. If the file is missing in the current worktree, check the main repository root (the parent of `.git/worktrees`). If the file is missing or unreadable, do not block the workflow — proceed silently with default settings.
 
-If the block above contains `language: en`, write documents in English.
-If `__NO_CONFIG__` or `language: zh-CN` or no language key, write documents in Chinese (default).
+If the config file contains `language: en`, write documents in English.
+If the file is missing, contains `language: zh-CN`, or has no language key, write documents in Chinese (default).
 
 ## Core Principles
 

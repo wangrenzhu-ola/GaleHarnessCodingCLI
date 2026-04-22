@@ -41,11 +41,11 @@ If no argument is provided, proceed with open-ended ideation.
 2. **Generate many -> critique all -> explain survivors only** - The quality mechanism is explicit rejection with reasons, not optimistic ranking. Do not let extra process obscure this pattern.
 3. **Route action into brainstorming** - Ideation identifies promising directions; `gh:brainstorm` defines the selected one precisely enough for planning. Do not skip to planning from ideation output.
 
-**Config (pre-resolved):**
-!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+**Config:**
+At the start of execution, use your native file-read tool to read `.compound-engineering/config.local.yaml` from the repository root. If the file is missing in the current worktree, check the main repository root (the parent of `.git/worktrees`). If the file is missing or unreadable, do not block the workflow — proceed silently with default settings.
 
-If the block above contains `language: en`, write documents in English.
-If `__NO_CONFIG__` or `language: zh-CN` or no language key, write documents in Chinese (default).
+If the config file contains `language: en`, write documents in English.
+If the file is missing, contains `language: zh-CN`, or has no language key, write documents in Chinese (default).
 
 ## Execution Flow
 
