@@ -74,12 +74,12 @@ class LayerManagerV5:
             if vector_backend == "sqlite":
                 from vector_store.sqlite_backend import SQLiteVectorBackend
                 self.vector_store = SQLiteVectorBackend(str(self.base_path / "vector_store.db"))
-                print(f"✅ Using SQLiteVectorBackend")
+                print(f"[OK] Using SQLiteVectorBackend")
             else:
                 self.vector_store = VectorStore(str(self.base_path / "vector_store.db"))
         except Exception as e:
             self._vector_store_error = str(e)
-            print(f"⚠️ Vector store unavailable: {e}")
+            print(f"[WARN] Vector store unavailable: {e}")
         self.lifecycle = MemoryLifecycleManager(self.base_path, self.config.get("lifecycle", {}))
         self.learnings = LearningTracker(self.base_path / "governance")
         self.errors = ErrorTracker(self.base_path / "governance")
@@ -94,7 +94,7 @@ class LayerManagerV5:
             self.session_transcript_index = BM25Index(str(self.base_path / "session_transcript_index.db"))
         except Exception as e:
             self._session_transcript_index_error = str(e)
-            print(f"⚠️ Session transcript index unavailable: {e}")
+            print(f"[WARN] Session transcript index unavailable: {e}")
         
         # 触发器（延迟加载，避免循环导入）
         self._trigger = None
@@ -715,11 +715,11 @@ class LayerManagerV5:
         if entry and self._is_session_transcript_entry(entry):
             sync_ok = self._sync_session_transcript_index_memory(l2_id)
             if not sync_ok:
-                print(f"⚠️ Session transcript index sync failed for {l2_id}")
+                print(f"[WARN] Session transcript index sync failed for {l2_id}")
         for pruned_id in prune_result.get("pruned", []):
             removed_ok = self._remove_session_transcript_index_entry(pruned_id)
             if not removed_ok:
-                print(f"⚠️ Session transcript index removal failed for {pruned_id}")
+                print(f"[WARN] Session transcript index removal failed for {pruned_id}")
         if prune_result.get("triggered"):
             result["pruned"] = prune_result.get("pruned", [])
         return result
@@ -1466,7 +1466,7 @@ class LayerManagerV5:
         try:
             raw_results = self.vector_store.search(query=query, top_k=max(limit, 10), layer="L2")
         except Exception as e:
-            print(f"⚠️ Vector search failed: {e}")
+            print(f"[WARN] Vector search failed: {e}")
             if debug_info is not None:
                 debug_info["vector"] = {
                     "enabled": False,
@@ -1709,7 +1709,7 @@ class LayerManagerV5:
             "retry_attempted": False,
             "recovered": False,
         }
-        print(f"⚠️ Vector store add failed for {l2_id}: {reason}")
+        print(f"[WARN] Vector store add failed for {l2_id}: {reason}")
         if not self._vector_store_can_add():
             return
         self._vector_store_last_add_failure["retry_attempted"] = True
@@ -1717,14 +1717,14 @@ class LayerManagerV5:
             retry_success = self.vector_store.add(**add_payload)
         except Exception as retry_error:
             self._vector_store_last_add_failure["retry_error"] = str(retry_error)
-            print(f"⚠️ Vector store retry failed for {l2_id}: {retry_error}")
+            print(f"[WARN] Vector store retry failed for {l2_id}: {retry_error}")
             return
         if retry_success:
             self._vector_store_last_add_failure["recovered"] = True
-            print(f"⚠️ Vector store add recovered on retry for {l2_id}")
+            print(f"[WARN] Vector store add recovered on retry for {l2_id}")
             return
         self._vector_store_last_add_failure["retry_error"] = "vector_store.add returned False"
-        print(f"⚠️ Vector store retry returned false for {l2_id}")
+        print(f"[WARN] Vector store retry returned false for {l2_id}")
 
     def _merge_score_field(self, existing: Dict[str, Any], item: Dict[str, Any], field: str) -> None:
         score_counts = existing.setdefault("_score_counts", {})
@@ -1840,5 +1840,5 @@ class LayerManagerV5:
         if full_sync:
             return self.rebuild_aggregates(include_archived=False)
         else:
-            print("🔄 增量同步模式...")
+            print("[SYNC] 增量同步模式...")
             return {"success": False, "message": "增量同步暂未实现"}

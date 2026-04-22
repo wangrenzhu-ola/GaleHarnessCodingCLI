@@ -70,18 +70,22 @@ function runHktCommand(
   })
 }
 
-// Check whether `uv` is on PATH
-async function isUvAvailable(): Promise<boolean> {
+// Check whether `uv` is on PATH (synchronous — safe to call at module load time)
+function isUvAvailableSync(): boolean {
   try {
-    const proc = Bun.spawn(["uv", "--version"], {
+    const proc = Bun.spawnSync(["uv", "--version"], {
       stdout: "pipe",
       stderr: "pipe",
     })
-    const exitCode = await proc.exited
-    return exitCode === 0
+    return proc.exitCode === 0
   } catch {
     return false
   }
+}
+
+// Async version kept for the prerequisites info test
+async function isUvAvailable(): Promise<boolean> {
+  return isUvAvailableSync()
 }
 
 // Check whether the HKT script file exists
@@ -110,12 +114,12 @@ function isScriptPresentSync(): boolean {
 }
 
 const scriptPresentSync = isScriptPresentSync()
+const uvAvailableSync = isUvAvailableSync()
 
-// For uv, we do a best-effort sync check: if the HKT script doesn't exist
-// we definitely skip; if it does exist we optimistically assume uv is
-// available. Tests that fail because uv is missing will still error clearly.
-// The beforeAll below also does a proper async check and can warn.
-const skipIfMissing = test.skipIf(!scriptPresentSync)
+// Both the HKT script and uv must be present; otherwise every test that
+// calls runHktCommand will fail. Using Bun.spawnSync at module load time
+// ensures skipIf evaluates the correct condition synchronously.
+const skipIfMissing = test.skipIf(!scriptPresentSync || !uvAvailableSync)
 
 describe("HKTMemory CLI Smoke Tests", () => {
   beforeAll(async () => {

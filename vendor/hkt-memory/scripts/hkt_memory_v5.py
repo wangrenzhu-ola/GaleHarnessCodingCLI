@@ -538,7 +538,7 @@ def main():
     )
     
     if args.command == "store":
-        print("📝 存储记忆...")
+        print("[WRITE] 存储记忆...")
         print(f"   Layer: {args.layer}")
         print(f"   Topic: {args.topic}")
         print(f"   Title: {args.title or 'Untitled'}")
@@ -553,13 +553,13 @@ def main():
             auto_extract=not args.no_extract
         )
         
-        print("\n✅ 存储完成!")
+        print("\n[OK] 存储完成!")
         print(f"   L2: {result.get('L2', 'N/A')}")
         print(f"   L1: {result.get('L1', 'N/A')}")
         print(f"   L0: {result.get('L0', 'N/A')}")
     
     elif args.command == "retrieve":
-        print(f"🔍 检索: {args.query}")
+        print(f"[FIND] 检索: {args.query}")
         print(f"   Layer: {args.layer}")
         if args.min_similarity is not None:
             print(f"   Min Similarity: {args.min_similarity}")
@@ -585,7 +585,7 @@ def main():
             if layer_name == "debug":
                 continue
             print(f"\n{'='*60}")
-            print(f"📂 {layer_name} 层 ({len(items)} 条结果)")
+            print(f"[LAYER] {layer_name} 层 ({len(items)} 条结果)")
             print(f"{'='*60}")
             
             for i, item in enumerate(items[:5], 1):
@@ -613,7 +613,7 @@ def main():
         if args.debug and results.get("debug"):
             debug_info = results["debug"]
             print(f"\n{'='*60}")
-            print("🧪 Debug 命中解释")
+            print("[TEST] Debug 命中解释")
             print(f"{'='*60}")
             config = debug_info.get("config", {})
             print(
@@ -649,7 +649,7 @@ def main():
             pr=args.pr,
             pr_id=args.pr_id,
         )
-        print("🔎 Session Search")
+        print("[FIND] Session Search")
         print()
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
@@ -663,7 +663,7 @@ def main():
             pr=args.pr,
             pr_id=args.pr_id,
         )
-        print("🕘 Recent Sessions\n")
+        print("[TIME] Recent Sessions\n")
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
     elif args.command == "prefetch":
@@ -680,7 +680,7 @@ def main():
             pr=args.pr,
             pr_id=args.pr_id,
         )
-        print("⚡ Prefetch Result\n")
+        print("[FAST] Prefetch Result\n")
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
     elif args.command == "orchestrate-recall":
@@ -701,11 +701,11 @@ def main():
             include_long_term=False if args.no_long_term else None,
             token_budget=args.token_budget,
         )
-        print("🧭 Orchestrated Recall\n")
+        print("[NAV] Orchestrated Recall\n")
         print(json.dumps(result, ensure_ascii=False, indent=2))
     
     elif args.command == "sync":
-        print("🔄 同步各层...")
+        print("[SYNC] 同步各层...")
         if args.full:
             print("   模式: 全量同步")
         else:
@@ -716,48 +716,48 @@ def main():
 
         result = memory.sync(full=args.full, rebuild_index=args.rebuild_index)
         if result:
-            print("🔁 同步结果\n")
+            print("[LOOP] 同步结果\n")
             for key, value in result.items():
                 print(f"   {key}: {value}")
     
     elif args.command == "stats":
-        print("📊 统计信息\n")
+        print("[STAT] 统计信息\n")
         stats = memory.stats()
         
         for layer_name, layer_stats in stats.items():
             print(f"\n{'='*60}")
-            print(f"📂 {layer_name} 层")
+            print(f"[LAYER] {layer_name} 层")
             print(f"{'='*60}")
             for key, value in layer_stats.items():
                 print(f"   {key}: {value}")
 
     elif args.command == "forget":
         result = memory.forget(memory_id=args.memory_id, force=args.force)
-        print("🧠 遗忘结果\n")
+        print("[BRAIN] 遗忘结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "restore":
         result = memory.restore(memory_id=args.memory_id)
-        print("♻️ 恢复结果\n")
+        print("[RECYCLE] 恢复结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "cleanup":
         result = memory.cleanup(dry_run=args.dry_run, scope=args.scope)
-        print("🧹 清理结果\n")
+        print("[CLEAN] 清理结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "pin":
         result = memory.pin(memory_id=args.memory_id, pinned=args.value == "true")
-        print("📌 Pin 结果\n")
+        print("[PIN] Pin 结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "importance":
         result = memory.set_importance(memory_id=args.memory_id, importance=args.value)
-        print("⭐ 重要性结果\n")
+        print("[STAR] 重要性结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
@@ -769,7 +769,7 @@ def main():
             query=args.query,
             note=args.note,
         )
-        print("🪝 反馈结果\n")
+        print("[HOOK] 反馈结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
@@ -791,13 +791,13 @@ def main():
                 })
                 if skill:
                     analyzer.write_skill(skill)
-                    print(f"\n✨ 已提取并写入技能: {skill['skill_name']}")
+                    print(f"\n[SKILL] 已提取并写入技能: {skill['skill_name']}")
                 else:
-                    print(f"\n⚠️ 反射分析未产出有效 skill")
+                    print(f"\n[WARN] 反射分析未产出有效 skill")
 
     elif args.command == "rebuild":
         result = memory.rebuild(include_archived=args.include_archived)
-        print("🧱 聚合重建结果\n")
+        print("[BUILD] 聚合重建结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
@@ -818,13 +818,13 @@ def main():
             layer=args.layer,
             auto_extract=args.auto_extract,
         )
-        print("📥 产物写入结果\n")
+        print("[WRITE] 产物写入结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "conflict-scan":
         result = memory.conflict_scan(output_path=args.output)
-        print("⚔️ 冲突扫描结果\n")
+        print("[SCAN] 冲突扫描结果\n")
         for key, value in result.items():
             if key == "conflicts":
                 print(f"   conflicts: {len(value)} entries")
@@ -832,7 +832,7 @@ def main():
                 print(f"   {key}: {value}")
     
     elif args.command == "test":
-        print("🧪 运行测试...\n")
+        print("[TEST] 运行测试...\n")
         
         test_content = """# MiniMax 语音转纪要工具
 
@@ -875,7 +875,7 @@ def main():
             total = layer_stats.get('total_entries') or layer_stats.get('total_topics', 0)
             print(f"   {layer}: {total} 条记录")
         
-        print("\n✅ 测试完成!")
+        print("\n[OK] 测试完成!")
         print(f"\n查看生成的文件:")
         print(f"   L2: {args.memory_dir}/L2-Full/daily/")
         print(f"   L1: {args.memory_dir}/L1-Overview/topics/tools.md")
@@ -883,7 +883,7 @@ def main():
 
     elif args.command == "serve":
         from mcp.server import MemoryMCPServer
-        print(f"🚀 启动 MCP HTTP 服务器 {args.host}:{args.port} ...")
+        print(f"[START] 启动 MCP HTTP 服务器 {args.host}:{args.port} ...")
         server = MemoryMCPServer(args.memory_dir)
         server.start_http(host=args.host, port=args.port)
 

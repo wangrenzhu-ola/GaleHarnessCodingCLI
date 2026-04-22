@@ -20,7 +20,7 @@ def test_classifier():
     
     assert result.category is not None
     assert result.confidence > 0
-    print(f"✓ Classification: {result.category.value} (confidence: {result.confidence:.2f})")
+    print(f"[OK] Classification: {result.category.value} (confidence: {result.confidence:.2f})")
     print(f"  Entities: {result.entities}")
     print(f"  Keywords: {result.keywords}")
 
@@ -39,7 +39,7 @@ def test_deduplicator():
     result = dedup.check_duplicate(new_memory, existing)
     
     assert result.action is not None
-    print(f"✓ Deduplication: {result.action.value}")
+    print(f"[OK] Deduplication: {result.action.value}")
     print(f"  Similarity: {result.similarity:.2f}")
     print(f"  Reason: {result.reason}")
 
@@ -51,17 +51,17 @@ def test_text_similarity():
     # 相同文本
     sim1 = dedup._text_similarity("Python开发", "Python开发")
     assert sim1 == 1.0
-    print(f"✓ Same text similarity: {sim1}")
+    print(f"[OK] Same text similarity: {sim1}")
     
     # 部分相似
     sim2 = dedup._text_similarity("Python开发", "Python编程")
     assert 0 < sim2 < 1.0
-    print(f"✓ Partial similarity: {sim2:.2f}")
+    print(f"[OK] Partial similarity: {sim2:.2f}")
     
     # 不同文本
     sim3 = dedup._text_similarity("Python", "JavaScript")
     assert sim3 < 0.5
-    print(f"✓ Different text similarity: {sim3:.2f}")
+    print(f"[OK] Different text similarity: {sim3:.2f}")
 
 
 if __name__ == "__main__":
@@ -76,4 +76,4 @@ if __name__ == "__main__":
     test_text_similarity()
     print()
     
-    print("All tests passed! ✓")
+    print("All tests passed! [OK]")

@@ -665,7 +665,7 @@ class MemoryLifecycleManager:
             "path": str(path),
             "error": str(error),
         }
-        print(f"⚠️ Lifecycle IO degraded during {operation}: {path} ({error})")
+        print(f"[WARN] Lifecycle IO degraded during {operation}: {path} ({error})")
 
     def _with_persistence_status(self, result: Dict[str, Any], persisted: bool) -> Dict[str, Any]:
         enriched = dict(result)

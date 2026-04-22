@@ -132,7 +132,7 @@ class L1Extractor:
             result = self._llm_extract(content)
             return self._parse_l1_result(result, title_hint)
         except Exception as e:
-            print(f"⚠️ LLM 提取失败，使用规则提取: {e}")
+            print(f"[WARN] LLM 提取失败，使用规则提取: {e}")
             return self._rule_based_extract(content, title_hint)
     
     def _llm_extract(self, content: str) -> str:

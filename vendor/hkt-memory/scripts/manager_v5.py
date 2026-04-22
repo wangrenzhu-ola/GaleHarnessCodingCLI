@@ -162,7 +162,7 @@ class LayerManagerV5:
                 }
             )
         except Exception as e:
-            print(f"⚠️ Vector store failed: {e}")
+            print(f"[WARN] Vector store failed: {e}")
         
         return {"L2": l2_id}
     
@@ -369,5 +369,5 @@ class LayerManagerV5:
             self.trigger.sync_all()
         else:
             # 增量同步：只处理没有 L1/L0 的 L2
-            print("🔄 增量同步模式...")
+            print("[SYNC] 增量同步模式...")
             # TODO: 实现增量检测逻辑
