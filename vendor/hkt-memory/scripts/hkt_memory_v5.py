@@ -45,6 +45,15 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Any
 
+# Windows console UTF-8 fix: reconfigure stdout/stderr so Chinese
+# characters in print() do not raise UnicodeEncodeError.
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except AttributeError:
+        pass
+
 # 添加项目路径
 SCRIPT_DIR = Path(__file__).parent.parent.absolute()
 if str(SCRIPT_DIR) not in sys.path:
