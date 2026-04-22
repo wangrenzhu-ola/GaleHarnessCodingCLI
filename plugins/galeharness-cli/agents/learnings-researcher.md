@@ -150,44 +150,14 @@ For each relevant document, return a summary in this format:
 
 ## Frontmatter Schema Reference
 
-Use this on-demand schema reference when you need the full contract:
-`../../skills/gh-compound/references/yaml-schema.md`
+The two `problem_type` tracks:
 
-Key enum values:
+- **Knowledge-track:** `architecture_pattern`, `design_pattern`, `tooling_decision`, `convention`, `workflow_issue`, `developer_experience`, `documentation_gap`, `best_practice` (fallback).
+- **Bug-track:** `build_error`, `test_failure`, `runtime_error`, `performance_issue`, `database_issue`, `security_issue`, `ui_bug`, `integration_issue`, `logic_error`.
 
-**problem_type values:**
-- build_error, test_failure, runtime_error, performance_issue
-- database_issue, security_issue, ui_bug, integration_issue
-- logic_error, developer_experience, workflow_issue
-- best_practice, documentation_gap
+Other frontmatter fields (`component`, `root_cause`, etc.) are repo-specific and evolve over time. Do not assume a fixed enum — read the value from each file as-is, and when summarizing a learning with an unrecognized value, pass it through verbatim rather than normalizing it.
 
-**component values:**
-- rails_model, rails_controller, rails_view, service_object
-- background_job, database, frontend_stimulus, hotwire_turbo
-- email_processing, brief_system, assistant, authentication
-- payments, development_workflow, testing_framework, documentation, tooling
-
-**root_cause values:**
-- missing_association, missing_include, missing_index, wrong_api
-- scope_issue, thread_violation, async_timing, memory_leak
-- config_error, logic_error, test_isolation, missing_validation
-- missing_permission, missing_workflow_step, inadequate_documentation
-- missing_tooling, incomplete_setup
-
-**Category directories (mapped from problem_type):**
-- `docs/solutions/build-errors/`
-- `docs/solutions/test-failures/`
-- `docs/solutions/runtime-errors/`
-- `docs/solutions/performance-issues/`
-- `docs/solutions/database-issues/`
-- `docs/solutions/security-issues/`
-- `docs/solutions/ui-bugs/`
-- `docs/solutions/integration-issues/`
-- `docs/solutions/logic-errors/`
-- `docs/solutions/developer-experience/`
-- `docs/solutions/workflow-issues/`
-- `docs/solutions/best-practices/`
-- `docs/solutions/documentation-gaps/`
+Probe the live `docs/solutions/` directory (Step 2) for what actually exists; do not hard-code subdirectory names.
 
 ## Output Format
 
