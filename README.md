@@ -7,6 +7,14 @@
 - [核心理念](#核心理念)
 - [工作流](#工作流)
 - [工程师实战指南](#工程师实战指南)
+  - [场景一：新需求开发](#场景一新需求开发)
+  - [场景二：Bug 修复](#场景二bug-修复)
+  - [场景三：需求讨论与评审](#场景三需求讨论与评审)
+  - [场景四：知识归档与复用](#场景四知识归档与复用)
+  - [场景五：代码优化](#场景五代码优化)
+  - [场景六：研究现有代码](#场景六研究现有代码)
+  - [场景七：并行开发（Worktree 隔离）](#场景七并行开发worktree-隔离)
+  - [场景八：探索改进机会](#场景八探索改进机会)
 - [系统架构](#系统架构)
 - [核心工作流时序图](#核心工作流时序图)
 - [核心功能](#核心功能)
@@ -138,7 +146,39 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
 /gh:slack-research "团队对微服务拆分的讨论"
 ```
 
-### 场景七：探索改进机会
+### 场景七：并行开发（Worktree 隔离）
+
+多个需求可以同时推进，互不影响。每个 worktree 拥有独立的文件目录和分支，共享 Git 对象，创建速度快、占用空间小。
+
+```bash
+# 开需求1
+/gh:brainstorm "实现用户登录"
+# → 选择 Option 2: Use a worktree → 自动创建 brainstorm/user-login 分支和 worktree
+
+# 开需求2（同时进行，互不干扰）
+/gh:brainstorm "接入支付系统"
+# → 选择 Option 2: Use a worktree → 自动创建 brainstorm/payment 分支和 worktree
+
+# 查看所有进行中的工作
+# git worktree list 或使用 git-worktree skill
+```
+
+**跨阶段复用**：从 `gh:brainstorm` 进入 `gh:work` 时，系统检测到已在 feature 分支，直接沿用，不会重复创建 worktree 或分支。如需调整分支名风格（如 `brainstorm/xxx` → `feat/xxx`），会提示 rename。
+
+```bash
+# brainstorm 阶段已创建 worktree + brainstorm/feature-a 分支
+/gh:work docs/plans/feature-a-plan.md
+# → 检测到已在 feature 分支 → 沿用，不重复创建
+```
+
+| 操作 | 命令 |
+|------|------|
+| 创建 worktree | `/gh:brainstorm` 或 `/gh:work` 中选择 worktree 选项 |
+| 查看所有 worktree | `git worktree list` 或 `/git-worktree` skill |
+| 切换 worktree | `/git-worktree` skill |
+| 清理完成的 worktree | `/git-worktree` skill |
+
+### 场景八：探索改进机会
 
 ```bash
 /gh:ideate
