@@ -42,12 +42,11 @@ After extracting tokens from arguments, resolve the delegation state using this 
 2. **Config file** -- extract settings from the config block below. Value `codex` for `work_delegate` activates delegation; `false` deactivates.
 3. **Hard default** -- `false` (delegation off)
 
-**Config (pre-resolved):**
-!`cat "$(git rev-parse --show-toplevel 2>/dev/null)/.compound-engineering/config.local.yaml" 2>/dev/null || cat "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)")/.compound-engineering/config.local.yaml" 2>/dev/null || echo '__NO_CONFIG__'`
+**Config:**
+At the start of execution, use your native file-read tool to read `.compound-engineering/config.local.yaml` from the repository root. If the file is missing in the current worktree, check the main repository root (the parent of `.git/worktrees`). If the file is missing or unreadable, do not block the workflow — proceed silently with default settings.
 
-If the block above contains YAML key-value pairs, extract values for the keys listed below.
-If it shows `__NO_CONFIG__`, the file does not exist — all settings fall through to defaults.
-If it shows an unresolved command string, read `.compound-engineering/config.local.yaml` from the repo root using the native file-read tool (e.g., Read in Claude Code, read_file in Codex). If the file does not exist, all settings fall through to defaults.
+If the config file contains YAML key-value pairs, extract values for the keys listed below.
+If the file does not exist, all settings fall through to defaults.
 
 If any setting has an unrecognized value, fall through to the hard default for that setting.
 

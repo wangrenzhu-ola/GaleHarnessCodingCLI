@@ -59,8 +59,7 @@ If `inside_sandbox` is true, delegation would recurse or fail.
 !`command -v codex >/dev/null 2>&1 && echo "CODEX_AVAILABLE" || echo "CODEX_NOT_FOUND"`
 
 If the line above shows `CODEX_AVAILABLE`, proceed to the next check.
-If it shows `CODEX_NOT_FOUND`, the Codex CLI is not installed. Emit "Codex CLI not found (install via `npm install -g @openai/codex` or `brew install codex`) -- using standard mode." and set `delegation_active` to false.
-If it shows an unresolved command string, run `command -v codex` using a shell tool. If the command prints a path, proceed. If it fails or prints nothing, emit the same message and set `delegation_active` to false.
+If it shows `CODEX_NOT_FOUND` or anything else, the Codex CLI is not installed or unavailable. Emit "Codex CLI not found (install via `npm install -g @openai/codex` or `brew install codex`) -- using standard mode." and set `delegation_active` to false.
 
 **3. Consent Flow**
 
