@@ -78,7 +78,7 @@ describe("apply-patch-to-worktree.sh", () => {
 
     expect(result.exitCode).toBe(1)
     expect(result.stderr).toContain("main worktree")
-    const fileContent = await fs.readFile(path.join(repoRoot, "file.txt"), "utf8")
+    const fileContent = (await fs.readFile(path.join(repoRoot, "file.txt"), "utf8")).replace(/\r\n/g, "\n")
     expect(fileContent).toBe("line 1\n")
   })
 
@@ -94,7 +94,7 @@ describe("apply-patch-to-worktree.sh", () => {
     const result = await runCommand(["bash", scriptPath, patchPath], worktreeRoot, gitEnv)
     expect(result.exitCode).toBe(0)
     expect(result.stdout).toContain("Patch applied successfully")
-    const fileContent = await fs.readFile(path.join(worktreeRoot, "file.txt"), "utf8")
+    const fileContent = (await fs.readFile(path.join(worktreeRoot, "file.txt"), "utf8")).replace(/\r\n/g, "\n")
     expect(fileContent).toBe("line 1\nline 2\n")
   })
 

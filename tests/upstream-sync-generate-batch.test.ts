@@ -126,8 +126,9 @@ describe("generate-batch.py", () => {
     ])
     expect(adaptedFiles).toEqual(rawFiles)
 
-    const commitRange = await fs.readFile(path.join(batchDir, "commit-range.txt"), "utf8")
+    const commitRange = (await fs.readFile(path.join(batchDir, "commit-range.txt"), "utf8")).replace(/\r\n/g, "\n")
     const expectedKeys = (await fs.readFile(path.join(expectedRoot, "commit-range.expected-keys.txt"), "utf8"))
+      .replace(/\r\n/g, "\n")
       .trim()
       .split("\n")
     for (const key of expectedKeys) {

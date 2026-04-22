@@ -1,0 +1,2 @@
+# Force LF line endings for test fixtures to avoid CRLF mismatches on Windows
+tests/fixtures/** text eol=lf
