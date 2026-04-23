@@ -26,3 +26,7 @@ __pycache__/
 
 # Local test scripts
 test-gh-local
+docs/async-progress/WINDOWS_COMPAT_SCAN_REPORT.md
+memory/_lifecycle/events.jsonl
+memory/_lifecycle/manifest.json
+memory/_lifecycle/state.json
