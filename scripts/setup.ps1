@@ -205,6 +205,45 @@ New-Item -ItemType File -Force -Path "memory/L1-Overview/index.md" | Out-Null
 New-Item -ItemType File -Force -Path "memory/L2-Full/evergreen/MEMORY.md" | Out-Null
 ok "HKTMemory 目录结构就绪"
 
+# ── HKTMemory CLI installation (Windows) ──
+Write-Host ""
+info "Installing hkt-memory CLI for Windows..."
+
+$hktCmdWrapper = Join-Path $repoRoot "vendor\hkt-memory\bin\hkt-memory.cmd"
+if (Test-Path $hktCmdWrapper) {
+    # Prefer ~/.bun/bin, then ~/.local/bin, create if needed
+    $hktInstallDir = $null
+    foreach ($candidate in @("$env:USERPROFILE\.bun\bin", "$env:USERPROFILE\.local\bin")) {
+        if (Test-Path $candidate) {
+            $hktInstallDir = $candidate
+            break
+        }
+    }
+    if (-not $hktInstallDir) {
+        $hktInstallDir = "$env:USERPROFILE\.bun\bin"
+        New-Item -ItemType Directory -Force -Path $hktInstallDir | Out-Null
+        info "Created $hktInstallDir for hkt-memory"
+    }
+
+    $destCmd = Join-Path $hktInstallDir "hkt-memory.cmd"
+    Copy-Item -Path $hktCmdWrapper -Destination $destCmd -Force
+    ok "hkt-memory.cmd -> $destCmd"
+
+    # Ensure install dir is in PATH
+    Add-ToUserPath $hktInstallDir
+    $env:Path = "$env:Path;$hktInstallDir"
+
+    # Verify
+    if (Test-Command "hkt-memory") {
+        ok "hkt-memory CLI is ready"
+    } else {
+        warn "hkt-memory not found on PATH. Restart PowerShell or add $hktInstallDir to PATH."
+        warn "Skills that use HKTMemory (gh:debug, gh:plan, etc.) will not work without it."
+    }
+} else {
+    warn "hkt-memory.cmd wrapper not found at $hktCmdWrapper, skipping PATH install"
+}
+
 # =====================================================
 #  7. Project Dependencies & Global Link
 # =====================================================
