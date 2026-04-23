@@ -116,19 +116,11 @@ function isScriptPresentSync(): boolean {
 const scriptPresentSync = isScriptPresentSync()
 const uvAvailableSync = isUvAvailableSync()
 
-function isWindowsSync(): boolean {
-  return process.platform === "win32"
-}
-
-const windowsSync = isWindowsSync()
-
 // Both the HKT script and uv must be present; otherwise every test that
 // calls runHktCommand will fail. Using Bun.spawnSync at module load time
 // ensures skipIf evaluates the correct condition synchronously.
-// Windows CI: uv run on Windows is slow enough to hit the 5s Bun test timeout,
-// so we skip these smoke tests on Windows. The compounding contract tests
-// (hkt-memory-compounding.test.ts) still validate SKILL.md content on all platforms.
-const skipIfMissing = test.skipIf(!scriptPresentSync || !uvAvailableSync || windowsSync)
+const skipIfMissing = test.skipIf(!scriptPresentSync || !uvAvailableSync)
+skipIfMissing.timeout(60_000)
 
 describe("HKTMemory CLI Smoke Tests", () => {
   beforeAll(async () => {
@@ -137,9 +129,7 @@ describe("HKTMemory CLI Smoke Tests", () => {
     if (!uvOk || !scriptOk) {
       console.warn("Prerequisites not met (uv or HKT script missing), some tests may fail or be skipped")
     }
-    if (windowsSync) {
-      console.warn("Windows detected: HKTMemory CLI smoke tests skipped (uv run timeout on Windows CI)")
-    }
+
   })
 
   // -------------------------------------------------------------------
