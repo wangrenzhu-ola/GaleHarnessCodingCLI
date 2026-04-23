@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.14.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.13.1...cli-v1.14.0) (2026-04-23)
+
+
+### Features
+
+* **compound-sync:** add per-commit upstream sync workflow ([9a0226e](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9a0226e2156d33e056cc61a58a52d91a0c8ae6ac))
+* **kilo:** 添加 Kilo Code 目标平台支持 ([#44](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/44)) ([a99c6d4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a99c6d45b67bc5ea481d5517d76477372a3a8f59))
+
+
+### Bug Fixes
+
+* **hkt-memory:** replace CWD-dependent vendor path with hkt-memory PATH wrapper ([9c44d5f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9c44d5fa0a8eda9e87dc907be12a8dcc78e0a8a7))
+* **lfg:** use platform-neutral skill references ([#642](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/642)) ([b5c561e](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/b5c561eb53f2335b7fc4d99eb958878b28fa4792))
+* **upstream-sync:** correct upstream repo config, apply Windows CI fixes, update baseline ([9bfdcc4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9bfdcc4722864f697e7b79a445fb9a4a7334158a))
+
 ## [1.13.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.13.0...cli-v1.13.1) (2026-04-22)
 
 

@@ -9,6 +9,21 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.13.1...galeharness-cli-v1.14.0) (2026-04-23)
+
+
+### Features
+
+* **ce-code-review:** add Swift/iOS stack-specific reviewer persona ([#638](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/638)) ([b16849d](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/b16849d8a9d5e119347c831c56f55526ef8842b3))
+* **ce-plan:** add U-IDs and origin trace to plan template ([#632](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/632)) ([75cc969](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/75cc96943ea9cf35fb4e32a1a313198d93bfe864))
+* **compound-sync:** add per-commit upstream sync workflow ([9a0226e](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9a0226e2156d33e056cc61a58a52d91a0c8ae6ac))
+
+
+### Bug Fixes
+
+* **hkt-memory:** replace CWD-dependent vendor path with hkt-memory PATH wrapper ([9c44d5f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9c44d5fa0a8eda9e87dc907be12a8dcc78e0a8a7))
+* **lfg:** use platform-neutral skill references ([#642](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/642)) ([b5c561e](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/b5c561eb53f2335b7fc4d99eb958878b28fa4792))
+
 ## [1.13.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v1.13.0...galeharness-cli-v1.13.1) (2026-04-22)
 
 

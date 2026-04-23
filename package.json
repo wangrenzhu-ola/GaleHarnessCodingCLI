@@ -1,6 +1,6 @@
 {
   "name": "@gale/harness-cli",
-  "version": "1.13.1",
+  "version": "1.14.0",
   "description": "GaleHarnessCLI - Compound Engineering workflow enhanced with HKTMemory vector knowledge base",
   "type": "module",
   "private": true,
