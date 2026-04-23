@@ -82,4 +82,30 @@
 
 **标签**: 通用
 
+### GaleHarnessCLI缺乏CLI自更新能力
+
+- **时间**: 2026-04-23
+- **摘要**: GaleHarnessCLI 不具备 CLI 自更新能力。package.json 标记为 private，已移除 npm publish，GitHub Rel...
+- **重要性**: medium
+- **来源**: [2026-04-23-110740-228](../L2-Full/daily/)
+
+**关键要点**:
+
+- GaleHarnessCLI 不具备 CLI 自更新能力。package.json 标记为 private，已移除 npm publish，GitHub Rel
+
+**标签**: 工具使用
+
+---
+### CLI自更新能力需求文档
+
+- **时间**: 2026-04-23
+- **摘要**: CLI自更新能力需求：从GitHub Release下载编译产物替换本地二进制，新增gale-harness update子命令（含--check和--roll...
+- **重要性**: medium
+- **来源**: [2026-04-23-112142-915](../L2-Full/daily/)
+
+**关键要点**:
+
+- CLI自更新能力需求：从GitHub Release下载编译产物替换本地二进制，新增gale-harness update子命令（含--check和--roll
+
+**标签**: 问题排查
 ---

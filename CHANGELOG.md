@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.0.0...cli-v2.0.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* **release:** align manifest and version files with actual v2.0.0 release ([c9d3217](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c9d321793041d91ac6963917bd3bf2f81e144397))
+
 ## [2.0.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v1.13.1...cli-v2.0.0) (2026-04-23)
 
 

@@ -7,6 +7,7 @@ import listCommand from "./commands/list"
 import pluginPath from "./commands/plugin-path"
 import sync from "./commands/sync"
 import board from "./commands/board"
+import update from "./commands/update"
 
 const main = defineCommand({
   meta: {
@@ -21,6 +22,7 @@ const main = defineCommand({
     "plugin-path": () => pluginPath,
     sync: () => sync,
     board: () => board,
+    update: () => update,
   },
   run: async (ctx) => {
     const hasSubCommand = ctx.rawArgs.some((arg) => !arg.startsWith("-"));

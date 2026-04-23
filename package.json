@@ -1,6 +1,6 @@
 {
   "name": "@gale/harness-cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "GaleHarnessCLI - Compound Engineering workflow enhanced with HKTMemory vector knowledge base",
   "type": "module",
   "private": true,
@@ -19,7 +19,9 @@
     "release:sync-metadata": "bun run scripts/release/sync-metadata.ts --write",
     "release:validate": "bun run scripts/release/validate.ts",
     "build:gale-task": "bun build --compile cmd/gale-task/index.ts --outfile gale-task --target bun",
-    "install-gale-task": "bun run build:gale-task && mv gale-task ~/.local/bin/gale-task && echo 'gale-task installed to ~/.local/bin/gale-task'"
+    "install-gale-task": "bun run build:gale-task && mv gale-task ~/.local/bin/gale-task && echo 'gale-task installed to ~/.local/bin/gale-task'",
+    "build:release": "bun run scripts/release/build.ts",
+    "build:cli": "bun build --compile src/index.ts --outfile gale-harness --target bun"
   },
   "dependencies": {
     "citty": "^0.1.6",
