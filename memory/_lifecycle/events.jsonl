@@ -603,6 +603,8 @@
 {"timestamp": "2026-04-22T14:52:47.620836+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-22T14:52:47.664977+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-22T14:52:47.712322+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T08:57:07.621586+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T08:57:09.719585+00:00", "type": "capture", "memory_id": "2026-04-23-165707-632", "scope": "topic:code-review", "data": {"status": "active"}}
 {"timestamp": "2026-04-23T01:49:18.633454+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-23T01:49:18.636035+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-23T01:49:40.951932+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
@@ -836,3 +838,5 @@
 {"timestamp": "2026-04-23T07:28:01.170362+00:00", "type": "recall", "memory_id": "2026-04-22-100817-438", "scope": "topic:hktmemory-integration", "data": {}}
 {"timestamp": "2026-04-23T07:28:01.170400+00:00", "type": "recall", "memory_id": "2026-04-20-160714-252", "scope": "topic:knowledge-repo,planning,infrastructure", "data": {}}
 {"timestamp": "2026-04-23T07:28:01.170437+00:00", "type": "recall", "memory_id": "2026-04-20-172528-002", "scope": "topic:developer-experience", "data": {}}
+{"timestamp": "2026-04-23T09:05:19.521519+00:00", "type": "capture", "memory_id": "2026-04-23-152013-870", "scope": "topic:implementation", "data": {"status": "active"}}
+{"timestamp": "2026-04-23T09:05:19.522585+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}

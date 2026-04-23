@@ -159,6 +159,20 @@ touch memory/L1-Overview/index.md
 touch memory/L2-Full/evergreen/MEMORY.md
 ok "HKTMemory 目录结构就绪"
 
+# ── HKTMemory CLI installation ──
+echo ""
+info "Installing hkt-memory CLI to PATH..."
+bash "$REPO_ROOT/vendor/hkt-memory/install.sh"
+
+# Verify hkt-memory is on PATH
+if command -v hkt-memory &>/dev/null; then
+  ok "hkt-memory CLI is ready ($(command -v hkt-memory))"
+else
+  warn "hkt-memory not found on PATH after install."
+  warn "You may need to restart your shell or run: source $SHELL_PROFILE"
+  warn "Skills that use HKTMemory (gh:debug, gh:plan, etc.) will not work without it."
+fi
+
 # =====================================================
 #  7. Project Dependencies & Global Link
 # =====================================================

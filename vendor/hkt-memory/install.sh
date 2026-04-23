@@ -79,6 +79,18 @@ else
     echo "  Note: 'hkt-memory' not yet on PATH. Restart your shell or run:"
     echo "    export PATH=\"$INSTALL_DIR:\$PATH\""
   fi
+
+  # ── Post-install verification ──
+  echo ""
+  echo "Verifying hkt-memory installation..."
+  if command -v hkt-memory &>/dev/null; then
+    echo "✅ hkt-memory is available: $(command -v hkt-memory)"
+  else
+    echo "⚠️  hkt-memory is NOT on PATH after installation."
+    echo "   Symlink created at: $INSTALL_DIR/hkt-memory"
+    echo "   Make sure $INSTALL_DIR is in your PATH."
+    echo "   Add to your shell profile: export PATH=\"$INSTALL_DIR:\$PATH\""
+  fi
 fi
 
 echo

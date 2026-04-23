@@ -205,6 +205,58 @@ New-Item -ItemType File -Force -Path "memory/L1-Overview/index.md" | Out-Null
 New-Item -ItemType File -Force -Path "memory/L2-Full/evergreen/MEMORY.md" | Out-Null
 ok "HKTMemory 目录结构就绪"
 
+# ── HKTMemory CLI installation (Windows) ──
+Write-Host ""
+info "Installing hkt-memory CLI for Windows..."
+
+$hktCmdWrapper = Join-Path $repoRoot "vendor\hkt-memory\bin\hkt-memory.cmd"
+$hktPythonScript = Join-Path $repoRoot "vendor\hkt-memory\scripts\hkt_memory_v5.py"
+
+if (Test-Path $hktCmdWrapper) {
+    # Prefer ~/.bun/bin, then ~/.local/bin, create if needed
+    $hktInstallDir = $null
+    foreach ($candidate in @("$env:USERPROFILE\.bun\bin", "$env:USERPROFILE\.local\bin")) {
+        if (Test-Path $candidate -PathType Container) {
+            $hktInstallDir = $candidate
+            break
+        }
+    }
+    if (-not $hktInstallDir) {
+        $hktInstallDir = "$env:USERPROFILE\.bun\bin"
+        New-Item -ItemType Directory -Force -Path $hktInstallDir | Out-Null
+        info "Created $hktInstallDir for hkt-memory"
+    }
+
+    $destCmd = Join-Path $hktInstallDir "hkt-memory.cmd"
+    Copy-Item -Path $hktCmdWrapper -Destination $destCmd -Force
+    ok "hkt-memory.cmd -> $destCmd"
+
+    # Persist HKT_MEMORY_SCRIPT so the copied wrapper can locate the Python
+    # script even when run outside the repo (Strategy 3 in hkt-memory.cmd).
+    # Also update the current session.
+    [Environment]::SetEnvironmentVariable("HKT_MEMORY_SCRIPT", $hktPythonScript, "User")
+    $env:HKT_MEMORY_SCRIPT = $hktPythonScript
+    ok "HKT_MEMORY_SCRIPT set to $hktPythonScript"
+
+    # Ensure install dir is in PATH
+    Add-ToUserPath $hktInstallDir
+    $env:Path = "$env:Path;$hktInstallDir"
+
+    # Verify: actually execute hkt-memory to confirm the wrapper resolves
+    # the Python script and runs successfully.
+    $hktVerifyOutput = & "$destCmd" stats 2>&1
+    $hktVerifyExit = $LASTEXITCODE
+    if ($hktVerifyExit -eq 0) {
+        ok "hkt-memory CLI is ready"
+    } else {
+        warn "hkt-memory command failed (exit $hktVerifyExit). Output:"
+        warn "$hktVerifyOutput"
+        warn "Skills that use HKTMemory (gh:debug, gh:plan, etc.) will not work without it."
+    }
+} else {
+    warn "hkt-memory.cmd wrapper not found at $hktCmdWrapper, skipping PATH install"
+}
+
 # =====================================================
 #  7. Project Dependencies & Global Link
 # =====================================================

@@ -289,5 +289,63 @@
       "topic": "brainstorm",
       "id": "2026-04-23-112142-915"
     }
+  },
+  "2026-04-23-165707-632": {
+    "memory_id": "2026-04-23-165707-632",
+    "title": "PR #47 Review Fixes: Windows hkt-memory CLI install",
+    "topic": "code-review",
+    "scope": "topic:code-review",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-23.md",
+    "status": "active",
+    "created_at": "2026-04-23T08:57:09.718876+00:00",
+    "updated_at": "2026-04-23T08:57:09.718876+00:00",
+    "last_accessed": "2026-04-23T08:57:09.718876+00:00",
+    "access_count": 0,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "fa72d520d74648feb79cb4bb6e62e75daf726fcc",
+      "pr_id": null,
+      "topic": "code-review",
+      "id": "2026-04-23-165707-632"
+    }
+  },
+  "2026-04-23-152013-870": {
+    "memory_id": "2026-04-23-152013-870",
+    "title": "CLI自更新能力实施完成",
+    "topic": "implementation",
+    "scope": "topic:implementation",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-23.md",
+    "status": "active",
+    "created_at": "2026-04-23T09:05:19.521190+00:00",
+    "updated_at": "2026-04-23T09:05:19.521190+00:00",
+    "last_accessed": "2026-04-23T09:05:19.521190+00:00",
+    "access_count": 0,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "c9d321793041d91ac6963917bd3bf2f81e144397",
+      "pr_id": null,
+      "topic": "implementation",
+      "id": "2026-04-23-152013-870"
+    }
   }
 }
