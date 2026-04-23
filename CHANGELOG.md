@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.1.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.0.1...cli-v2.1.0) (2026-04-23)
+
+
+### Features
+
+* **cli:** add Linux deployment support ([bd92c8a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/bd92c8aa98e78d44b58f2caf2ee0f65e60884b58))
+* **cli:** add Linux deployment support ([6ff9f51](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/6ff9f5100bf70ca3c9718f1345e3aaf839ce02c7))
+* **cli:** add self-update command with check, update, and rollback ([d7c6605](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d7c6605958d94477f740ad0e8d2da19fefba4bb2))
+* **cli:** CLI自更新能力与gh:update skill修复 ([81f8df3](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/81f8df3e32bd450552a5142514ff34d7a200edf2))
+* **cli:** 增加 GaleHarnessCLI 自更新能力需求文档及相关内容 ([95dc9bb](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/95dc9bba9d29e97fa0b483e74e131ef4c4b48234))
+
+
+### Bug Fixes
+
+* **hkt-memory:** address review findings for Windows CLI install ([fa72d52](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/fa72d520d74648feb79cb4bb6e62e75daf726fcc))
+* **hkt-memory:** ensure CLI is properly installed to PATH during setup ([61c0014](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/61c00141a9488d6d85b283554375d51bb5f9e70c))
+* **hkt-memory:** 确保 setup 流程将 hkt-memory CLI 正确安装到 PATH ([ff660a6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ff660a65ff428dd4da314810125a1467b446ff2f))
+* **windows:** 修复 Windows 兼容性问题 -- emoji 编码安全与 file 模式 vector_backend 处理 ([c2a0ba4](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c2a0ba417bf48c104fa48cfceda2803889d318f9))
+* **windows:** 修复 Windows 兼容性问题 -- emoji 编码安全与 file 模式 vector_backend 处理 ([22a6c44](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/22a6c44e805ce3ae59e4100e08d772813eab2600))
+
 ## [2.0.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.0.0...cli-v2.0.1) (2026-04-23)
 
 
