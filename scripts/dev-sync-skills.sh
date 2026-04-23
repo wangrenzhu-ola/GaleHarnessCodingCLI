@@ -17,9 +17,11 @@ fi
 TARGETS=()
 [ -d "$HOME/.qoder/skills" ] && TARGETS+=("$HOME/.qoder")
 [ -d "$HOME/.claude/skills" ] && TARGETS+=("$HOME/.claude")
+[ -d "$HOME/.trae/skills" ] && TARGETS+=("$HOME/.trae")
+[ -d "$HOME/.kimi/skills" ] && TARGETS+=("$HOME/.kimi")
 
 if [ ${#TARGETS[@]} -eq 0 ]; then
-  echo "ERROR: No installed environments found (~/.qoder or ~/.claude)."
+  echo "ERROR: No installed environments found (~/.qoder, ~/.claude, ~/.trae, or ~/.kimi)."
   echo "Run 'compound-plugin install' first."
   exit 1
 fi
@@ -38,12 +40,12 @@ for target in "${TARGETS[@]}"; do
     skill_count=$((skill_count + 1))
   done
 
-  # Sync agents: flatten category subdirs -> target/agents/<agent>.md
+  # Sync agents: support both category-subdir and flat layout
   # Remove agents that exist in our source but were previously installed,
   # then copy fresh versions. Don't touch agents from other plugins.
   agent_count=0
-  # Build list of agent filenames from source to know what we own
   owned_agents=()
+  mkdir -p "$target/agents"
   for category_dir in "$AGENTS_SRC"/*/; do
     for agent_file in "$category_dir"*.md; do
       [ -f "$agent_file" ] || continue
@@ -52,15 +54,24 @@ for target in "${TARGETS[@]}"; do
       agent_count=$((agent_count + 1))
     done
   done
+  # Also pick up .md files directly under AGENTS_SRC (flat layout)
+  for agent_file in "$AGENTS_SRC"/*.md; do
+    [ -f "$agent_file" ] || continue
+    owned_agents+=("$(basename "$agent_file")")
+    cp "$agent_file" "$target/agents/"
+    agent_count=$((agent_count + 1))
+  done
 
   # Remove previously installed agents that no longer exist in source
   for installed in "$target/agents/"*.md; do
     [ -f "$installed" ] || continue
     base=$(basename "$installed")
     found=false
-    for owned in "${owned_agents[@]}"; do
-      if [ "$base" = "$owned" ]; then found=true; break; fi
-    done
+    if [ ${#owned_agents[@]} -gt 0 ]; then
+      for owned in "${owned_agents[@]}"; do
+        if [ "$base" = "$owned" ]; then found=true; break; fi
+      done
+    fi
     if [ "$found" = false ]; then
       # Only remove if we previously installed it (check for our signature header)
       if head -5 "$installed" | grep -q 'galeharness-cli'; then
