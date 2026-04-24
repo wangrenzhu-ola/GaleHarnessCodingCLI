@@ -13,28 +13,22 @@ on:
         required: false
 
 jobs:
-  build-and-upload:
+  determine-version:
     if: >-
       github.event_name == 'release' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
         github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.head_branch == 'main')
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+    outputs:
+      skip: ${{ steps.version.outputs.skip }}
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
 
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
       - name: Determine version
         id: version
         env:
@@ -42,6 +36,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           DISPATCH_TAG: ${{ github.event.inputs.tag }}
+          WORKFLOW_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             TAG="$DISPATCH_TAG"
@@ -67,19 +62,57 @@ jobs:
             exit 0
           fi
 
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            TARGET_COMMITISH="$(gh release view "$TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --json targetCommitish \
+              --jq '.targetCommitish')"
+            if [ "$TARGET_COMMITISH" != "$WORKFLOW_HEAD_SHA" ]; then
+              echo "Latest galeharness-cli release '$TAG' points to '$TARGET_COMMITISH', not workflow head '$WORKFLOW_HEAD_SHA'; skipping."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
           VERSION="${TAG#galeharness-cli-v}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
+  build-and-upload:
+    needs: determine-version
+    if: needs.determine-version.result == 'success' && needs.determine-version.outputs.skip != 'true'
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - darwin-arm64
+          - darwin-x64
+          - linux-arm64
+          - linux-x64
+          - windows-arm64
+          - windows-x64
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
       - name: Build release binaries
-        if: steps.version.outputs.skip != 'true'
-        run: bun run build:release --version ${{ steps.version.outputs.version }}
+        run: bun run build:release --version ${{ needs.determine-version.outputs.version }} --platform ${{ matrix.platform }}
 
       - name: Upload assets to release
-        if: steps.version.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ARCHIVE="galeharness-cli-${{ steps.version.outputs.version }}-darwin-arm64.tar.gz"
-          gh release upload "${{ steps.version.outputs.tag }}" "$ARCHIVE" --clobber
+          ARCHIVE="galeharness-cli-${{ needs.determine-version.outputs.version }}-${{ matrix.platform }}.tar.gz"
+          gh release upload "${{ needs.determine-version.outputs.tag }}" "$ARCHIVE" --clobber

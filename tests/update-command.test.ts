@@ -7,11 +7,18 @@ import {
   getCurrentVersion,
   detectPlatform,
   detectBinDir,
+  getLatestVersion,
   isCompiledBinary,
   checkForUpdate,
   performUpdate,
   performRollback,
 } from "../src/utils/update"
+import {
+  RELEASE_PLATFORMS,
+  detectReleasePlatform,
+  getReleaseBinaryFileName,
+  getReleaseBinaryFileNames,
+} from "../src/utils/release-platforms"
 
 // ── Unit tests (pure logic) ─────────────────────────────────────────────────
 
@@ -73,6 +80,110 @@ describe("update utils", () => {
       if (process.platform === "darwin" && process.arch === "arm64") {
         expect(platform).toBe("darwin-arm64")
       }
+    })
+  })
+
+  describe("release platform metadata", () => {
+    test("includes macOS, Linux, and Windows release platforms", () => {
+      expect(RELEASE_PLATFORMS).toEqual([
+        "darwin-arm64",
+        "darwin-x64",
+        "linux-arm64",
+        "linux-x64",
+        "windows-arm64",
+        "windows-x64",
+      ])
+    })
+
+    test("maps Node platform and arch values to release platform names", () => {
+      expect(detectReleasePlatform("darwin", "arm64")).toBe("darwin-arm64")
+      expect(detectReleasePlatform("darwin", "x64")).toBe("darwin-x64")
+      expect(detectReleasePlatform("linux", "arm64")).toBe("linux-arm64")
+      expect(detectReleasePlatform("linux", "x64")).toBe("linux-x64")
+      expect(detectReleasePlatform("win32", "arm64")).toBe("windows-arm64")
+      expect(detectReleasePlatform("win32", "x64")).toBe("windows-x64")
+    })
+
+    test("uses .exe binary names for Windows release archives", () => {
+      expect(getReleaseBinaryFileName("gale-harness", "windows-x64")).toBe("gale-harness.exe")
+      expect(getReleaseBinaryFileNames("windows-arm64")).toEqual([
+        "gale-harness.exe",
+        "compound-plugin.exe",
+        "gale-knowledge.exe",
+        "gale-memory.exe",
+      ])
+    })
+  })
+
+  describe("getLatestVersion", () => {
+    const originalFetch = globalThis.fetch
+
+    afterEach(() => {
+      globalThis.fetch = originalFetch
+    })
+
+    test("selects the latest galeharness-cli release instead of sibling release components", async () => {
+      const platform = detectPlatform()
+      const assetName = `galeharness-cli-2.4.0-${platform}.tar.gz`
+      globalThis.fetch = mock(async () =>
+        new Response(
+          JSON.stringify([
+            {
+              tag_name: "cli-v2.4.0",
+              draft: false,
+              prerelease: false,
+              assets: [],
+            },
+            {
+              tag_name: "galeharness-cli-v2.4.0",
+              draft: false,
+              prerelease: false,
+              assets: [
+                {
+                  name: assetName,
+                  browser_download_url: "https://example.test/download",
+                  size: 123,
+                },
+              ],
+            },
+          ]),
+          { status: 200 },
+        ),
+      ) as typeof fetch
+
+      const latest = await getLatestVersion("owner/repo")
+
+      expect(latest).toEqual({
+        version: "2.4.0",
+        assetName,
+        assetUrl: "https://example.test/download",
+      })
+    })
+
+    test("reports available assets when the matching release lacks this platform", async () => {
+      const otherPlatform = detectPlatform() === "linux-x64" ? "darwin-arm64" : "linux-x64"
+      const otherAsset = `galeharness-cli-2.4.0-${otherPlatform}.tar.gz`
+      globalThis.fetch = mock(async () =>
+        new Response(
+          JSON.stringify([
+            {
+              tag_name: "galeharness-cli-v2.4.0",
+              draft: false,
+              prerelease: false,
+              assets: [
+                {
+                  name: otherAsset,
+                  browser_download_url: "https://example.test/linux",
+                  size: 123,
+                },
+              ],
+            },
+          ]),
+          { status: 200 },
+        ),
+      ) as typeof fetch
+
+      await expect(getLatestVersion("owner/repo")).rejects.toThrow(`Available assets: ${otherAsset}`)
     })
   })
 

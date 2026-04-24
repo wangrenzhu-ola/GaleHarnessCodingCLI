@@ -32,6 +32,8 @@ detect_platform() {
     Darwin:x86_64) echo "darwin-x64" ;;
     Linux:x86_64) echo "linux-x64" ;;
     Linux:aarch64 | Linux:arm64) echo "linux-arm64" ;;
+    MINGW*:x86_64 | MSYS*:x86_64 | CYGWIN*:x86_64) echo "windows-x64" ;;
+    MINGW*:aarch64 | MINGW*:arm64 | MSYS*:aarch64 | MSYS*:arm64 | CYGWIN*:aarch64 | CYGWIN*:arm64) echo "windows-arm64" ;;
     *)
       err "unsupported platform: $os $arch"
       exit 1
@@ -85,6 +87,10 @@ fi
 
 version="${tag#$TAG_PREFIX}"
 platform="$(detect_platform)"
+exe=""
+if [[ "$platform" == windows-* ]]; then
+  exe=".exe"
+fi
 asset="galeharness-cli-$version-$platform.tar.gz"
 url="https://github.com/$REPO/releases/download/$tag/$asset"
 tmpdir="$(mktemp -d -t galeharness-install-XXXXXX)"
@@ -102,21 +108,17 @@ curl -fL "$url" -o "$tmpdir/$asset"
 tar -xzf "$tmpdir/$asset" -C "$tmpdir"
 
 mkdir -p "$install_dir"
-for bin in gale-harness compound-plugin gale-knowledge; do
-  dest="$install_dir/$bin"
+for bin in gale-harness compound-plugin gale-knowledge gale-memory; do
+  src="$tmpdir/$bin$exe"
+  if [ ! -f "$src" ]; then
+    continue
+  fi
+  dest="$install_dir/$bin$exe"
   if [ -L "$dest" ]; then
     rm "$dest"
   fi
-  install -m 0755 "$tmpdir/$bin" "$dest"
+  install -m 0755 "$src" "$dest"
 done
-
-if [ -f "$tmpdir/gale-memory" ]; then
-  dest="$install_dir/gale-memory"
-  if [ -L "$dest" ]; then
-    rm "$dest"
-  fi
-  install -m 0755 "$tmpdir/gale-memory" "$dest"
-fi
 
 install -m 0644 "$tmpdir/VERSION" "$install_dir/VERSION"
 

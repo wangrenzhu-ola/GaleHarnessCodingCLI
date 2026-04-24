@@ -436,7 +436,7 @@ gale-knowledge rebuild-index --full  # 全量
 curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | bash
 ```
 
-脚本会优先安装到当前 `gale-harness` 所在目录，并移除旧的 `bun link` symlink 后写入编译二进制。没有已安装命令时，默认安装到 `~/.local/bin`。
+脚本会优先安装到当前 `gale-harness` 所在目录，并移除旧的 `bun link` symlink 后写入编译二进制。没有已安装命令时，默认安装到 `~/.local/bin`。Release assets 覆盖 macOS、Linux、Windows 的 arm64/x64 平台。
 
 #### macOS / Linux
 

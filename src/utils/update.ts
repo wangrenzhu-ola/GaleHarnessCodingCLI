@@ -15,10 +15,14 @@ import os from "node:os"
 import path from "node:path"
 import { execSync } from "node:child_process"
 import { fileURLToPath } from "node:url"
+import {
+  RELEASE_BINARY_BASENAMES,
+  detectReleasePlatform,
+  getReleaseBinaryFileNames,
+} from "./release-platforms"
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
-const BINARY_NAMES = ["gale-harness", "compound-plugin", "gale-knowledge"] as const
 const TAG_PREFIX = "galeharness-cli-v"
 const DEFAULT_REPO = "wangrenzhu-ola/GaleHarnessCodingCLI"
 const BACKUP_DIR = path.join(os.homedir(), ".galeharness", "backup")
@@ -38,6 +42,13 @@ export interface UpdateResult {
   message: string
   previousVersion?: string
   newVersion?: string
+}
+
+interface GitHubRelease {
+  tag_name: string
+  draft?: boolean
+  prerelease?: boolean
+  assets: Array<{ name: string; browser_download_url: string; size: number }>
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -106,14 +117,15 @@ export function isCompiledBinary(): boolean {
   if (!execPath) return false
   // If the executable name is one of our binaries, we're in compiled mode
   const basename = path.basename(execPath)
-  return BINARY_NAMES.includes(basename as any) || basename === "gale-harness" || basename === "compound-plugin" || basename === "gale-knowledge"
+  const normalizedBasename = basename.endsWith(".exe") ? basename.slice(0, -4) : basename
+  return RELEASE_BINARY_BASENAMES.includes(normalizedBasename as any)
 }
 
 /**
  * Query GitHub Release API for the latest version matching our tag prefix.
  */
 export async function getLatestVersion(repo: string): Promise<{ version: string; assetUrl: string; assetName: string }> {
-  const url = `https://api.github.com/repos/${repo}/releases/latest`
+  const url = `https://api.github.com/repos/${repo}/releases?per_page=20`
   const response = await fetch(url, {
     headers: {
       "User-Agent": "gale-harness-update",
@@ -128,14 +140,16 @@ export async function getLatestVersion(repo: string): Promise<{ version: string;
     throw new Error(`GitHub API error: ${response.status} ${response.statusText}`)
   }
 
-  const release = (await response.json()) as {
-    tag_name: string
-    assets: Array<{ name: string; browser_download_url: string; size: number }>
-  }
+  const releases = (await response.json()) as GitHubRelease[]
+  const release = releases.find(
+    (candidate) =>
+      !candidate.draft &&
+      !candidate.prerelease &&
+      candidate.tag_name.startsWith(TAG_PREFIX),
+  )
 
-  // Verify tag prefix
-  if (!release.tag_name.startsWith(TAG_PREFIX)) {
-    throw new Error(`Latest release tag '${release.tag_name}' does not match expected prefix '${TAG_PREFIX}'.`)
+  if (!release) {
+    throw new Error(`No releases found for ${repo} with tag prefix '${TAG_PREFIX}'.`)
   }
 
   const version = release.tag_name.slice(TAG_PREFIX.length)
@@ -163,14 +177,7 @@ export async function getLatestVersion(repo: string): Promise<{ version: string;
  * Detect the current platform suffix for asset selection.
  */
 export function detectPlatform(): string {
-  const platform = os.platform()
-  const arch = os.arch()
-  const platformMap: Record<string, Record<string, string>> = {
-    darwin: { arm64: "darwin-arm64", x64: "darwin-x64" },
-    linux: { x64: "linux-x64", arm64: "linux-arm64" },
-    win32: { x64: "windows-x64" },
-  }
-  return platformMap[platform]?.[arch] || `${platform}-${arch}`
+  return detectReleasePlatform()
 }
 
 // ── Check ───────────────────────────────────────────────────────────────────
@@ -236,7 +243,7 @@ export async function performUpdate(): Promise<UpdateResult> {
     execSync(`tar -xzf ${archivePath} -C ${extractDir}`, { stdio: "pipe" })
 
     // Verify extracted files
-    for (const name of BINARY_NAMES) {
+    for (const name of getReleaseBinaryFileNames(detectPlatform())) {
       const extracted = path.join(extractDir, name)
       if (!fs.existsSync(extracted)) {
         throw new Error(`Expected binary '${name}' not found in archive.`)
@@ -306,7 +313,7 @@ async function backupBinaries(binDir: string, version: string): Promise<void> {
   const versionBackupDir = path.join(BACKUP_DIR, version)
   fs.mkdirSync(versionBackupDir, { recursive: true })
 
-  for (const name of BINARY_NAMES) {
+  for (const name of getReleaseBinaryFileNames(detectPlatform())) {
     const src = path.join(binDir, name)
     if (fs.existsSync(src)) {
       await fs.promises.copyFile(src, path.join(versionBackupDir, name))
@@ -324,7 +331,7 @@ async function backupBinaries(binDir: string, version: string): Promise<void> {
  * Replace binaries in the install directory with new ones from extractDir.
  */
 async function replaceBinaries(binDir: string, extractDir: string): Promise<void> {
-  for (const name of BINARY_NAMES) {
+  for (const name of getReleaseBinaryFileNames(detectPlatform())) {
     const src = path.join(extractDir, name)
     const dest = path.join(binDir, name)
     await fs.promises.copyFile(src, dest)
@@ -384,7 +391,7 @@ async function rollbackBinaries(binDir: string, version: string): Promise<Update
     }
   }
 
-  for (const name of BINARY_NAMES) {
+  for (const name of getReleaseBinaryFileNames(detectPlatform())) {
     const src = path.join(backupVersionDir, name)
     const dest = path.join(binDir, name)
     if (fs.existsSync(src)) {
