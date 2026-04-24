@@ -129,6 +129,13 @@ describe("convertClaudeToCodex", () => {
           sourceDir: "/tmp/plugin/skills/workflows-plan",
           skillPath: "/tmp/plugin/skills/workflows-plan/SKILL.md",
         },
+        {
+          name: "gh:work-x",
+          description: "Morph-X work workflow",
+          argumentHint: "[plan]",
+          sourceDir: "/tmp/plugin/skills/gh-work-x",
+          skillPath: "/tmp/plugin/skills/gh-work-x/SKILL.md",
+        },
       ],
     }
 
@@ -138,15 +145,20 @@ describe("convertClaudeToCodex", () => {
       permissions: "none",
     })
 
-    expect(bundle.prompts).toHaveLength(1)
+    expect(bundle.prompts).toHaveLength(2)
     expect(bundle.prompts[0]?.name).toBe("gh-plan")
+    expect(bundle.prompts[1]?.name).toBe("gh-work-x")
 
     const parsedPrompt = parseFrontmatter(bundle.prompts[0]!.content)
     expect(parsedPrompt.data.description).toBe("Planning workflow")
     expect(parsedPrompt.data["argument-hint"]).toBe("[feature]")
     expect(parsedPrompt.body).toContain("Use the gh:plan skill")
+    const parsedXPrompt = parseFrontmatter(bundle.prompts[1]!.content)
+    expect(parsedXPrompt.data.description).toBe("Morph-X work workflow")
+    expect(parsedXPrompt.data["argument-hint"]).toBe("[plan]")
+    expect(parsedXPrompt.body).toContain("Use the gh:work-x skill")
 
-    expect(bundle.skillDirs.map((skill) => skill.name)).toEqual(["gh:plan"])
+    expect(bundle.skillDirs.map((skill) => skill.name)).toEqual(["gh:plan", "gh:work-x"])
   })
 
   test("does not apply compound workflow canonicalization to other plugins", () => {

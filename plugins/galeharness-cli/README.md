@@ -32,7 +32,7 @@ language: zh-CN  # zh-CN (Chinese, default) or en (English)
 | Component | Count |
 |-----------|-------|
 | Agents | 50+ |
-| Skills | 42+ |
+| Skills | 39 |
 
 ## Skills
 
@@ -48,6 +48,8 @@ The primary entry points for engineering work, invoked as slash commands:
 | `/gh:review` | Structured code review with tiered persona agents, confidence gating, and dedup pipeline |
 | `/gh:work` | Execute work items systematically |
 | `/gh:debug` | Systematically find root causes and fix bugs -- traces causal chains, forms testable hypotheses, and implements test-first fixes |
+| `/gh:work-x` | Morph-X work execution for iOS code-output projects; reduces template-code repetition risk with blueprint constraints, safe transforms, and similarity audit |
+| `/gh:debug-x` | Morph-X debugging workflow for iOS fixes; keeps root-cause discipline while applying blueprint constraints, transforms, and similarity audit |
 | `/gh:compound` | Document solved problems to compound team knowledge |
 | `/gh:compound-refresh` | Refresh stale or drifting learnings and decide whether to keep, update, replace, or archive them |
 | `/gh:optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring |
@@ -138,6 +140,10 @@ Recommended operating model:
 |-------|-------------|
 | `/gh:polish-beta` | Human-in-the-loop polish phase after /gh:review — verifies review + CI, starts a dev server from `.claude/launch.json`, generates a testable checklist, and dispatches polish sub-agents for fixes. Emits stacked-PR seeds for oversized work |
 | `/lfg` | Full autonomous engineering workflow |
+
+### Morph-X CLI Utilities
+
+`gale-harness audit --similarity <project>` scans Swift/ObjC source against configured baselines and reports statement, token, structural, and control-flow similarity risk. `gale-harness morph --apply <project>` selects a deterministic Morph-X blueprint/strategy and calls an optional SwiftSyntax adapter when configured. These tools are for reducing template-code repetition risk; they do not guarantee Apple App Review outcomes.
 
 ## Agents
 

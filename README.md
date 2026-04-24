@@ -58,15 +58,23 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
 | `/gh:brainstorm` | 在规划前探索需求和方案，通过交互式问答细化想法 | 检索相关需求，存储需求文档 |
 | `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 | 检索相似方案，存储技术规划 |
 | `/gh:work` | 系统化执行工作项，使用 worktree 和任务追踪 | 检索实现模式，存储实现总结 |
+| `/gh:work-x` | iOS Morph-X 实施模式：在保留工作流能力的同时降低模板化代码重复风险 | 检索历史模式标签，存储蓝图/策略指纹 |
 | `/gh:review` | 多代理代码审查，分层角色和置信度门控 | 检索审查模式，存储审查发现 |
 | `/gh:compound` | 记录已解决问题，沉淀团队知识 | 检索相关解决方案，存储完整知识 |
 | `/gh:debug` | 系统性查找根本原因并修复缺陷 | 检索类似问题，存储调试经验 |
+| `/gh:debug-x` | iOS Morph-X 调试模式：保持根因定位纪律，并在修复产出后执行变换和相似度审计 | 检索历史模式标签，存储蓝图/策略指纹 |
 | `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 | 检索优化策略，存储优化结果 |
 | `/document-review` | 多角色并行评审需求/方案文档 | 无 |
 | `/gh:sessions` | 搜索历史 Claude Code/Codex/Cursor 会话 | 无 |
 | `/gh:slack-research` | 搜索 Slack 获取组织上下文 | 无 |
 
 > **入口说明**：`/gh:brainstorm` 是主要入口 —— 它通过交互式问答将想法细化为需求文档，在不需要时自动跳过。`/gh:ideate` 效果显著但使用较少 —— 基于代码库主动发现改进建议。
+
+### iOS Morph-X 降低代码重复风险
+
+`/gh:work-x` 和 `/gh:debug-x` 是面向 iOS Swift/ObjC 代码产出的特殊工作流。它们先根据项目 seed、历史模式标签和 `.morph-config.yaml` 选择实现蓝图，再在代码产出后运行 `gale-harness morph --apply` 与 `gale-harness audit --similarity`，输出相似度风险报告。
+
+Morph-X 的定位是降低模板化代码重复风险并提供自检证据，不保证 Apple App Review 通过，也不能替代真实的产品、UI、内容和功能差异。
 
 ---
 

@@ -8,6 +8,8 @@ import pluginPath from "./commands/plugin-path"
 import sync from "./commands/sync"
 import board from "./commands/board"
 import update from "./commands/update"
+import audit from "./commands/audit"
+import morph from "./commands/morph"
 
 const main = defineCommand({
   meta: {
@@ -23,6 +25,8 @@ const main = defineCommand({
     sync: () => sync,
     board: () => board,
     update: () => update,
+    audit: () => audit,
+    morph: () => morph,
   },
   run: async (ctx) => {
     const hasSubCommand = ctx.rawArgs.some((arg) => !arg.startsWith("-"));
