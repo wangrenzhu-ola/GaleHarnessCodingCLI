@@ -10,7 +10,7 @@ Run metric-driven iterative optimization. Define a goal, build measurement scaff
 
 ## Interaction Method
 
-Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension)). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
 
 ## Input
 

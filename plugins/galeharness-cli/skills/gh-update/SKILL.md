@@ -1,7 +1,8 @@
 ---
 name: gh:update
 description: |
-  Check if the GaleHarnessCLI plugin is up to date and fix stale cache if not.
+  Check if the GaleHarnessCLI plugin is up to date and recommend the
+  update command if not.
   Use when the user says "update gale harness", "check gale harness version",
   "gh update", "is gale harness up to date", "update gh plugin", or reports issues
   that might stem from a stale GaleHarnessCLI plugin version. This skill only works
@@ -10,64 +11,91 @@ disable-model-invocation: true
 ce_platforms: [claude]
 ---
 
-# Check & Fix Plugin Version
+# Check Plugin Version
 
-Verify the installed GaleHarnessCLI plugin version matches the latest released
-version, and fix stale marketplace/cache state if it doesn't. Claude Code only.
+Verify the installed GaleHarnessCLI plugin version matches the upstream
+`plugin.json` on `main`, and recommend the update command if it doesn't.
+Claude Code only.
 
 > **Note:** This skill updates the **plugin cache** only. To update the CLI binary
 > itself, run `gale-harness update` from your terminal.
 
 ## Pre-resolved context
 
-The three sections below contain pre-resolved data. Only the **Plugin root
-path** determines whether this session is Claude Code — if it contains an error
-sentinel, an empty value, or a literal `${CLAUDE_PLUGIN_ROOT}` string, tell the
-user this skill only works in Claude Code and stop. The other two sections may
+Only the **Skill directory** determines whether this session is Claude Code —
+if empty or unresolved, the skill requires Claude Code. The other sections may
 contain error sentinels even in valid Claude Code sessions; the decision logic
 below handles those cases.
 
-**Plugin root path:**
-!`echo "${CLAUDE_PLUGIN_ROOT}" 2>/dev/null || echo '__CE_UPDATE_ROOT_FAILED__'`
+`${CLAUDE_SKILL_DIR}` is a Claude Code-documented substitution that resolves
+at skill-load time. For a marketplace-cached install it looks like
+`~/.claude/plugins/cache/<marketplace>/galeharness-cli/<version>/skills/gh-update`,
+so the currently-loaded version is the basename two `dirname` levels up.
 
-**Latest released version:**
-!`gh release list --repo wangrenzhu-ola/GaleHarnessCLI --limit 30 --json tagName --jq '[.[] | select(.tagName | startswith("galeharness-cli-v"))][0].tagName | sub("galeharness-cli-v";"")' 2>/dev/null || echo '__CE_UPDATE_VERSION_FAILED__'`
+The upstream version comes from `plugins/galeharness-cli/.claude-plugin/plugin.json`
+on `main` rather than the latest GitHub release tag, because the marketplace
+installs plugin contents from `main` HEAD. Comparing against release tags
+false-positives whenever `main` is ahead of the last tag (the normal state
+between releases).
 
-**Cached version folder(s):**
-!`ls "${CLAUDE_PLUGIN_ROOT}/cache/gale-harness-cli/galeharness-cli/" 2>/dev/null || echo '__CE_UPDATE_CACHE_FAILED__'`
+**Skill directory:**
+!`echo "${CLAUDE_SKILL_DIR}"`
+
+**Latest upstream version:**
+!`version=$(gh api repos/wangrenzhu-ola/GaleHarnessCLI/contents/plugins/galeharness-cli/.claude-plugin/plugin.json --jq '.content | @base64d | fromjson | .version' 2>/dev/null) && [ -n "$version" ] && echo "$version" || echo '__CE_UPDATE_VERSION_FAILED__'`
+
+**Currently loaded version:**
+!`case "${CLAUDE_SKILL_DIR}" in */plugins/cache/*/galeharness-cli/*/skills/gh-update) basename "$(dirname "$(dirname "${CLAUDE_SKILL_DIR}")")" ;; *) echo '__CE_UPDATE_NOT_MARKETPLACE__' ;; esac`
+
+**Marketplace name:**
+!`case "${CLAUDE_SKILL_DIR}" in */plugins/cache/*/galeharness-cli/*/skills/gh-update) basename "$(dirname "$(dirname "$(dirname "$(dirname "${CLAUDE_SKILL_DIR}")")")")" ;; *) echo '__CE_UPDATE_NOT_MARKETPLACE__' ;; esac`
 
 ## Decision logic
 
 ### 1. Platform gate
 
-If **Plugin root path** contains `__CE_UPDATE_ROOT_FAILED__`, a literal
-`${CLAUDE_PLUGIN_ROOT}` string, or is empty: tell the user this skill requires Claude Code
-and stop. No further action.
+If **Skill directory** is empty or unresolved: tell the user this skill
+requires Claude Code and stop. No further action.
 
-### 2. Compare versions
+### 2. Handle failure cases
 
-If **Latest released version** contains `__CE_UPDATE_VERSION_FAILED__`: tell the user the
-latest release could not be fetched (gh may be unavailable or rate-limited) and stop.
+If **Latest upstream version** contains `__CE_UPDATE_VERSION_FAILED__`: tell
+the user the upstream version could not be fetched (gh may be unavailable or
+rate-limited) and stop.
 
-If **Cached version folder(s)** contains `__CE_UPDATE_CACHE_FAILED__`: no marketplace cache
-exists. Tell the user: "No marketplace cache found — this appears to be a local dev checkout
-or fresh install." and stop.
+If **Currently loaded version** contains `__CE_UPDATE_NOT_MARKETPLACE__`: this
+session loaded the skill from outside the standard marketplace cache (typical
+when using `claude --plugin-dir` for local development, or for a non-standard
+install). Tell the user (substituting the actual path):
 
-Take the **latest released version** and the **cached folder list**.
+> "Skill is loaded from `{skill-directory}` -- not the standard marketplace
+> cache at `~/.claude/plugins/cache/`. This is normal when using
+> `claude --plugin-dir` for local development. No action for this session.
+> Your marketplace install (if any) is unaffected -- run `/gh:update` in a
+> regular Claude Code session (no `--plugin-dir`) to check that cache."
 
-**Up to date** — exactly one cached folder exists AND its name matches the latest version:
-- Tell the user: "GaleHarnessCLI **v{version}** is installed and up to date."
+Then stop.
 
-**Out of date or corrupted** — multiple cached folders exist, OR the single folder name
-does not match the latest version. Use the **Plugin root path** value from above to
-construct the delete path.
+### 3. Compare versions
 
-**Clear the stale cache:**
-```bash
-rm -rf "<plugin-root-path>/cache/gale-harness-cli/galeharness-cli"
-```
+**Up to date** — `{currently loaded} == {latest upstream}`:
 
-Tell the user:
-- "GaleHarnessCLI was on **v{old}** but **v{latest}** is available."
-- "Cleared the plugin cache. Now run `/plugin marketplace update` in this session, then restart Claude Code to pick up v{latest}."
-- "To also update the CLI binary, run `gale-harness update` from your terminal."
+> "GaleHarnessCLI **v{version}** is installed and up to date."
+
+**Out of date** — `{currently loaded} != {latest upstream}`:
+
+> "GaleHarnessCLI is on **v{currently loaded}** but **v{latest upstream}** is available.
+>
+> Update with:
+> ```
+> claude plugin update galeharness-cli@{marketplace-name}
+> ```
+> Then restart Claude Code to apply."
+
+The `claude plugin update` command ships with Claude Code itself and updates
+installed plugins to their latest version; it replaces earlier manual cache
+sweep / marketplace-refresh workarounds. The marketplace name is derived from
+the skill path rather than hardcoded because this plugin may be distributed
+under multiple marketplace names.
+
+To also update the CLI binary, run `gale-harness update` from your terminal.

@@ -491,6 +491,13 @@ gale-harness install ./plugins/galeharness-cli --to kimi
 
 Codex 使用全局模型配置，不支持 Claude Code 风格的 per-agent `model` 字段或 `Task` subagent dispatch。转换到 Codex 时，CLI 会把源 skill 中可解析的 `Task agent(args)` 调用降级为同一 `SKILL.md` 内的 embedded agent instructions，并要求 Codex 在当前上下文中顺序执行。skill 作者不需要为此修改源文件。
 
+**Pi 前置依赖。** Pi 没有内置 subagent 能力。安装到 Pi 时需要先安装 [nicobailon/pi-subagents](https://github.com/nicobailon/pi-subagents)，并建议安装 [edlsh/pi-ask-user](https://github.com/edlsh/pi-ask-user) 以支持阻塞式用户提问：
+
+```bash
+pi install npm:pi-subagents    # 必需：提供 skills 并行调度所需的 subagent 工具
+pi install npm:pi-ask-user     # 推荐：提供 ask_user；缺失时 skills 会退回聊天编号选项
+```
+
 **Claude Code 本地插件模式：**
 
 ```bash

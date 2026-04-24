@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Interaction Method
 
-Ask the user each question below using the platform's blocking question tool (e.g., `AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no structured question tool is available, present each question as a numbered list and wait for a reply before proceeding. For multiSelect questions, accept comma-separated numbers (e.g. `1, 3`). Never skip or auto-configure.
+Ask the user each question below using the platform's blocking question tool (e.g., `AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension)). If no structured question tool is available, present each question as a numbered list and wait for a reply before proceeding. For multiSelect questions, accept comma-separated numbers (e.g. `1, 3`). Never skip or auto-configure.
 
 Interactive setup for compound-engineering — diagnoses environment health, cleans obsolete repo-local CE config, and helps configure required tools. Review agent selection is handled automatically by `gh:review`; project-specific review guidance belongs in `CLAUDE.md` or `AGENTS.md`.
 
@@ -87,7 +87,7 @@ If a version is found, pass it to the check script via `--version`. Otherwise om
 
 Before running the script, display: "Compound Engineering -- checking your environment..."
 
-Run the bundled check script. Do not perform manual dependency checks -- the script handles all CLI tools, repo-local CE file checks, and `.gitignore` guidance in one pass.
+Run the bundled check script. Do not perform manual dependency checks -- the script handles all CLI tools, agent skills, repo-local CE file checks, and `.gitignore` guidance in one pass.
 
 ```bash
 bash scripts/check-health --version VERSION
@@ -115,19 +115,23 @@ If the platform detection resolved to `CLAUDE_CODE`, this is a Claude Code sessi
 
 After the diagnostic report, check whether:
 
-- any dependencies are missing:
+- any CLI tools are missing:
   - **macOS/Linux:** reported as yellow in the script output
   - **Windows:** `Get-Command` returned no result for uv, gh, or jq
+- any agent skills are missing:
+  - **macOS/Linux:** reported as yellow in the Skills section
+  - **Windows:** skip agent-skill checks for now
 - `compound-engineering.local.md` is present and needs cleanup
 - `.compound-engineering/config.local.yaml` does not exist or is not safely gitignored
 - `.compound-engineering/config.local.example.yaml` is missing or outdated
 
-If everything is installed, no repo-local cleanup is needed, and `.compound-engineering/config.local.yaml` already exists and is gitignored, display the tool list and completion message. Parse the tool names from the script output and list each with a green circle:
+If everything is installed, no repo-local cleanup is needed, and `.compound-engineering/config.local.yaml` already exists and is gitignored, display the tool and skill list and completion message. Parse the tool and skill names from the script output and list each with a green circle. Omit the Skills line if the Skills section is absent from the script output:
 
 ```
  ✅ Compound Engineering setup complete
 
-    Tools: 🟢 agent-browser  🟢 gh  🟢 jq  🟢 vhs  🟢 silicon  🟢 ffmpeg
+    Tools:  🟢 agent-browser  🟢 gh  🟢 jq  🟢 vhs  🟢 silicon  🟢 ffmpeg  🟢 ast-grep
+    Skills: 🟢 ast-grep
     Config: ✅
 
     Run /gh:setup anytime to re-check.
@@ -172,22 +176,26 @@ If the local config already exists, check whether it is safely gitignored. If no
 
 ### Step 6: Offer Installation
 
-Present the missing dependencies using a multiSelect question with all items pre-selected. Use the install commands and URLs from the script's diagnostic output.
+Present the missing tools and skills using a multiSelect question with all items pre-selected. Use the install commands and URLs from the script's diagnostic output. Group items under `Tools:` and `Skills:` so the user can see which runtime each item targets; omit a group whose items are all installed.
 
 ```
-The following tools are missing. Select which to install:
+The following items are missing. Select which to install:
 (All items are pre-selected)
 
-Recommended:
+Tools:
   [x] agent-browser - Browser automation for testing and screenshots
   [x] gh - GitHub CLI for issues and PRs
   [x] jq - JSON processor
   [x] vhs (charmbracelet/vhs) - Create GIFs from CLI output
   [x] silicon (Aloxaf/silicon) - Generate code screenshots
   [x] ffmpeg - Video processing for feature demos
+  [x] ast-grep - Structural code search using AST patterns
+
+Skills:
+  [x] ast-grep - Agent skill for structural code search with ast-grep
 ```
 
-Only show dependencies that are actually missing. Omit installed ones.
+Only show items that are actually missing. Omit installed ones.
 
 ### Step 7: Install Selected Dependencies
 
@@ -203,7 +211,9 @@ For each selected dependency, in order:
    2. Skip - I'll install it manually
    ```
 
-2. **If approved:** Run the install command using a shell execution tool. After the command completes, verify installation by running the dependency's check command (e.g., `command -v agent-browser`).
+2. **If approved:** Run the install command using a shell execution tool. After the command completes, verify installation:
+   - For a CLI tool, run the dependency's check command (e.g., `command -v agent-browser`).
+   - For an agent skill, prefer `npx --yes skills list --global --json | jq -r '.[].name' | grep -qx <skill-name>` when `npx` is available; otherwise fall back to checking that `~/.claude/skills/<skill-name>` exists (file, directory, or symlink).
 
 3. **If verification succeeds:** Report success.
 

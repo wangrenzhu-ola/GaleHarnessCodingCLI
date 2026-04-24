@@ -76,6 +76,7 @@ When adding or modifying skills, verify compliance with the skill spec:
 
 - [ ] `name:` present and matches directory name (lowercase-with-hyphens)
 - [ ] `description:` present and describes **what it does and when to use it** (per official spec: "Explains code with diagrams. Use when exploring how code works.")
+- [ ] `description:` is no longer than 1024 characters -- some coding harnesses reject longer skill descriptions. Enforced by `tests/frontmatter.test.ts`.
 - [ ] `description:` value is quoted (single or double) if it contains colons -- unquoted colons break `js-yaml` strict parsing and crash `install --to opencode/codex`. Run `bun test tests/frontmatter.test.ts` to verify.
 
 ### Reference File Inclusion (Required if references/ exists)
@@ -104,14 +105,19 @@ Skill content loaded at trigger time is carried in every subsequent message — 
 
 ### Cross-Platform User Interaction
 
-- [ ] When a skill needs to ask the user a question, instruct use of the platform's blocking question tool and name the known equivalents (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini)
+- [ ] When a skill needs to ask the user a question, instruct use of the platform's blocking question tool and name the known equivalents (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi via the `pi-ask-user` extension)
 - [ ] If the question tool is unavailable, do not proceed silently — present numbered options directly in chat and wait for the user's reply before continuing. Surface unavailability explicitly to avoid silent skips.
 
 ### Cross-Platform Task Tracking
 
 - [ ] When a skill needs to create or track tasks, describe the intent (e.g., "create a task list") and name the known equivalents (`TaskCreate`/`TaskUpdate`/`TaskList` in Claude Code, `update_plan` in Codex)
 - [ ] Do not reference `TodoWrite` or `TodoRead` — these are legacy Claude Code tools replaced by `TaskCreate`/`TaskUpdate`/`TaskList`
-- [ ] When a skill dispatches sub-agents, prefer parallel execution but include a sequential fallback for platforms that do not support parallel dispatch
+
+### Cross-Platform Sub-Agent Dispatch
+
+- [ ] When a skill dispatches sub-agents, instruct use of the platform's subagent primitive and name the known equivalents (`Agent`/`Task` in Claude Code, `spawn_agent` in Codex, `subagent` in Pi via the `pi-subagents` extension)
+- [ ] Prefer parallel execution but include a sequential fallback for platforms that do not support parallel dispatch
+- [ ] Prefer sub-agents shipped with this plugin over platform built-ins. Built-ins have different names on each target (for example, Claude Code's `Explore`, Codex's `explorer`, and Pi's `scout`). If a built-in offers a meaningful benefit, enumerate the per-platform equivalents inline at the call site.
 
 ### Script Path References in Skills
 

@@ -489,8 +489,8 @@ describe("CLI", () => {
     expect(stdout).toContain("Converted galeharness-cli")
     expect(stdout).toContain(piRoot)
     expect(await exists(path.join(piRoot, "prompts", "workflows-review.md"))).toBe(true)
-    expect(await exists(path.join(piRoot, "skills", "repo-research-analyst", "SKILL.md"))).toBe(true)
-    expect(await exists(path.join(piRoot, "extensions", "galeharness-cli-compat.ts"))).toBe(true)
+    expect(await exists(path.join(piRoot, "agents", "repo-research-analyst.md"))).toBe(true)
+    expect(await exists(path.join(piRoot, "extensions", "galeharness-cli-compat.ts"))).toBe(false)
     expect(await exists(path.join(piRoot, "galeharness-cli", "mcporter.json"))).toBe(true)
   })
 
@@ -530,7 +530,8 @@ describe("CLI", () => {
     expect(stdout).toContain("Installed galeharness-cli")
     expect(stdout).toContain(piRoot)
     expect(await exists(path.join(piRoot, "prompts", "workflows-review.md"))).toBe(true)
-    expect(await exists(path.join(piRoot, "extensions", "galeharness-cli-compat.ts"))).toBe(true)
+    expect(await exists(path.join(piRoot, "agents", "repo-research-analyst.md"))).toBe(true)
+    expect(await exists(path.join(piRoot, "extensions", "galeharness-cli-compat.ts"))).toBe(false)
   })
 
   test("install --to opencode uses permissions:none by default", async () => {

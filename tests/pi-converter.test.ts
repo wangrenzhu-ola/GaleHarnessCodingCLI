@@ -8,7 +8,7 @@ import type { ClaudePlugin } from "../src/types/claude"
 const fixtureRoot = path.join(import.meta.dir, "fixtures", "sample-plugin")
 
 describe("convertClaudeToPi", () => {
-  test("converts commands, skills, extensions, and MCPorter config", async () => {
+  test("converts commands, skills, agents, and MCPorter config without shipping a Pi extension", async () => {
     const plugin = await loadClaudePlugin(fixtureRoot)
     const bundle = convertClaudeToPi(plugin, {
       agentMode: "subagent",
@@ -28,22 +28,21 @@ describe("convertClaudeToPi", () => {
     const parsedPrompt = parseFrontmatter(workflowsReview!.content)
     expect(parsedPrompt.data.description).toBe("Run a multi-agent review workflow")
 
-    // Existing skills are copied and agents are converted into generated Pi skills
+    // Existing skills are copied and agents are converted into Pi agent files
+    // for nicobailon/pi-subagents to resolve by filename.
     expect(bundle.skillDirs.some((skill) => skill.name === "skill-one")).toBe(true)
-    expect(bundle.generatedSkills.some((skill) => skill.name === "repo-research-analyst")).toBe(true)
+    expect(bundle.agents.some((agent) => agent.name === "repo-research-analyst")).toBe(true)
+    expect(bundle.generatedSkills).toEqual([])
 
-    // Pi compatibility extension is included (with subagent + MCPorter tools)
-    const compatExtension = bundle.extensions.find((extension) => extension.name === "galeharness-cli-compat.ts")
-    expect(compatExtension).toBeDefined()
-    expect(compatExtension!.content).toContain('name: "subagent"')
-    expect(compatExtension!.content).toContain('name: "mcporter_call"')
+    // Pi installs now depend on pi-subagents and pi-ask-user instead of a bundled compat extension.
+    expect(bundle.extensions).toEqual([])
 
     // Claude MCP config is translated to MCPorter config
     expect(bundle.mcporterConfig?.mcpServers.context7?.baseUrl).toBe("https://mcp.context7.com/mcp")
     expect(bundle.mcporterConfig?.mcpServers["local-tooling"]?.command).toBe("echo")
   })
 
-  test("transforms Task calls, AskUserQuestion, slash commands, and todo tool references", () => {
+  test("transforms Task calls, slash commands, and todo tool references; preserves AskUserQuestion", () => {
     const plugin: ClaudePlugin = {
       root: "/tmp/plugin",
       manifest: { name: "fixture", version: "1.0.0" },
@@ -79,7 +78,7 @@ describe("convertClaudeToPi", () => {
 
     expect(parsedPrompt.body).toContain("Run subagent with agent=\"repo-research-analyst\" and task=\"feature_description\".")
     expect(parsedPrompt.body).toContain("Run subagent with agent=\"learnings-researcher\" and task=\"feature_description\".")
-    expect(parsedPrompt.body).toContain("ask_user_question")
+    expect(parsedPrompt.body).toContain("AskUserQuestion")
     expect(parsedPrompt.body).toContain("/workflows-work")
     expect(parsedPrompt.body).toContain("/todo-resolve")
     expect(parsedPrompt.body).toContain("the platform's task-tracking primitive")
@@ -149,7 +148,7 @@ describe("convertClaudeToPi", () => {
     expect(parsedPrompt.body).not.toContain("()")
   })
 
-  test("appends MCPorter compatibility note when command references MCP", () => {
+  test("does not append bundled-extension MCPorter notes to command bodies", () => {
     const plugin: ClaudePlugin = {
       root: "/tmp/plugin",
       manifest: { name: "fixture", version: "1.0.0" },
@@ -174,7 +173,6 @@ describe("convertClaudeToPi", () => {
     })
 
     const parsedPrompt = parseFrontmatter(bundle.prompts[0].content)
-    expect(parsedPrompt.body).toContain("Pi + MCPorter note")
-    expect(parsedPrompt.body).toContain("mcporter_call")
+    expect(parsedPrompt.body).not.toContain("Pi + MCPorter note")
   })
 })
