@@ -94,3 +94,8 @@
 - **关键词**: rewrite, boundary, copied, fixed, markdown
 - **核心**: Fixed PR #57 C…
 - **来源**: 2026-04-24-145930-411
+### Codex copied skill reference Markdown must not be transformed
+- **时间**: 2026-04-24
+- **关键词**: must, skill, 工具使用, directories, only
+- **核心**: Codex target c…
+- **来源**: 2026-04-24-153529-070

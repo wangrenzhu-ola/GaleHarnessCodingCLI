@@ -247,3 +247,17 @@
 **标签**: 工具使用
 
 ---
+### Codex copied skill reference Markdown must not be transformed
+
+- **时间**: 2026-04-24
+- **摘要**: Codex target copied skill directories must only transform SKILL.md. Passing tran...
+- **重要性**: medium
+- **来源**: [2026-04-24-153529-070](../L2-Full/daily/)
+
+**关键要点**:
+
+- Codex target copied skill directories must only transform SKILL.md. Passing tran
+
+**标签**: 工具使用
+
+---

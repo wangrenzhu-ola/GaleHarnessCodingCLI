@@ -10,6 +10,9 @@
 
 ## 最新条目
 
+- [2026-04-24] **Codex copied skill reference Markdown must not be transformed** (tools): Codex target c…
+
+
 - [2026-04-24] **Fix Codex copied skill reference Markdown rewrite boundary** (tools): Fixed PR #57 C…
 
 
