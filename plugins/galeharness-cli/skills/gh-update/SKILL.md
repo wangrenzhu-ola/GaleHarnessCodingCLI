@@ -13,8 +13,9 @@ ce_platforms: [claude]
 
 # Check Plugin Version
 
-Verify the installed GaleHarnessCLI plugin version matches the latest released
-version, and recommend the update command if it doesn't. Claude Code only.
+Verify the installed GaleHarnessCLI plugin version matches the upstream
+`plugin.json` on `main`, and recommend the update command if it doesn't.
+Claude Code only.
 
 > **Note:** This skill updates the **plugin cache** only. To update the CLI binary
 > itself, run `gale-harness update` from your terminal.
@@ -31,11 +32,17 @@ at skill-load time. For a marketplace-cached install it looks like
 `~/.claude/plugins/cache/<marketplace>/galeharness-cli/<version>/skills/gh-update`,
 so the currently-loaded version is the basename two `dirname` levels up.
 
+The upstream version comes from `plugins/galeharness-cli/.claude-plugin/plugin.json`
+on `main` rather than the latest GitHub release tag, because the marketplace
+installs plugin contents from `main` HEAD. Comparing against release tags
+false-positives whenever `main` is ahead of the last tag (the normal state
+between releases).
+
 **Skill directory:**
 !`echo "${CLAUDE_SKILL_DIR}"`
 
-**Latest released version:**
-!`gh release list --repo wangrenzhu-ola/GaleHarnessCLI --limit 30 --json tagName --jq '[.[] | select(.tagName | startswith("galeharness-cli-v"))][0].tagName | sub("galeharness-cli-v";"")' 2>/dev/null || echo '__CE_UPDATE_VERSION_FAILED__'`
+**Latest upstream version:**
+!`version=$(gh api repos/wangrenzhu-ola/GaleHarnessCLI/contents/plugins/galeharness-cli/.claude-plugin/plugin.json --jq '.content | @base64d | fromjson | .version' 2>/dev/null) && [ -n "$version" ] && echo "$version" || echo '__CE_UPDATE_VERSION_FAILED__'`
 
 **Currently loaded version:**
 !`case "${CLAUDE_SKILL_DIR}" in */plugins/cache/*/galeharness-cli/*/skills/gh-update) basename "$(dirname "$(dirname "${CLAUDE_SKILL_DIR}")")" ;; *) echo '__CE_UPDATE_NOT_MARKETPLACE__' ;; esac`
@@ -52,8 +59,9 @@ requires Claude Code and stop. No further action.
 
 ### 2. Handle failure cases
 
-If **Latest released version** contains `__CE_UPDATE_VERSION_FAILED__`: tell the user the
-latest release could not be fetched (gh may be unavailable or rate-limited) and stop.
+If **Latest upstream version** contains `__CE_UPDATE_VERSION_FAILED__`: tell
+the user the upstream version could not be fetched (gh may be unavailable or
+rate-limited) and stop.
 
 If **Currently loaded version** contains `__CE_UPDATE_NOT_MARKETPLACE__`: this
 session loaded the skill from outside the standard marketplace cache (typical
@@ -70,13 +78,13 @@ Then stop.
 
 ### 3. Compare versions
 
-**Up to date** — `{currently loaded} == {latest}`:
+**Up to date** — `{currently loaded} == {latest upstream}`:
 
 > "GaleHarnessCLI **v{version}** is installed and up to date."
 
-**Out of date** — `{currently loaded} != {latest}`:
+**Out of date** — `{currently loaded} != {latest upstream}`:
 
-> "GaleHarnessCLI is on **v{currently loaded}** but **v{latest}** is available.
+> "GaleHarnessCLI is on **v{currently loaded}** but **v{latest upstream}** is available.
 >
 > Update with:
 > ```
