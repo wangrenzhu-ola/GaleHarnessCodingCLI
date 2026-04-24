@@ -218,6 +218,10 @@ describe("CLI", () => {
     expect(await exists(path.join(codexRoot, "prompts", "gh-plan.md"))).toBe(true)
     expect(await exists(path.join(codexRoot, "skills", "gh-plan", "SKILL.md"))).toBe(true)
     expect(await exists(path.join(codexRoot, "AGENTS.md"))).toBe(true)
+
+    const ghPlanSkill = await fs.readFile(path.join(codexRoot, "skills", "gh-plan", "SKILL.md"), "utf8")
+    expect(ghPlanSkill).toContain("## Embedded Agent Instructions")
+    expect(ghPlanSkill).not.toContain("Use the $repo-research-analyst skill")
   })
 
   test("install by name ignores same-named local directory", async () => {

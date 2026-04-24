@@ -261,7 +261,7 @@ describe("writeCodexBundle", () => {
     expect(config).toContain("[user]")
   })
 
-  test("transforms copied SKILL.md files using Codex invocation targets", async () => {
+  test("transforms copied SKILL.md files using Codex invocation targets without rewriting references", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "codex-skill-transform-"))
     const sourceSkillDir = path.join(tempRoot, "source-skill")
     await fs.mkdir(sourceSkillDir, { recursive: true })
@@ -311,9 +311,10 @@ Use /todo-resolve for deeper research.
       "utf8",
     )
     expect(notes).toContain("/gh:plan")
+    expect(notes).not.toContain("/prompts:gh-plan")
   })
 
-  test("transforms namespaced Task calls in copied SKILL.md files", async () => {
+  test("inlines namespaced Task calls in copied SKILL.md files", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "codex-ns-task-"))
     const sourceSkillDir = path.join(tempRoot, "source-skill")
     await fs.mkdir(sourceSkillDir, { recursive: true })
@@ -344,6 +345,28 @@ Also run bare agents:
         promptTargets: {},
         skillTargets: {},
       },
+      agentInstructions: {
+        "repo-research-analyst": {
+          name: "repo-research-analyst",
+          description: "Repo research",
+          body: "Research repository structure.",
+        },
+        "learnings-researcher": {
+          name: "learnings-researcher",
+          description: "Learning search",
+          body: "Search prior learnings.",
+        },
+        "best-practices-researcher": {
+          name: "best-practices-researcher",
+          description: "Best practices",
+          body: "Research best practices.",
+        },
+        "code-simplicity-reviewer": {
+          name: "code-simplicity-reviewer",
+          description: "Simplicity review",
+          body: "Review for unnecessary complexity.",
+        },
+      },
     }
 
     await writeCodexBundle(tempRoot, bundle)
@@ -353,18 +376,128 @@ Also run bare agents:
       "utf8",
     )
 
-    // Namespaced Task calls should be rewritten using the final segment
-    expect(installedSkill).toContain("Use the $repo-research-analyst skill to: feature_description")
-    expect(installedSkill).toContain("Use the $learnings-researcher skill to: feature_description")
-    expect(installedSkill).not.toContain("Task compound-engineering:")
+    expect(installedSkill).toContain("Run the embedded agent section `Agent: repo-research-analyst` sequentially in this context. Input: feature_description")
+    expect(installedSkill).toContain("Run the embedded agent section `Agent: learnings-researcher` sequentially in this context. Input: feature_description")
+    expect(installedSkill).toContain("## Embedded Agent Instructions")
+    expect(installedSkill).toContain("### Agent: repo-research-analyst")
+    expect(installedSkill).not.toContain("Task galeharness-cli:")
 
-    // Bare Task calls should still be rewritten
-    expect(installedSkill).toContain("Use the $best-practices-researcher skill to: topic")
+    expect(installedSkill).toContain("Run the embedded agent section `Agent: best-practices-researcher` sequentially in this context. Input: topic")
     expect(installedSkill).not.toContain("Task best-practices-researcher")
 
-    // Zero-arg Task calls should be rewritten without trailing "to:"
-    expect(installedSkill).toContain("Use the $code-simplicity-reviewer skill")
+    expect(installedSkill).toContain("Run the embedded agent section `Agent: code-simplicity-reviewer` sequentially in this context.")
     expect(installedSkill).not.toContain("code-simplicity-reviewer skill to:")
+  })
+
+  test("deduplicates embedded agent sections and reports missing instructions", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "codex-task-dedupe-"))
+    const sourceSkillDir = path.join(tempRoot, "source-skill")
+    await fs.mkdir(sourceSkillDir, { recursive: true })
+    await fs.writeFile(
+      path.join(sourceSkillDir, "SKILL.md"),
+      [
+        "---",
+        "name: gh:plan",
+        "description: Planning workflow",
+        "---",
+        "",
+        "- Task repo-research-analyst(first)",
+        "- Task repo-research-analyst(second)",
+        "- Task missing-agent(topic)",
+      ].join("\n"),
+    )
+
+    const bundle: CodexBundle = {
+      prompts: [],
+      skillDirs: [{ name: "gh:plan", sourceDir: sourceSkillDir }],
+      generatedSkills: [],
+      invocationTargets: {
+        promptTargets: {},
+        skillTargets: {},
+      },
+      agentInstructions: {
+        "repo-research-analyst": {
+          name: "repo-research-analyst",
+          body: "Research repository structure.",
+        },
+      },
+    }
+
+    await writeCodexBundle(tempRoot, bundle)
+
+    const installedSkill = await fs.readFile(
+      path.join(tempRoot, ".codex", "skills", "gh-plan", "SKILL.md"),
+      "utf8",
+    )
+    expect(installedSkill.match(/### Agent: repo-research-analyst/g)?.length).toBe(1)
+    expect(installedSkill).toContain("Input: first")
+    expect(installedSkill).toContain("Input: second")
+    expect(installedSkill).toContain("Agent instructions were not available in the converted bundle")
+    expect(installedSkill).not.toContain("Use the $missing-agent skill")
+  })
+
+  test("keeps Task skill references when capabilities allow spawning agents", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "codex-task-capable-"))
+    const sourceSkillDir = path.join(tempRoot, "source-skill")
+    await fs.mkdir(sourceSkillDir, { recursive: true })
+    await fs.writeFile(path.join(sourceSkillDir, "SKILL.md"), "- Task repo-research-analyst(feature_description)\n")
+
+    const bundle: CodexBundle = {
+      prompts: [],
+      skillDirs: [{ name: "gh:plan", sourceDir: sourceSkillDir }],
+      generatedSkills: [],
+      invocationTargets: {
+        promptTargets: {},
+        skillTargets: {},
+      },
+      platformCapabilities: { can_spawn_agents: true, model_override: "field" },
+    }
+
+    await writeCodexBundle(tempRoot, bundle)
+
+    const installedSkill = await fs.readFile(
+      path.join(tempRoot, ".codex", "skills", "gh-plan", "SKILL.md"),
+      "utf8",
+    )
+    expect(installedSkill).toContain("Use the $repo-research-analyst skill to: feature_description")
+    expect(installedSkill).not.toContain("Embedded Agent Instructions")
+  })
+
+  test("strips unsupported model override instructions in copied SKILL.md files", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "codex-model-strip-"))
+    const sourceSkillDir = path.join(tempRoot, "source-skill")
+    await fs.mkdir(sourceSkillDir, { recursive: true })
+    await fs.writeFile(
+      path.join(sourceSkillDir, "SKILL.md"),
+      [
+        "---",
+        "name: gh:review",
+        "description: Review workflow",
+        "---",
+        "",
+        "Use the data model and model context protocol docs.",
+        "Dispatch with `model: \"sonnet\"` for deep review.",
+        "model: haiku",
+      ].join("\n"),
+    )
+
+    const bundle: CodexBundle = {
+      prompts: [],
+      skillDirs: [{ name: "gh:review", sourceDir: sourceSkillDir }],
+      generatedSkills: [],
+    }
+
+    await writeCodexBundle(tempRoot, bundle)
+
+    const installedSkill = await fs.readFile(
+      path.join(tempRoot, ".codex", "skills", "gh-review", "SKILL.md"),
+      "utf8",
+    )
+    expect(installedSkill).toContain("data model")
+    expect(installedSkill).toContain("model context protocol")
+    expect(installedSkill).toContain("current global model")
+    expect(installedSkill).not.toContain("model: \"sonnet\"")
+    expect(installedSkill).not.toContain("model: haiku")
   })
 
   test("preserves unknown slash text in copied SKILL.md files", async () => {

@@ -78,3 +78,19 @@
 - **核心**: Codex copied s…
 - **来源**: 2026-04-24-122547-902
 
+### feat: Add platform capability manifest
+- **时间**: 2026-04-24
+- **关键词**: 通用, plan, adds, manifest, galeharnesscli
+- **核心**: Platform Capab…
+- **来源**: 2026-04-24-140106-940
+
+### Work: Platform Capability Manifest
+- **时间**: 2026-04-24
+- **关键词**: capability, galeharnesscli, manifest, platformcapab, platform
+- **核心**: Implemented Pl…
+- **来源**: 2026-04-24-143332-269
+### Fix Codex copied skill reference Markdown rewrite boundary
+- **时间**: 2026-04-24
+- **关键词**: rewrite, boundary, copied, fixed, markdown
+- **核心**: Fixed PR #57 C…
+- **来源**: 2026-04-24-145930-411

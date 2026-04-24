@@ -1,4 +1,5 @@
 import type { ClaudeMcpServer } from "./claude"
+import type { PlatformCapabilities } from "./platform-capabilities"
 import type { CodexInvocationTargets } from "../utils/codex-content"
 
 export type CodexPrompt = {
@@ -22,10 +23,19 @@ export type CodexGeneratedSkillSidecarDir = {
   targetName: string
 }
 
+export type CodexEmbeddedAgentInstruction = {
+  name: string
+  description?: string
+  capabilities?: string[]
+  body: string
+}
+
 export type CodexBundle = {
   prompts: CodexPrompt[]
   skillDirs: CodexSkillDir[]
   generatedSkills: CodexGeneratedSkill[]
   invocationTargets?: CodexInvocationTargets
+  agentInstructions?: Record<string, CodexEmbeddedAgentInstruction>
+  platformCapabilities?: PlatformCapabilities
   mcpServers?: Record<string, ClaudeMcpServer>
 }

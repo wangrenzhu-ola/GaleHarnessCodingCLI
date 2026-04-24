@@ -14,6 +14,7 @@ import type {
   OpenCodeConfig,
   OpenCodeMcpServer,
 } from "../types/opencode"
+import type { PlatformCapabilities } from "../types/platform-capabilities"
 
 export type PermissionMode = "none" | "broad" | "from-commands"
 
@@ -21,6 +22,7 @@ export type ClaudeToOpenCodeOptions = {
   agentMode: "primary" | "subagent"
   inferTemperature: boolean
   permissions: PermissionMode
+  platformCapabilities?: PlatformCapabilities
 }
 
 const TOOL_MAP: Record<string, string> = {

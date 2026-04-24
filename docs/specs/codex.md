@@ -26,6 +26,7 @@ https://developers.openai.com/codex/mcp
 - A top-level `profile = "<name>"` sets the default profile; CLI flags can override it. citeturn4view0
 - Profiles are experimental and not supported in the IDE extension. citeturn4view0
 - Custom model providers can be defined with base URL, wire API, and optional headers, then referenced via `model_provider`. citeturn4view0
+- GaleHarnessCLI treats Codex model selection as global/profile-level capability. Generated Codex skills do not write per-skill or per-agent model override fields.
 
 ## Custom prompts (slash commands)
 
@@ -52,6 +53,13 @@ https://developers.openai.com/codex/mcp
 - Inference: some existing tooling and user setups still use `.codex/skills/` and `~/.codex/skills/` as legacy compatibility paths, but those locations are not documented in the current OpenAI Codex skills docs linked above.
 - Codex also supports admin-scoped skills in `/etc/codex/skills` plus built-in system skills bundled with Codex. citeturn1view4
 - Skills can be invoked explicitly using `/skills` or `$skill-name`. citeturn3view3
+
+## GaleHarnessCLI conversion policy
+
+- Codex target capabilities are `can_spawn_agents: false` and `model_override: "global"`.
+- When converting Claude Code `Task agent(args)` calls for Codex, GaleHarnessCLI embeds known agent instructions inside the converted skill and rewrites the call site to run that section sequentially in the current context.
+- Unknown agents are not rewritten to `$agent` skill calls. The converted output keeps a diagnostic fallback noting that agent instructions were not available in the bundle.
+- Per-dispatch model snippets such as `model: "sonnet"` are stripped or replaced with current-global-model wording in Codex output. Ordinary prose such as "data model" is preserved.
 
 ## MCP (Model Context Protocol)
 

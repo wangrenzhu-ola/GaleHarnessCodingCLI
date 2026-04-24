@@ -4,7 +4,7 @@ import os from "os"
 import path from "path"
 import { fileURLToPath } from "url"
 import { loadClaudePlugin } from "../parsers/claude"
-import { targets, validateScope } from "../targets"
+import { resolveTargetCapabilities, targets, validateScope, type TargetHandler } from "../targets"
 import { pathExists } from "../utils/files"
 import type { ClaudeToOpenCodeOptions, PermissionMode } from "../converters/claude-to-opencode"
 import { ensureCodexAgentsFile } from "../utils/codex-agents"
@@ -148,7 +148,7 @@ export default defineCommand({
             console.warn(`Skipping ${tool.name}: not implemented.`)
             continue
           }
-          const bundle = handler.convert(plugin, options)
+          const bundle = handler.convert(plugin, optionsForTarget(options, handler))
           if (!bundle) {
             console.warn(`Skipping ${tool.name}: no output returned.`)
             continue
@@ -188,7 +188,7 @@ export default defineCommand({
 
       const resolvedScope = validateScope(targetName, target, args.scope ? String(args.scope) : undefined)
 
-      const bundle = target.convert(plugin, options)
+      const bundle = target.convert(plugin, optionsForTarget(options, target))
       if (!bundle) {
         throw new Error(`Target ${targetName} did not return a bundle.`)
       }
@@ -223,7 +223,7 @@ export default defineCommand({
           console.warn(`Skipping ${extra}: not implemented yet.`)
           continue
         }
-        const extraBundle = handler.convert(plugin, options)
+        const extraBundle = handler.convert(plugin, optionsForTarget(options, handler))
         if (!extraBundle) {
           console.warn(`Skipping ${extra}: no output returned.`)
           continue
@@ -301,6 +301,16 @@ function resolveOutputRoot(value: unknown): string {
   // OpenCode global config lives at ~/.config/opencode per XDG spec
   // See: https://opencode.ai/docs/config/
   return path.join(os.homedir(), ".config", "opencode")
+}
+
+function optionsForTarget(
+  options: ClaudeToOpenCodeOptions,
+  target: TargetHandler,
+): ClaudeToOpenCodeOptions {
+  return {
+    ...options,
+    platformCapabilities: resolveTargetCapabilities(target),
+  }
 }
 
 async function resolveBundledPluginPath(pluginName: string): Promise<string | null> {

@@ -4,8 +4,27 @@ import { loadClaudePlugin } from "../src/parsers/claude"
 import { convertClaudeToOpenCode, transformSkillContentForOpenCode } from "../src/converters/claude-to-opencode"
 import { parseFrontmatter } from "../src/utils/frontmatter"
 import type { ClaudePlugin } from "../src/types/claude"
+import { resolveTargetCapabilities, targets } from "../src/targets"
+import { DEFAULT_PLATFORM_CAPABILITIES } from "../src/types/platform-capabilities"
 
 const fixtureRoot = path.join(import.meta.dir, "fixtures", "sample-plugin")
+
+describe("target platform capabilities", () => {
+  test("declares Codex and Claude capabilities", () => {
+    expect(targets.codex.capabilities).toEqual({
+      can_spawn_agents: false,
+      model_override: "global",
+    })
+    expect(targets.claude.capabilities).toEqual({
+      can_spawn_agents: true,
+      model_override: "field",
+    })
+  })
+
+  test("falls back to Claude-compatible capabilities when a target is undeclared", () => {
+    expect(resolveTargetCapabilities({})).toEqual(DEFAULT_PLATFORM_CAPABILITIES)
+  })
+})
 
 describe("convertClaudeToOpenCode", () => {
   test("from-command mode: map allowedTools to global permission block", async () => {

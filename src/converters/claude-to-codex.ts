@@ -2,8 +2,14 @@ import fs, { type Dirent } from "fs"
 import path from "path"
 import { formatFrontmatter } from "../utils/frontmatter"
 import { type ClaudeAgent, type ClaudeCommand, type ClaudePlugin, type ClaudeSkill, filterSkillsByPlatform } from "../types/claude"
-import type { CodexBundle, CodexGeneratedSkill, CodexGeneratedSkillSidecarDir } from "../types/codex"
+import type {
+  CodexBundle,
+  CodexEmbeddedAgentInstruction,
+  CodexGeneratedSkill,
+  CodexGeneratedSkillSidecarDir,
+} from "../types/codex"
 import type { ClaudeToOpenCodeOptions } from "./claude-to-opencode"
+import { CODEX_PLATFORM_CAPABILITIES } from "../types/platform-capabilities"
 import {
   normalizeCodexName,
   transformContentForCodex,
@@ -16,8 +22,9 @@ const CODEX_DESCRIPTION_MAX_LENGTH = 1024
 
 export function convertClaudeToCodex(
   plugin: ClaudePlugin,
-  _options: ClaudeToCodexOptions,
+  options: ClaudeToCodexOptions,
 ): CodexBundle {
+  const platformCapabilities = options.platformCapabilities ?? CODEX_PLATFORM_CAPABILITIES
   const platformSkills = filterSkillsByPlatform(plugin.skills, "codex")
   const invocableCommands = plugin.commands.filter((command) => !command.disableModelInvocation)
   const applyCompoundWorkflowModel = shouldApplyCompoundWorkflowModel(plugin)
@@ -75,13 +82,15 @@ export function convertClaudeToCodex(
   }
 
   const invocationTargets: CodexInvocationTargets = { promptTargets, skillTargets }
+  const agentInstructions = buildAgentInstructions(plugin.agents)
+  const transformOptions = { platformCapabilities, agentInstructions }
 
   const commandSkills: CodexGeneratedSkill[] = []
   const prompts = invocableCommands.map((command) => {
     const promptName = commandPromptNames.get(command.name)!
-    const commandSkill = convertCommandSkill(command, usedSkillNames, invocationTargets)
+    const commandSkill = convertCommandSkill(command, usedSkillNames, invocationTargets, transformOptions)
     commandSkills.push(commandSkill)
-    const content = renderPrompt(command, commandSkill.name, invocationTargets)
+    const content = renderPrompt(command, commandSkill.name, invocationTargets, transformOptions)
     return { name: promptName, content }
   })
   const workflowPrompts = canonicalWorkflowSkills.map((skill) => ({
@@ -90,7 +99,7 @@ export function convertClaudeToCodex(
   }))
 
   const agentSkills = plugin.agents.map((agent) =>
-    convertAgent(agent, usedSkillNames, invocationTargets),
+    convertAgent(agent, usedSkillNames, invocationTargets, transformOptions),
   )
   const generatedSkills = [...commandSkills, ...agentSkills]
 
@@ -99,6 +108,8 @@ export function convertClaudeToCodex(
     skillDirs,
     generatedSkills,
     invocationTargets,
+    agentInstructions,
+    platformCapabilities,
     mcpServers: plugin.mcpServers,
   }
 }
@@ -107,6 +118,7 @@ function convertAgent(
   agent: ClaudeAgent,
   usedNames: Set<string>,
   invocationTargets: CodexInvocationTargets,
+  transformOptions: Parameters<typeof transformContentForCodex>[2],
 ): CodexGeneratedSkill {
   const name = uniqueName(normalizeCodexName(agent.name), usedNames)
   const description = sanitizeDescription(
@@ -114,7 +126,7 @@ function convertAgent(
   )
   const frontmatter: Record<string, unknown> = { name, description }
 
-  let body = transformContentForCodex(agent.body.trim(), invocationTargets)
+  let body = transformContentForCodex(agent.body.trim(), invocationTargets, transformOptions)
   if (agent.capabilities && agent.capabilities.length > 0) {
     const capabilities = agent.capabilities.map((capability) => `- ${capability}`).join("\n")
     body = `## Capabilities\n${capabilities}\n\n${body}`.trim()
@@ -131,6 +143,7 @@ function convertCommandSkill(
   command: ClaudeCommand,
   usedNames: Set<string>,
   invocationTargets: CodexInvocationTargets,
+  transformOptions: Parameters<typeof transformContentForCodex>[2],
 ): CodexGeneratedSkill {
   const name = uniqueName(normalizeCodexName(command.name), usedNames)
   const frontmatter: Record<string, unknown> = {
@@ -146,7 +159,7 @@ function convertCommandSkill(
   if (command.allowedTools && command.allowedTools.length > 0) {
     sections.push(`## Allowed tools\n${command.allowedTools.map((tool) => `- ${tool}`).join("\n")}`)
   }
-  const transformedBody = transformContentForCodex(command.body.trim(), invocationTargets)
+  const transformedBody = transformContentForCodex(command.body.trim(), invocationTargets, transformOptions)
   sections.push(transformedBody)
   const body = sections.filter(Boolean).join("\n\n").trim()
   const content = formatFrontmatter(frontmatter, body.length > 0 ? body : command.body)
@@ -157,15 +170,44 @@ function renderPrompt(
   command: ClaudeCommand,
   skillName: string,
   invocationTargets: CodexInvocationTargets,
+  transformOptions: Parameters<typeof transformContentForCodex>[2],
 ): string {
   const frontmatter: Record<string, unknown> = {
     description: command.description,
     "argument-hint": command.argumentHint,
   }
   const instructions = `Use the $${skillName} skill for this command and follow its instructions.`
-  const transformedBody = transformContentForCodex(command.body, invocationTargets)
+  const transformedBody = transformContentForCodex(command.body, invocationTargets, transformOptions)
   const body = [instructions, "", transformedBody].join("\n").trim()
   return formatFrontmatter(frontmatter, body)
+}
+
+function buildAgentInstructions(agents: ClaudeAgent[]): Record<string, CodexEmbeddedAgentInstruction> {
+  const instructions: Record<string, CodexEmbeddedAgentInstruction> = {}
+
+  for (const agent of agents) {
+    const instruction: CodexEmbeddedAgentInstruction = {
+      name: normalizeAgentDisplayName(agent.name),
+      description: agent.description,
+      capabilities: agent.capabilities,
+      body: agent.body.trim(),
+    }
+    const keys = new Set([
+      normalizeCodexName(agent.name),
+      normalizeCodexName(normalizeAgentDisplayName(agent.name)),
+      normalizeCodexName(agent.name.includes(":") ? agent.name.split(":").pop()! : agent.name),
+    ])
+    for (const key of keys) {
+      instructions[key] = instruction
+    }
+  }
+
+  return instructions
+}
+
+function normalizeAgentDisplayName(name: string): string {
+  const finalSegment = name.includes(":") ? name.split(":").pop()! : name
+  return normalizeCodexName(finalSegment)
 }
 
 function renderWorkflowPrompt(skill: ClaudeSkill): string {

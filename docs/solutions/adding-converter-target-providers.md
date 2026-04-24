@@ -360,11 +360,17 @@ export const targets: Record<string, TargetHandler<any>> = {
   {target}: {
     name: "{target}",
     implemented: true,
+    capabilities: {
+      can_spawn_agents: true,      // or false if the target cannot dispatch subagents
+      model_override: "field",    // "field" | "global" | "none"
+    },
     convert: convertClaudeTo{Target} as TargetHandler<{Target}Bundle>["convert"],
     write: write{Target}Bundle as TargetHandler<{Target}Bundle>["write"],
   },
 }
 ```
+
+If a handler omits `capabilities`, conversion falls back to Claude-compatible defaults: `can_spawn_agents: true` and `model_override: "field"`. Prefer declaring capabilities explicitly for new targets so content transforms can make target-aware decisions.
 
 **File: `src/commands/convert.ts` and `src/commands/install.ts`**
 
@@ -635,7 +641,7 @@ Use this checklist when adding a new target provider:
 - [ ] Create `src/types/{target}.ts` with bundle and component types
 - [ ] Implement `src/converters/claude-to-{target}.ts` with converter and content transformer
 - [ ] Implement `src/targets/{target}.ts` with writer
-- [ ] Register target in `src/targets/index.ts`
+- [ ] Register target in `src/targets/index.ts` and declare `capabilities` when behavior differs from Claude Code defaults
 - [ ] Update `src/commands/convert.ts` (add output root resolution, update help text)
 - [ ] Update `src/commands/install.ts` (same as convert.ts)
 - [ ] (Optional) Implement `src/sync/{target}.ts` and update `src/commands/sync.ts`

@@ -10,6 +10,15 @@
 
 ## 最新条目
 
+- [2026-04-24] **Fix Codex copied skill reference Markdown rewrite boundary** (tools): Fixed PR #57 C…
+
+
+- [2026-04-24] **Work: Platform Capability Manifest** (tools): Implemented Pl…
+
+
+- [2026-04-24] **feat: Add platform capability manifest** (tools): Platform Capab…
+
+
 - [2026-04-24] **Codex copied skill descriptions must be truncated at install time** (tools): Codex copied s…
 
 
@@ -47,5 +56,4 @@
 
 
 - [2026-04-23] **GaleHarnessCLI 初始化：HKTMemory 集成完成** (tools): GaleHarnessCLI…
-
 
