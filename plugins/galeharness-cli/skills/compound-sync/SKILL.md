@@ -26,50 +26,75 @@ GaleHarnessCLI was forked from EveryInc/compound-engineering-plugin at the commi
 
 ## Workflow
 
-### Step 1: Read Local Baseline
+Use the upstream sync CLI as the source of truth for batch generation, per-commit worktrees, PR creation, state transitions, cleanup, and `.upstream-ref` updates.
 
-- Read `.upstream-ref` for the last synced upstream commit.
-- Read `.upstream-repo` for the local upstream checkout path, unless an explicit path is provided for this run.
-- Treat the value in `.upstream-ref` as the start of the new batch, not as something to mutate immediately.
+### Step 1: Initialize The Batch
 
-### Step 2: Generate A Per-Commit Batch
+From the repository root, run:
 
-From the repository root, generate a dated batch under `.context/galeharness-cli/upstream-sync/`.
+```bash
+python3 scripts/upstream-sync/sync-cli.py init
+python3 scripts/upstream-sync/sync-cli.py status
+```
 
-The batch should contain:
-- `raw/NNNN-*.patch` for exact upstream provenance
-- `adapted/NNNN-*.patch` for mechanical GaleHarnessCLI renames
-- `commit-range.txt` with `baseline_before_batch`, `end_commit`, and `next_baseline_candidate`
-- `README.md` with the patch table and worktree instructions
+The CLI reads `.upstream-ref` and `.upstream-repo`, generates a dated batch under `.context/galeharness-cli/upstream-sync/`, and writes workflow state under `.context/galeharness-cli/upstream-sync/state.json`.
 
-### Step 3: Review And Process One Patch At A Time
+If `init` reports no new upstream commits, stop. Do not mutate `.upstream-ref` manually.
 
-For each adapted patch:
-- Review the paired raw patch to understand upstream intent
-- Create an isolated worktree
-- Apply exactly one adapted patch in that worktree
-- Run focused verification for that patch's scope
-- Commit and open a PR for that patch
+### Step 2: Process One Commit
+
+Start exactly one pending upstream commit:
+
+```bash
+python3 scripts/upstream-sync/sync-cli.py next
+```
+
+The CLI creates an isolated worktree, applies one adapted patch, runs verification, commits the result, pushes the branch, and opens a PR. Treat the generated PR as the review boundary for that upstream commit.
 
 Default operating model:
 - one upstream commit -> one adapted patch
 - one adapted patch -> one isolated worktree
 - one adapted patch -> one PR
 
-### Step 4: Re-apply GaleHarnessCLI-Specific Logic
+### Step 3: Re-apply GaleHarnessCLI-Specific Logic
 
-Mechanical adaptation only handles naming and path rewrites. After a patch applies:
+Mechanical adaptation only handles naming and path rewrites. In the generated worktree or PR:
 
 1. Re-apply `gh:` naming expectations not covered by raw text replacement
 2. Re-inject HKTMemory workflow patches where upstream does not know about them
 3. Update or add tests for the changed behavior
-4. Run verification before creating the PR
+4. Run focused verification before the PR lands
 
-### Step 5: Advance Baseline Only After The Batch Lands
+### Step 4: Resume Or Skip
 
-Do not update `.upstream-ref` when the batch is merely generated.
+After the PR is merged, return to the original worktree and run:
 
-Update `.upstream-ref` only after every patch in the batch has landed. The new value should be the batch's `next_baseline_candidate`, which is also the batch `end_commit`. That makes the recorded terminal commit the next run's starting baseline.
+```bash
+python3 scripts/upstream-sync/sync-cli.py resume
+python3 scripts/upstream-sync/sync-cli.py status
+```
+
+`resume` verifies the PR target, reconciles upstream ancestry, updates `.upstream-ref` for the merged upstream commit, cleans up the worktree, and returns the workflow to `idle` for the next explicit `next` command. It does not automatically start the next commit.
+
+If a commit must be abandoned, run:
+
+```bash
+python3 scripts/upstream-sync/sync-cli.py skip --reason "short reason"
+```
+
+For an open or closed PR that needs cleanup, use:
+
+```bash
+python3 scripts/upstream-sync/sync-cli.py skip --force-cleanup --reason "short reason"
+```
+
+The CLI validates branch ownership before deleting remote branches.
+
+### Step 5: Complete The Batch
+
+Repeat `next` -> PR review/merge -> `resume` until `status` reports `complete`.
+
+Do not hand-edit `.upstream-ref`. The CLI advances it only after each corresponding PR is confirmed merged and upstream ancestry checks pass.
 
 ## HKTMemory Patches to Re-apply
 

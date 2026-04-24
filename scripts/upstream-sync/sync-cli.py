@@ -88,6 +88,20 @@ REDACT_PATTERNS = ["GH_TOKEN", "GITHUB_TOKEN", "Authorization", "x-access-token"
 # Utility: safe command runner
 # ---------------------------------------------------------------------------
 
+def _configure_stdio() -> None:
+    """Force UTF-8 console output on Windows and other non-UTF-8 locales."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure:
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
+
+_configure_stdio()
+
+
 def _redact_text(text: str, extra_patterns: Optional[List[str]] = None) -> str:
     """Remove sensitive tokens from text."""
     result = text
@@ -132,6 +146,8 @@ def run_cmd(
         argv,
         cwd=str(resolved_cwd),
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=capture,
         check=False,
     )
@@ -164,13 +180,13 @@ def resolve_main_worktree_root() -> Path:
     """Resolve the main worktree root via git worktree list --porcelain."""
     result = subprocess.run(
         ["git", "worktree", "list", "--porcelain"],
-        capture_output=True, text=True, check=False,
+        capture_output=True, text=True, encoding="utf-8", errors="replace", check=False,
     )
     if result.returncode != 0:
         # Fallback: use git-common-dir
         result2 = subprocess.run(
             ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
-            capture_output=True, text=True, check=False,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", check=False,
         )
         if result2.returncode != 0:
             raise RuntimeError("无法解析 git 仓库信息，请在 git 仓库内运行。")
@@ -359,8 +375,11 @@ def cmd_init(args: argparse.Namespace) -> int:
                     file=sys.stderr,
                 )
                 return EXIT_PRECONDITION
-        except Exception:
-            pass  # Corrupted state, allow re-init
+        except Exception as e:
+            print(f"错误: 已存在状态文件但无法读取: {state_path}", file=sys.stderr)
+            print(f"原因: {e}", file=sys.stderr)
+            print("请先备份并修复状态文件，或确认后使用 --force 重新初始化。", file=sys.stderr)
+            return EXIT_STATE_CORRUPT
 
     # Resolve remote and base branch
     remote_name = "origin"
@@ -389,18 +408,20 @@ def cmd_init(args: argparse.Namespace) -> int:
         ],
         cwd=main_root,
     )
+    gen_stdout = gen_result.stdout or ""
+    if "No new upstream commits" in gen_stdout:
+        print("无需同步: upstream 没有新的 commit。")
+        return EXIT_OK
+
     if gen_result.returncode != 0:
         stderr_msg = _truncate(gen_result.stderr or "")
-        stdout_msg = _truncate(gen_result.stdout or "")
-        if "No new upstream commits" in (gen_result.stdout or ""):
-            print("无需同步: upstream 没有新的 commit。")
-            return EXIT_OK
+        stdout_msg = _truncate(gen_stdout)
         print(f"错误: generate-batch.py 失败\nstdout:\n{stdout_msg}\nstderr:\n{stderr_msg}", file=sys.stderr)
         return EXIT_RUNTIME
 
     # Parse generate-batch.py JSON output for batch_dir
     try:
-        gen_info = json.loads(gen_result.stdout.strip())
+        gen_info = json.loads(gen_stdout.strip())
         batch_dir = Path(gen_info["batch_dir"])
     except (json.JSONDecodeError, KeyError):
         print(f"错误: 无法解析 generate-batch.py 输出:\n{gen_result.stdout}", file=sys.stderr)
@@ -604,8 +625,8 @@ def cmd_next(args: argparse.Namespace) -> int:
     batch_date = Path(state.batch_dir).name
     branch_name = make_branch_name(batch_date, commit.sequence, commit.subject)
 
-    worktree_path = Path(state.main_worktree_root).parent / f"GaleHarnessCodingCLI-{branch_name}"
     adapted_patch = Path(commit.adapted_patch)
+    worktree_path = Path(state.main_worktree_root).parent / f"GaleHarnessCodingCLI-{branch_name}"
 
     if dry_run:
         print("=== next --dry-run ===")
@@ -629,6 +650,7 @@ def cmd_next(args: argparse.Namespace) -> int:
     try:
         # --- Stage: worktree_create ---
         branch_name = _resolve_unique_branch(branch_name, state.remote_name, main_root_path)
+        worktree_path = Path(state.main_worktree_root).parent / f"GaleHarnessCodingCLI-{branch_name}"
         commit.branch = branch_name
         commit.base_branch = state.base_branch
         commit.worktree_path = str(worktree_path)
@@ -1072,29 +1094,99 @@ def _resume_from_review(state: SyncState, state_path: Path, dry_run: bool) -> in
         return EXIT_RUNTIME
 
 
+def _git_commit_exists(repo: Path, sha: str) -> bool:
+    r = run_cmd(["git", "rev-parse", "--verify", f"{sha}^{{commit}}"], repo)
+    return r.returncode == 0
+
+
+def _git_is_ancestor(repo: Path, ancestor: str, descendant: str) -> bool:
+    r = run_cmd(["git", "merge-base", "--is-ancestor", ancestor, descendant], repo)
+    return r.returncode == 0
+
+
+def _should_write_upstream_ref(state: SyncState, commit: CommitEntry, main_root_path: Path) -> Optional[bool]:
+    """Validate upstream ancestry before mutating .upstream-ref."""
+    upstream_ref_path = main_root_path / ".upstream-ref"
+    upstream_repo_path = main_root_path / ".upstream-repo"
+
+    if not upstream_ref_path.is_file():
+        print(f"错误: 缺少 .upstream-ref 文件: {upstream_ref_path}", file=sys.stderr)
+        return None
+    if not upstream_repo_path.is_file():
+        print(f"错误: 缺少 .upstream-repo 文件: {upstream_repo_path}", file=sys.stderr)
+        return None
+
+    current_ref = upstream_ref_path.read_text(encoding="utf-8").strip()
+    if not current_ref:
+        print("错误: .upstream-ref 文件为空，拒绝推进 baseline。", file=sys.stderr)
+        return None
+
+    upstream_repo = Path(upstream_repo_path.read_text(encoding="utf-8").strip()).expanduser().resolve()
+    if not upstream_repo.is_dir():
+        print(f"错误: upstream 仓库路径无效: {upstream_repo}", file=sys.stderr)
+        return None
+
+    missing = [
+        label
+        for label, sha in [
+            ("state.baseline_sha", state.baseline_sha),
+            ("commit.sha", commit.sha),
+            (".upstream-ref", current_ref),
+        ]
+        if not _git_commit_exists(upstream_repo, sha)
+    ]
+    if missing:
+        print(f"错误: upstream 对账失败，以下引用不是有效 commit: {', '.join(missing)}", file=sys.stderr)
+        return None
+
+    if not _git_is_ancestor(upstream_repo, state.baseline_sha, commit.sha):
+        print(
+            f"错误: upstream ancestry 对账未通过 (baseline {state.baseline_sha[:7]} -> {commit.sha[:7]})",
+            file=sys.stderr,
+        )
+        print("拒绝更新 .upstream-ref，请人工检查 upstream 历史和 state.json。", file=sys.stderr)
+        return None
+
+    if current_ref == commit.sha:
+        print(f"提示: .upstream-ref 已经是 {commit.sha[:7]}，只推进本地状态。", file=sys.stderr)
+        return False
+
+    if current_ref == state.baseline_sha:
+        return True
+
+    if _git_is_ancestor(upstream_repo, commit.sha, current_ref):
+        print(
+            f"警告: .upstream-ref ({current_ref[:7]}) 已经位于当前 commit ({commit.sha[:7]}) 之后，只推进本地状态。",
+            file=sys.stderr,
+        )
+        return False
+
+    if _git_is_ancestor(upstream_repo, current_ref, commit.sha):
+        print(
+            f"警告: .upstream-ref ({current_ref[:7]}) 与 state baseline ({state.baseline_sha[:7]}) 不同，但仍是当前 commit 的祖先；将推进到 {commit.sha[:7]}。",
+            file=sys.stderr,
+        )
+        return True
+
+    print(
+        f"错误: .upstream-ref ({current_ref[:7]}) 与当前 commit ({commit.sha[:7]}) 分叉，拒绝推进 baseline。",
+        file=sys.stderr,
+    )
+    return None
+
+
 def _handle_pr_merged(
     state: SyncState, commit: CommitEntry, state_path: Path, main_root_path: Path,
 ) -> int:
     """Handle PR merged: reconcile .upstream-ref, cleanup, advance."""
     upstream_ref_path = main_root_path / ".upstream-ref"
 
-    # Ancestry reconciliation via upstream repo
-    upstream_repo_path = main_root_path / ".upstream-repo"
-    if upstream_repo_path.is_file():
-        upstream_repo = Path(upstream_repo_path.read_text(encoding="utf-8").strip()).expanduser().resolve()
-        if upstream_repo.is_dir():
-            # Check ancestry: baseline_sha should be ancestor of commit.sha
-            r = run_cmd(
-                ["git", "merge-base", "--is-ancestor", state.baseline_sha, commit.sha],
-                upstream_repo,
-            )
-            if r.returncode != 0:
-                print(f"警告: upstream ancestry 对账未通过 (baseline {state.baseline_sha[:7]} -> {commit.sha[:7]})", file=sys.stderr)
-                print("仍将推进 .upstream-ref，请人工确认 upstream 历史。", file=sys.stderr)
-
-    # Write .upstream-ref
-    upstream_ref_path.write_text(commit.sha + "\n", encoding="utf-8")
-    add_operation(state, "upstream_ref_update", f".upstream-ref 更新为 {commit.sha[:7]}")
+    should_write_ref = _should_write_upstream_ref(state, commit, main_root_path)
+    if should_write_ref is None:
+        return EXIT_STATE_CORRUPT
+    if should_write_ref:
+        upstream_ref_path.write_text(commit.sha + "\n", encoding="utf-8")
+        add_operation(state, "upstream_ref_update", f".upstream-ref 更新为 {commit.sha[:7]}")
 
     # Cleanup worktree
     if commit.worktree_path:
@@ -1124,7 +1216,7 @@ def _handle_pr_merged(
         save_state(state, state_path)
         print(f"=== 同步完成 ===")
         print(f"所有 {len(state.commits)} 个 commit 已处理完成。")
-        print(f".upstream-ref 已更新为 {commit.sha[:7]}")
+        print(f".upstream-ref {'已更新为' if should_write_ref else '保持为'} {commit.sha[:7]}")
         return EXIT_OK
     else:
         state.workflow_state = "idle"
@@ -1133,7 +1225,7 @@ def _handle_pr_merged(
         save_state(state, state_path)
         print(f"=== PR 已合并 ===")
         print(f"Commit #{commit.sequence} 已标记为 merged。")
-        print(f".upstream-ref 已更新为 {commit.sha[:7]}")
+        print(f".upstream-ref {'已更新为' if should_write_ref else '保持为'} {commit.sha[:7]}")
         print(f"\n下一个: #{next_commit.sequence} {next_commit.sha[:7]} {next_commit.subject}")
         print(f"请执行 next 继续。")
         return EXIT_OK
@@ -1217,6 +1309,76 @@ def cmd_skip(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _head_repository_name(pr_data: Dict[str, Any]) -> str:
+    head_repo = pr_data.get("headRepository") or {}
+    if not isinstance(head_repo, dict):
+        return ""
+    name_with_owner = head_repo.get("nameWithOwner")
+    if isinstance(name_with_owner, str):
+        return name_with_owner
+    owner = head_repo.get("owner") or {}
+    owner_login = owner.get("login") if isinstance(owner, dict) else ""
+    repo_name = head_repo.get("name")
+    if owner_login and repo_name:
+        return f"{owner_login}/{repo_name}"
+    return ""
+
+
+def _verify_cleanup_pr_target(state: SyncState, commit: CommitEntry, main_root_path: Path) -> bool:
+    if not commit.pr_number:
+        print("警告: 缺少 PR 编号，无法验真远程分支归属，跳过远程删除。", file=sys.stderr)
+        return False
+
+    result = run_cmd(
+        [
+            "gh", "pr", "view", str(commit.pr_number),
+            "--repo", state.github_repo,
+            "--json", "state,number,headRefName,baseRefName,headRepository",
+        ],
+        main_root_path,
+    )
+    if result.returncode != 0:
+        stderr_safe = _redact_text(_truncate(result.stderr or ""))
+        print(f"警告: 无法查询 PR #{commit.pr_number}，跳过远程删除。\n{stderr_safe}", file=sys.stderr)
+        return False
+
+    try:
+        pr_data = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        print(f"警告: 无法解析 PR #{commit.pr_number} JSON，跳过远程删除:\n{result.stdout}", file=sys.stderr)
+        return False
+
+    problems: List[str] = []
+    if pr_data.get("number") not in (None, commit.pr_number):
+        problems.append(f"number 不一致 (PR: {pr_data.get('number')}, state: {commit.pr_number})")
+
+    pr_state = str(pr_data.get("state") or "").upper()
+    if pr_state == "OPEN":
+        problems.append("PR 仍为 OPEN")
+
+    expected_head = commit.pr_head_ref or commit.branch
+    head_ref = pr_data.get("headRefName") or ""
+    if expected_head and head_ref != expected_head:
+        problems.append(f"headRefName 不一致 (PR: {head_ref}, state: {expected_head})")
+
+    expected_base = commit.pr_base_ref or state.base_branch
+    base_ref = pr_data.get("baseRefName") or ""
+    if expected_base and base_ref != expected_base:
+        problems.append(f"baseRefName 不一致 (PR: {base_ref}, state: {expected_base})")
+
+    head_repo_name = _head_repository_name(pr_data)
+    if head_repo_name and head_repo_name != state.github_repo:
+        problems.append(f"headRepository 不一致 (PR: {head_repo_name}, expected: {state.github_repo})")
+
+    if problems:
+        print("警告: PR 验真未通过，跳过远程分支删除:", file=sys.stderr)
+        for problem in problems:
+            print(f"  - {problem}", file=sys.stderr)
+        return False
+
+    return True
+
+
 def _do_force_cleanup(state: SyncState, commit: CommitEntry, main_root_path: Path) -> None:
     """Cleanup worktree and remote branch with validation."""
     # Validate and cleanup worktree
@@ -1246,16 +1408,17 @@ def _do_force_cleanup(state: SyncState, commit: CommitEntry, main_root_path: Pat
             print(f"警告: 分支 {branch} 是默认分支，跳过删除。", file=sys.stderr)
             return
 
-        # Delete remote branch
-        r = run_cmd(
-            ["git", "push", state.remote_name, "--delete", branch],
-            main_root_path,
-        )
-        if r.returncode != 0:
-            print(f"警告: 删除远程分支失败: {branch}", file=sys.stderr)
-            print(f"手动删除: git push {state.remote_name} --delete {branch}", file=sys.stderr)
-        else:
-            add_operation(state, "cleanup_remote_branch", f"已删除远程分支: {branch}")
+        # Delete remote branch only after PR metadata proves the branch target.
+        if _verify_cleanup_pr_target(state, commit, main_root_path):
+            r = run_cmd(
+                ["git", "push", state.remote_name, "--delete", branch],
+                main_root_path,
+            )
+            if r.returncode != 0:
+                print(f"警告: 删除远程分支失败: {branch}", file=sys.stderr)
+                print(f"手动删除: git push {state.remote_name} --delete {branch}", file=sys.stderr)
+            else:
+                add_operation(state, "cleanup_remote_branch", f"已删除远程分支: {branch}")
 
         # Delete local branch
         r = run_cmd(["git", "branch", "-D", branch], main_root_path)
@@ -1342,4 +1505,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

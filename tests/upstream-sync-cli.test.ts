@@ -105,6 +105,20 @@ async function readState(repoRoot: string): Promise<Record<string, any>> {
   return JSON.parse(await fs.readFile(sp, "utf8"))
 }
 
+async function configureUpstreamAtHead(repoRoot: string): Promise<string> {
+  const headSha = await runGit(["rev-parse", "HEAD"], repoRoot)
+  await fs.writeFile(path.join(repoRoot, ".upstream-ref"), headSha + "\n", "utf8")
+  await fs.writeFile(path.join(repoRoot, ".upstream-repo"), repoRoot + "\n", "utf8")
+  return headSha
+}
+
+async function writeMockGh(mockBin: string, json: string): Promise<void> {
+  await fs.writeFile(path.join(mockBin, "gh"), `#!/bin/sh\necho '${json}'\n`, {
+    mode: 0o755,
+  })
+  await fs.writeFile(path.join(mockBin, "gh.cmd"), `@echo off\r\necho ${json}\r\n`, "utf8")
+}
+
 function createMinimalState(
   repoRoot: string,
   overrides: Record<string, any> = {},
@@ -198,6 +212,19 @@ describe("sync-cli.py", () => {
       expect(r.stdout).toContain("idle")
     })
 
+    test("plain status output is UTF-8 safe under ascii Python IO settings", async () => {
+      await writeState(repoRoot, createMinimalState(repoRoot))
+      const r = await runSyncCli(["status"], repoRoot, {
+        ...gitEnv,
+        PYTHONIOENCODING: "ascii",
+        LC_ALL: "C",
+        LANG: "C",
+      })
+      expect(r.exitCode).toBe(0)
+      expect(r.stdout).toContain("Upstream Sync")
+      expect(r.stderr).not.toContain("UnicodeEncodeError")
+    })
+
     test("invalid JSON in state.json causes exit code 3", async () => {
       const sp = statePath(repoRoot)
       await fs.mkdir(path.dirname(sp), { recursive: true })
@@ -261,6 +288,31 @@ describe("sync-cli.py", () => {
       const r = await runSyncCli(["init"], repoRoot)
       expect(r.exitCode).toBe(1)
       expect(r.stderr).toContain("未完成")
+    })
+
+    test("refuses corrupt existing state without --force", async () => {
+      await configureUpstreamAtHead(repoRoot)
+      const sp = statePath(repoRoot)
+      await fs.mkdir(path.dirname(sp), { recursive: true })
+      await fs.writeFile(sp, "{not valid json!!!", "utf8")
+
+      const r = await runSyncCli(["init"], repoRoot)
+      expect(r.exitCode).toBe(3)
+      expect(r.stderr).toContain("无法读取")
+      expect(r.stderr).toContain("--force")
+    })
+
+    test("no new upstream commits returns success without parsing JSON", async () => {
+      await configureUpstreamAtHead(repoRoot)
+      await runGit(
+        ["remote", "add", "origin", "https://github.com/test-owner/test-repo.git"],
+        repoRoot,
+      )
+
+      const r = await runSyncCli(["init"], repoRoot)
+      expect(r.exitCode).toBe(0)
+      expect(r.stdout).toContain("无需同步")
+      await expect(fs.access(statePath(repoRoot))).rejects.toThrow()
     })
 
     test("--dry-run does not write state.json", async () => {
@@ -500,10 +552,14 @@ describe("sync-cli.py", () => {
     })
 
     test("--dry-run from awaiting_human_review shows PR check plan", async () => {
+      const upstreamSha = await configureUpstreamAtHead(repoRoot)
       const state = createMinimalState(repoRoot, {
+        baseline_sha: upstreamSha,
+        target_sha: upstreamSha,
         workflow_state: "awaiting_human_review",
         commits: [
           makeCommitEntry(1, {
+            sha: upstreamSha,
             status: "awaiting_human_review",
             pr_url: "https://github.com/test/repo/pull/42",
             pr_number: 42,
@@ -559,19 +615,19 @@ describe("sync-cli.py", () => {
       const mockBin = await fs.mkdtemp(
         path.join(os.tmpdir(), "sync-cli-mock-gh-"),
       )
-      const ghScript = path.join(mockBin, "gh")
-      await fs.writeFile(
-        ghScript,
-        `#!/bin/sh
-echo '{"state":"OPEN","mergedAt":null,"url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-2026-04-24-0001-feat-change-1","baseRefName":"main"}'
-`,
-        { mode: 0o755 },
+      await writeMockGh(
+        mockBin,
+        '{"state":"OPEN","mergedAt":null,"url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-2026-04-24-0001-feat-change-1","baseRefName":"main"}',
       )
 
+      const upstreamSha = await configureUpstreamAtHead(repoRoot)
       const state = createMinimalState(repoRoot, {
+        baseline_sha: upstreamSha,
+        target_sha: upstreamSha,
         workflow_state: "awaiting_human_review",
         commits: [
           makeCommitEntry(1, {
+            sha: upstreamSha,
             status: "awaiting_human_review",
             pr_url: "https://github.com/test/repo/pull/42",
             pr_number: 42,
@@ -600,20 +656,21 @@ echo '{"state":"OPEN","mergedAt":null,"url":"https://github.com/test/repo/pull/4
       const mockBin = await fs.mkdtemp(
         path.join(os.tmpdir(), "sync-cli-mock-gh-merged-"),
       )
-      const ghScript = path.join(mockBin, "gh")
-      await fs.writeFile(
-        ghScript,
-        `#!/bin/sh
-echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-2026-04-24-0001-feat-change-1","baseRefName":"main"}'
-`,
-        { mode: 0o755 },
+      await writeMockGh(
+        mockBin,
+        '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-2026-04-24-0001-feat-change-1","baseRefName":"main"}',
       )
+
+      const upstreamSha = await configureUpstreamAtHead(repoRoot)
 
       // Two commits: first awaiting review, second pending
       const state = createMinimalState(repoRoot, {
+        baseline_sha: upstreamSha,
+        target_sha: upstreamSha,
         workflow_state: "awaiting_human_review",
         commits: [
           makeCommitEntry(1, {
+            sha: upstreamSha,
             status: "awaiting_human_review",
             pr_url: "https://github.com/test/repo/pull/42",
             pr_number: 42,
@@ -625,12 +682,6 @@ echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.
           makeCommitEntry(2),
         ],
       })
-      // Write .upstream-repo pointing to repoRoot for ancestry check
-      await fs.writeFile(
-        path.join(repoRoot, ".upstream-repo"),
-        repoRoot + "\n",
-        "utf8",
-      )
       await writeState(repoRoot, state)
 
       const envWithMockGh = {
@@ -651,20 +702,21 @@ echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.
       const mockBin = await fs.mkdtemp(
         path.join(os.tmpdir(), "sync-cli-mock-gh-complete-"),
       )
-      const ghScript = path.join(mockBin, "gh")
-      await fs.writeFile(
-        ghScript,
-        `#!/bin/sh
-echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-2026-04-24-0001-feat-change-1","baseRefName":"main"}'
-`,
-        { mode: 0o755 },
+      await writeMockGh(
+        mockBin,
+        '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-2026-04-24-0001-feat-change-1","baseRefName":"main"}',
       )
+
+      const upstreamSha = await configureUpstreamAtHead(repoRoot)
 
       // Only one commit
       const state = createMinimalState(repoRoot, {
+        baseline_sha: upstreamSha,
+        target_sha: upstreamSha,
         workflow_state: "awaiting_human_review",
         commits: [
           makeCommitEntry(1, {
+            sha: upstreamSha,
             status: "awaiting_human_review",
             pr_url: "https://github.com/test/repo/pull/42",
             pr_number: 42,
@@ -675,11 +727,6 @@ echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.
           }),
         ],
       })
-      await fs.writeFile(
-        path.join(repoRoot, ".upstream-repo"),
-        repoRoot + "\n",
-        "utf8",
-      )
       await writeState(repoRoot, state)
 
       const envWithMockGh = {
@@ -692,6 +739,50 @@ echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.
       const updated = await readState(repoRoot)
       expect(updated.workflow_state).toBe("complete")
       expect(updated.current_index).toBe(1)
+    })
+
+    test("resume after merged refuses to update upstream ref when ancestry check fails", async () => {
+      const mockBin = await fs.mkdtemp(
+        path.join(os.tmpdir(), "sync-cli-mock-gh-diverged-"),
+      )
+      await writeMockGh(
+        mockBin,
+        '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-2026-04-24-0001-feat-change-1","baseRefName":"main"}',
+      )
+
+      const upstreamSha = await configureUpstreamAtHead(repoRoot)
+      const invalidBaseline = "abc1234567890abcdef1234567890abcdef123456"
+      const state = createMinimalState(repoRoot, {
+        baseline_sha: invalidBaseline,
+        target_sha: upstreamSha,
+        workflow_state: "awaiting_human_review",
+        commits: [
+          makeCommitEntry(1, {
+            sha: upstreamSha,
+            status: "awaiting_human_review",
+            pr_url: "https://github.com/test/repo/pull/42",
+            pr_number: 42,
+            pr_head_ref: "upstream-sync-2026-04-24-0001-feat-change-1",
+            pr_base_ref: "main",
+            branch: "upstream-sync-2026-04-24-0001-feat-change-1",
+            worktree_path: path.join(repoRoot, "nonexistent-wt"),
+          }),
+        ],
+      })
+      await writeState(repoRoot, state)
+
+      const r = await runSyncCli(["resume"], repoRoot, {
+        ...gitEnv,
+        PATH: `${mockBin}:${process.env.PATH}`,
+      })
+      expect(r.exitCode).toBe(3)
+      expect(r.stderr).toContain("upstream 对账失败")
+      expect(await fs.readFile(path.join(repoRoot, ".upstream-ref"), "utf8")).toBe(
+        upstreamSha + "\n",
+      )
+
+      const updated = await readState(repoRoot)
+      expect(updated.workflow_state).toBe("awaiting_human_review")
     })
   })
 
@@ -844,6 +935,45 @@ echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.
       expect(updated.current_index).toBe(1)
       expect(updated.workflow_state).toBe("idle")
     })
+
+    test("skip --force-cleanup skips remote deletion when PR metadata mismatches state", async () => {
+      const mockBin = await fs.mkdtemp(
+        path.join(os.tmpdir(), "sync-cli-mock-gh-cleanup-"),
+      )
+      await writeMockGh(
+        mockBin,
+        '{"state":"CLOSED","number":42,"headRefName":"upstream-sync-other","baseRefName":"main","headRepository":{"nameWithOwner":"test-owner/test-repo"}}',
+      )
+
+      const state = createMinimalState(repoRoot, {
+        workflow_state: "awaiting_human_review",
+        commits: [
+          makeCommitEntry(1, {
+            status: "awaiting_human_review",
+            pr_url: "https://github.com/test/repo/pull/42",
+            pr_number: 42,
+            pr_head_ref: "upstream-sync-2026-04-24-0001-feat-change-1",
+            pr_base_ref: "main",
+            branch: "upstream-sync-2026-04-24-0001-feat-change-1",
+            worktree_path: null,
+          }),
+          makeCommitEntry(2),
+        ],
+      })
+      await writeState(repoRoot, state)
+
+      const r = await runSyncCli(["skip", "--force-cleanup"], repoRoot, {
+        ...gitEnv,
+        PATH: `${mockBin}:${process.env.PATH}`,
+      })
+      expect(r.exitCode).toBe(0)
+      expect(r.stderr).toContain("PR 验真未通过")
+      expect(r.stderr).toContain("headRefName")
+
+      const updated = await readState(repoRoot)
+      expect(updated.commits[0].status).toBe("skipped")
+      expect(updated.current_index).toBe(1)
+    })
   })
 
   // =========================================================================
@@ -874,19 +1004,19 @@ echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.
       const mockBin = await fs.mkdtemp(
         path.join(os.tmpdir(), "sync-cli-boundary-"),
       )
-      const ghScript = path.join(mockBin, "gh")
-      await fs.writeFile(
-        ghScript,
-        `#!/bin/sh
-echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-test","baseRefName":"main"}'
-`,
-        { mode: 0o755 },
+      await writeMockGh(
+        mockBin,
+        '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.com/test/repo/pull/42","number":42,"headRefName":"upstream-sync-test","baseRefName":"main"}',
       )
 
+      const upstreamSha = await configureUpstreamAtHead(repoRoot)
       const state = createMinimalState(repoRoot, {
+        baseline_sha: upstreamSha,
+        target_sha: upstreamSha,
         workflow_state: "awaiting_human_review",
         commits: [
           makeCommitEntry(1, {
+            sha: upstreamSha,
             status: "awaiting_human_review",
             pr_url: "https://github.com/test/repo/pull/42",
             pr_number: 42,
@@ -899,11 +1029,6 @@ echo '{"state":"MERGED","mergedAt":"2026-04-24T12:00:00Z","url":"https://github.
           makeCommitEntry(3),
         ],
       })
-      await fs.writeFile(
-        path.join(repoRoot, ".upstream-repo"),
-        repoRoot + "\n",
-        "utf8",
-      )
       await writeState(repoRoot, state)
 
       const envWithMockGh = {

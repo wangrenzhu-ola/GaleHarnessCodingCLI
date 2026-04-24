@@ -31,7 +31,12 @@ deepened: 2026-04-24
 
 这不是只为一次 14-commit 批处理写临时脚本：GaleHarnessCLI 会持续 vendored upstream HKTMemory，并且每次 upstream 拉取都要重复同一组 worktree、patch、测试、PR、baseline 对账动作。v1 仍放在 `scripts/upstream-sync/` 内，避免过早产品化到顶层 CLI；但用显式状态机和可恢复命令，是为了降低后续每次同步的认知负担和重复出错率。
 
-更新后的需求进一步明确了几个规划约束：`init` 负责批量生成 patch，`next` 不再现场生成 patch；`resume` 必须覆盖 merged/open/closed 三种 PR 状态，并支持从 failed 恢复；`skip` 只推进指针，不自动开始下一个 commit；`--dry-run` 是单步预览；`state.json` 是主要事实来源，`.upstream-ref` 是派生状态。
+更新后的需求进一步明确了几个规划约束：
+
+- **F1 逐 Commit 同步主流程**：触发命令为 `sync-cli.py next`；CLI 读取状态文件的 `current_index`，从 `init` 阶段已生成的 `adapted/` 目录消费 patch（不再现场生成）；新增 `git apply --check` 预检步骤（步骤4），通过后才应用 patch。Covered by: R1, R2, R4, R5, R7, R9, R10, R13。
+- **F2 人类验收后继续**：触发命令为 `sync-cli.py resume`；`resume` 处理三种 PR 状态——已 merge（执行推进流程）、未 merge/open（输出状态，保持等待）、已关闭/拒绝（警告，提示 `skip --force-cleanup`）；新增 CLI 对账 `state.json` 与 `.upstream-ref` 的步骤；merged 后将 commit 状态更新为 `merged`，`current_index += 1`。需求 F2 步骤6 指定 resume 在 merged 后自动进入下一个 commit 的 F1 流程，但本计划选择不自动调用 `next`（见 Scope Boundaries 说明）。Covered by: R11, R13, R14。
+- **F3 失败处理与人工接管**：失败时记录 `failed_at` 字段和失败阶段；`resume` 从失败步骤开始重试（不重跑整个流程），例如 `failed_at: "test"` 时重跑 `bun test`，`failed_at: "patch_check"` 时重跑 `git apply --check`；`skip` 将状态变为 `skipped`。Covered by: R6, R8, R15, R16。
+- **其他约束**：`skip` 只推进指针，不自动 `next`；`--dry-run` 是单步预览；`state.json` 是主要事实来源，`.upstream-ref` 是派生状态。
 
 ---
 
@@ -64,7 +69,7 @@ deepened: 2026-04-24
 ### `resume`
 
 - R11. `resume` 根据 PR merged/open/closed 状态分别推进、继续等待或提示 `skip --force-cleanup`
-- R15. `resume` 从 failed 状态恢复时从失败步骤开始重试，并继续后续步骤
+- R15. `resume` 在人类 merge PR 后继续同步流程；从 `failed` 状态恢复时从失败步骤开始重试（而非重跑完整流程），并继续后续步骤；若 PR 未 merge，输出当前状态并保持等待
 
 ### `dry-run` 与 `skip`
 
@@ -73,8 +78,16 @@ deepened: 2026-04-24
 - R18. `skip --force-cleanup` 清理已推送远程分支和 worktree，然后标记 skipped
 
 **Origin actors:** A1 研发人员（同步执行者），A2 自动化同步 CLI，A3 代码审查者
-**Origin flows:** F1 逐 Commit 同步主流程，F2 人类验收后继续，F3 失败处理与人工接管
-**Origin acceptance examples:** AE1 status 队列检测，AE2 next 创建 PR 并暂停，AE3 patch 冲突失败，AE4 resume after merge，AE5 dry-run 单步预览
+**Origin flows:**
+  F1 逐 Commit 同步主流程 — Trigger: `sync-cli.py next`；含 `git apply --check` 预检；从 `init` 已生成的 `adapted/` 消费 patch；Covered by: R1, R2, R4, R5, R7, R9, R10, R13
+  F2 人类验收后继续 — Trigger: `sync-cli.py resume`；覆盖 merged/open/closed 三种 PR 状态；含 state.json 与 .upstream-ref 对账；merged 后 current_index += 1；Covered by: R11, R13, R14
+  F3 失败处理与人工接管 — 记录 `failed_at`；`resume` 从失败步骤重试；`skip` 变为 skipped；Covered by: R6, R8, R15, R16
+**Origin acceptance examples:**
+  AE1 Covers R1, R3/R12 — status 队列检测
+  AE2 Covers R4, R7, R9, R10 — next 创建 PR 并暂停
+  AE3 Covers R6, R17 — patch 冲突失败（含 `failed_at: "patch_check"` 描述）
+  AE4 Covers R11, R14 — resume after merge
+  AE5 Covers R16 — dry-run 单步预览（只预览 current_index 指向的 commit）
 
 ---
 
@@ -85,7 +98,7 @@ deepened: 2026-04-24
 - 不处理 upstream force-push 导致的历史 SHA 失效；仍假设 upstream 历史线性可追踪。
 - 不支持多个 upstream commit 合并为一个 PR；保持 1:1 commit-to-PR 映射。
 - 不自动 merge PR，也不绕过 review。
-- 不在 `resume` merged 后自动启动下一轮 `next`；用户每次进入新的 commit 副作用流程都必须显式执行 `next`。
+- 不在 `resume` merged 后自动启动下一轮 `next`；用户每次进入新的 commit 副作用流程都必须显式执行 `next`。**与需求文档 F2 的差异**：需求 F2 步骤6 指定"CLI 自动进入下一个 commit 的 F1 流程（除非已到达队列末尾）"，但本计划选择不自动调用 `next`，理由：(1) 每次 `next` 产生 worktree、push、PR 等不可逆副作用，自动链式执行会剥夺用户在 commit 间检查和干预的机会；(2) 保持 `skip`/`next`/`resume` 的正交语义——`resume` 只负责验收推进和 failed 恢复，`next` 只负责启动新的副作用流程；(3) 减少状态机复杂度，避免 `resume` 内部隐式调用 `next` 时嵌套失败导致的恢复路径歧义。
 - 不在 v1 支持全量 14-commit dry-run 计划输出；`--dry-run` 只预览当前命令的单步副作用。
 
 ### Deferred to Follow-Up Work
@@ -134,6 +147,9 @@ deepened: 2026-04-24
 - **`skip` 不触发下一步工作**：`skip` 只标记当前 commit skipped、推进指针并退出，让用户显式执行 `next`，避免跳过后立即进入新的副作用流程。
 - **`--dry-run` 是单步副作用预览**：dry-run 应输出当前命令会读取/写入哪些路径、将创建哪个 worktree/branch、将运行哪些外部命令、将创建什么 PR 标题，但不执行文件写入、worktree 创建、push 或 PR 创建。
 - **CLI 输出中文，人机与 agent 双可读**：默认中文摘要和下一步提示；`status --json` 或全局 `--json` 可作为结构化输出增量，至少在 `status` 和 dry-run 上应提供稳定字段以方便 agent 解析。
+- **"无状态方案"被拒绝**：曾有建议用单次执行命令处理下一个 commit、通过 `.upstream-ref` 隐式追踪进度。此方案被拒绝，因为用户明确要求"每执行完毕后交给人类验收"，无状态方案无法在中断后恢复上下文（如机器重启、会话切换后无法知道当前处理到哪个 commit、PR 链接是什么、worktree 在哪里）。显式状态机是必要的。
+- **1:1 commit-to-PR 映射是不可协商约束**：用户明确要求"独立的一个 commit 一个 commit 的适配然后发到 PR 里"。虽然这带来更多 PR review 周期，但对于机械变更 review 成本极低，对于业务逻辑变更则必须独立 review。该约束作为不可协商的 scope boundary 保留。
+- **`compound-sync` SKILL 将在 CLI 建成后更新**：`plugins/galeharness-cli/skills/compound-sync/SKILL.md` 当前描述手动版工作流，新 CLI 自动化其中的机械步骤。CLI 建设完成后，`compound-sync` SKILL 将更新为引用 `sync-cli.py` 命令而非手动步骤描述。
 
 ---
 
@@ -141,13 +157,13 @@ deepened: 2026-04-24
 
 ### Resolved During Planning
 
-- CLI 实现语言选择：使用 Python，与现有 `scripts/upstream-sync/` 脚本和多步骤编排经验一致；不进入 TypeScript 主 CLI。
-- PR 分支命名策略：使用 `upstream-sync-<date>-<NNNN>-<slug>`，若远程已存在同名分支，尝试 `-2`、`-3` 后缀并记录最终 branch 到 state。
-- `bun test` 执行路径：在新 worktree 根目录运行；默认不在 CLI 内执行 `bun install`，依赖仓库已有 Bun 安装和 lockfile。若缺依赖，按 test 失败记录并提示用户修复。
-- 并发批次：v1 假设一次只有一个同步流程，固定状态文件为 `.context/galeharness-cli/upstream-sync/state.json`。多批次并发后续另行规划。
-- failed 恢复粒度：从 `failed_at` 阶段重新执行，并继续所有后续阶段；不会从 F1 顶部重跑已成功阶段，除非状态缺失导致无法安全恢复。
-- 需求文档中 Success Criteria 的“完整预览整个 14-commit 流程”与 R16 更新冲突：本计划以更新后的 R16 为准，v1 只做单步 dry-run。
-- `resume` merged 后的默认行为：只推进 `.upstream-ref`、清理资源、标记当前 commit merged、推进 `current_index`，然后回到 `idle` 或 `complete`；不自动调用下一轮 `next`。
+- CLI 实现语言选择：使用 Python，与现有 `scripts/upstream-sync/` 脚本和多步骤编排经验一致；不进入 TypeScript 主 CLI。（对应需求文档 Deferred to Planning: CLI 实现语言选择）
+- PR 分支命名策略：使用 `upstream-sync-<date>-<NNNN>-<slug>`，若远程已存在同名分支，尝试 `-2`、`-3` 后缀并记录最终 branch 到 state。此策略已在 R9b 中覆盖。（对应需求文档 Deferred to Planning: PR 分支命名策略）
+- `bun test` 执行路径：在新 worktree 根目录运行；默认不在 CLI 内执行 `bun install`，依赖仓库已有 Bun 安装和 lockfile。若缺依赖，按 test 失败记录并提示用户修复。（对应需求文档 Deferred to Planning: bun test 执行路径）
+- 并发批次：v1 假设一次只有一个同步流程，固定状态文件为 `.context/galeharness-cli/upstream-sync/state.json`。多批次并发后续另行规划。（对应需求文档 Deferred to Planning: 状态文件 schema 与多批次并发）
+- failed 恢复粒度：从 `failed_at` 阶段重新执行，并继续所有后续阶段；不会从 F1 顶部重跑已成功阶段，除非状态缺失导致无法安全恢复。具体示例：`failed_at: "test"` 时重跑 `bun test`，`failed_at: "patch_check"` 时重跑 `git apply --check`。（对应需求文档 Deferred to Planning: resume 从 failed 恢复时的重试粒度）
+- 需求文档中 Success Criteria 的"完整预览整个 14-commit 流程"与 R16 更新冲突：本计划以更新后的 R16 为准，v1 只做单步 dry-run。
+- `resume` merged 后的默认行为：只推进 `.upstream-ref`、清理资源、标记当前 commit merged、推进 `current_index`，然后回到 `idle` 或 `complete`；不自动调用下一轮 `next`。**与需求文档 F2 的差异**：需求 F2 步骤6 指定"CLI 自动进入下一个 commit 的 F1 流程"，但本计划选择不自动调用 `next`，理由见 Scope Boundaries。
 - worktree 基准分支选择：`base_branch` 是 state 字段，默认来自已验证 remote 的 default branch，也可用 `--base` 显式指定；不得隐式依赖当前 shell 所在分支。
 
 ### Deferred to Implementation
