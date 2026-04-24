@@ -122,11 +122,12 @@ async function writeMockGh(mockBin: string, json: string): Promise<void> {
 function envWithMockBin(mockBin: string): NodeJS.ProcessEnv {
   const originalPath = process.env.PATH ?? process.env.Path ?? ""
   const mockPath = `${mockBin}${path.delimiter}${originalPath}`
-  return {
-    ...gitEnv,
-    PATH: mockPath,
-    Path: mockPath,
-  }
+  const env = { ...gitEnv }
+  delete env.PATH
+  delete env.Path
+  env[process.platform === "win32" ? "Path" : "PATH"] = mockPath
+  env.GALE_SYNC_GH_BIN = path.join(mockBin, process.platform === "win32" ? "gh.cmd" : "gh")
+  return env
 }
 
 function createMinimalState(
@@ -773,8 +774,7 @@ describe("sync-cli.py", () => {
       await writeState(repoRoot, state)
 
       const r = await runSyncCli(["resume"], repoRoot, {
-        ...gitEnv,
-        PATH: envWithMockBin(mockBin).PATH,
+        ...envWithMockBin(mockBin),
       })
       expect(r.exitCode).toBe(3)
       expect(r.stderr).toContain("upstream 对账失败")
@@ -964,8 +964,7 @@ describe("sync-cli.py", () => {
       await writeState(repoRoot, state)
 
       const r = await runSyncCli(["skip", "--force-cleanup"], repoRoot, {
-        ...gitEnv,
-        PATH: envWithMockBin(mockBin).PATH,
+        ...envWithMockBin(mockBin),
       })
       expect(r.exitCode).toBe(0)
       expect(r.stderr).toContain("PR 验真未通过")

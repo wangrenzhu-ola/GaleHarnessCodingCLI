@@ -172,6 +172,11 @@ def run_cmd_checked(
     return result
 
 
+def gh_argv(*args: str) -> List[str]:
+    """Return a GitHub CLI argv, allowing tests to bypass platform PATH lookup."""
+    return [os.environ.get("GALE_SYNC_GH_BIN", "gh"), *args]
+
+
 # ---------------------------------------------------------------------------
 # Utility: main worktree root resolution
 # ---------------------------------------------------------------------------
@@ -747,14 +752,14 @@ def cmd_next(args: argparse.Namespace) -> int:
             f"- Baseline: `{state.baseline_sha[:7]}`\n"
         )
         result = run_cmd(
-            [
-                "gh", "pr", "create",
+            gh_argv(
+                "pr", "create",
                 "--base", state.base_branch,
                 "--head", branch_name,
                 "--title", pr_title,
                 "--body", pr_body,
                 "--repo", state.github_repo,
-            ],
+            ),
             wt_path,
         )
         if result.returncode != 0:
@@ -982,14 +987,14 @@ def _resume_from_failed(state: SyncState, state_path: Path, dry_run: bool) -> in
                     f"- Sequence: {commit.sequence}/{len(state.commits)}\n"
                 )
                 result = run_cmd(
-                    [
-                        "gh", "pr", "create",
+                    gh_argv(
+                        "pr", "create",
                         "--base", state.base_branch,
                         "--head", commit.branch,
                         "--title", pr_title,
                         "--body", pr_body,
                         "--repo", state.github_repo,
-                    ],
+                    ),
                     wt_path,
                 )
                 if result.returncode != 0:
@@ -1040,11 +1045,11 @@ def _resume_from_review(state: SyncState, state_path: Path, dry_run: bool) -> in
 
     # Query PR status
     result = run_cmd(
-        [
-            "gh", "pr", "view", str(commit.pr_number),
+        gh_argv(
+            "pr", "view", str(commit.pr_number),
             "--repo", state.github_repo,
             "--json", "state,mergedAt,url,number,headRefName,baseRefName",
-        ],
+        ),
         main_root_path,
     )
     if result.returncode != 0:
@@ -1330,11 +1335,11 @@ def _verify_cleanup_pr_target(state: SyncState, commit: CommitEntry, main_root_p
         return False
 
     result = run_cmd(
-        [
-            "gh", "pr", "view", str(commit.pr_number),
+        gh_argv(
+            "pr", "view", str(commit.pr_number),
             "--repo", state.github_repo,
             "--json", "state,number,headRefName,baseRefName,headRepository",
-        ],
+        ),
         main_root_path,
     )
     if result.returncode != 0:

@@ -136,9 +136,9 @@ export function migrateLegacyMemory(options: { cwd: string; targetDir: string })
 }
 
 function isScaffoldFile(rel: string): boolean {
-  return rel === path.join("L0-Abstract", "index.md") ||
-    rel === path.join("L1-Overview", "index.md") ||
-    rel === path.join("L2-Full", "evergreen", "MEMORY.md")
+  return rel === "L0-Abstract/index.md" ||
+    rel === "L1-Overview/index.md" ||
+    rel === "L2-Full/evergreen/MEMORY.md"
 }
 
 export function readMigrationManifest(targetDir: string): Record<string, unknown> | null {
@@ -173,6 +173,7 @@ function collectMigratableFiles(root: string, dir = root): string[] {
   for (const entry of entries) {
     const full = path.join(dir, entry.name)
     const rel = path.relative(root, full)
+    const displayRel = rel.split(path.sep).join("/")
     const parts = rel.split(path.sep)
     if (parts.some((part) => SKIPPED_PARTS.has(part))) continue
     if (entry.isSymbolicLink()) continue
@@ -182,7 +183,7 @@ function collectMigratableFiles(root: string, dir = root): string[] {
     }
     if (!entry.isFile() || shouldSkipFile(full, entry.name)) continue
     if (statSync(full).size > 5 * 1024 * 1024) continue
-    files.push(rel)
+    files.push(displayRel)
   }
   return files.sort()
 }

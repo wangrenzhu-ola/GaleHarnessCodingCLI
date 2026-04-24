@@ -1,4 +1,6 @@
 import { spawn } from "node:child_process"
+import { existsSync, readFileSync } from "node:fs"
+import path from "node:path"
 
 export interface HktClientOptions {
   binary?: string
@@ -58,7 +60,8 @@ export class HktClient {
         resolve(result)
       }
 
-      const proc = spawn(this.binary, args, {
+      const command = resolveExecutableCommand(this.binary, args)
+      const proc = spawn(command.executable, command.args, {
         cwd: this.cwd,
         stdio: ["ignore", "pipe", "pipe"],
         env: this.memoryDir ? { ...process.env, HKT_MEMORY_DIR: this.memoryDir } : { ...process.env },
@@ -117,5 +120,34 @@ export function skippedResult(reason: string): HktTaskResult {
     injectable_markdown: "",
     items: [],
     diagnostics: { blocked: [], omitted_sources: [] },
+  }
+}
+
+function resolveExecutableCommand(executable: string, args: string[]): { executable: string; args: string[] } {
+  if (process.platform !== "win32" || !isPathLike(executable)) {
+    return { executable, args }
+  }
+
+  if (shouldRunWithBun(executable)) {
+    return { executable: process.execPath, args: [executable, ...args] }
+  }
+
+  return { executable, args }
+}
+
+function isPathLike(executable: string): boolean {
+  return path.isAbsolute(executable) || executable.includes("/") || executable.includes("\\")
+}
+
+function shouldRunWithBun(executable: string): boolean {
+  const ext = path.extname(executable).toLowerCase()
+  if ([".js", ".mjs", ".cjs", ".ts"].includes(ext)) return true
+  if (!existsSync(executable)) return false
+
+  try {
+    const firstLine = readFileSync(executable, "utf8").split(/\r?\n/, 1)[0] ?? ""
+    return firstLine.startsWith("#!") && /\b(?:bun|node)\b/.test(firstLine)
+  } catch {
+    return false
   }
 }

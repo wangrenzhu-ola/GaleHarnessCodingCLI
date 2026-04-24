@@ -46,7 +46,8 @@ export async function runSwiftAdapter(
     return adapterUnavailable(`Swift adapter executable not found: ${executable}`)
   }
 
-  const proc = Bun.spawn([executable], {
+  const command = resolveExecutableCommand(executable)
+  const proc = Bun.spawn(command, {
     cwd: options.cwd,
     stdin: "pipe",
     stdout: "pipe",
@@ -135,7 +136,7 @@ function readStringArray(value: unknown): string[] {
 }
 
 async function executableExists(executable: string): Promise<boolean> {
-  if (executable.includes(path.sep)) {
+  if (isPathLike(executable)) {
     try {
       await fs.access(executable, fs.constants.X_OK)
       return true
@@ -144,8 +145,23 @@ async function executableExists(executable: string): Promise<boolean> {
     }
   }
 
-  const proc = Bun.spawn(["which", executable], { stdout: "pipe", stderr: "pipe" })
+  const proc = Bun.spawn([process.platform === "win32" ? "where" : "which", executable], { stdout: "pipe", stderr: "pipe" })
   return (await proc.exited) === 0
+}
+
+function resolveExecutableCommand(executable: string): string[] {
+  if (process.platform === "win32" && isPathLike(executable) && shouldRunWithBun(executable)) {
+    return [process.execPath, executable]
+  }
+  return [executable]
+}
+
+function isPathLike(executable: string): boolean {
+  return path.isAbsolute(executable) || executable.includes("/") || executable.includes("\\")
+}
+
+function shouldRunWithBun(executable: string): boolean {
+  return [".js", ".mjs", ".cjs", ".ts"].includes(path.extname(executable).toLowerCase())
 }
 
 function adapterUnavailable(message: string): SwiftAdapterResult {
