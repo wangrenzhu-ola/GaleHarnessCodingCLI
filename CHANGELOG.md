@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.2.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.1.0...cli-v2.2.0) (2026-04-24)
+
+
+### Features
+
+* **converters:** 增加平台能力清单 ([06bd092](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/06bd0928fae22cb61c4504b2d2de7bb432423305))
+* **converters:** 增加平台能力清单 ([aaa3f50](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/aaa3f50b34ae0f7c222667958dd5866b660d5062))
+* **upstream-sync:** add automated sync CLI ([18fbc1a](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/18fbc1afd8d5596d82b856d33cb74c1a88bc6eba))
+* **upstream-sync:** 实现 Upstream Sync CLI 自动化工作流 ([f065b20](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/f065b20a76b24cbb1a6a3fe0c65c6a218cd0899c))
+* **workflows:** 更新审查调试和演示工作流 ([d933e51](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d933e519fa9bdfc657dd1e1f382699f70c851b71))
+
+
+### Bug Fixes
+
+* **codex:** truncate copied skill descriptions ([29eedf9](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/29eedf962341e17a2ac063112ee664225ecae55c))
+* **codex:** truncate copied skill descriptions ([ded7368](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ded7368ce5fc9f8ce024b285828ecd8900c438e3))
+* **upstream-sync:** harden sync CLI review paths ([ebff081](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ebff081008630c12c5508e54e3f2d5e2a6314437))
+* **upstream-sync:** use portable gh mock path in tests ([7adabf0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/7adabf06bb5c577646076c6cf2779c3633b69ffe))
+
 ## [2.1.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.0.1...cli-v2.1.0) (2026-04-23)
 
 

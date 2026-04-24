@@ -9,6 +9,19 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.1.0...galeharness-cli-v2.2.0) (2026-04-24)
+
+
+### Features
+
+* **upstream-sync:** 实现 Upstream Sync CLI 自动化工作流 ([f065b20](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/f065b20a76b24cbb1a6a3fe0c65c6a218cd0899c))
+* **workflows:** 更新审查调试和演示工作流 ([d933e51](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d933e519fa9bdfc657dd1e1f382699f70c851b71))
+
+
+### Bug Fixes
+
+* **upstream-sync:** harden sync CLI review paths ([ebff081](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ebff081008630c12c5508e54e3f2d5e2a6314437))
+
 ## [2.1.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.0.1...galeharness-cli-v2.1.0) (2026-04-23)
 
 
