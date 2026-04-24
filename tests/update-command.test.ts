@@ -9,6 +9,7 @@ import {
   detectBinDir,
   isCompiledBinary,
   checkForUpdate,
+  getLatestVersion,
   performUpdate,
   performRollback,
 } from "../src/utils/update"
@@ -88,6 +89,56 @@ describe("update utils", () => {
       const dir = detectBinDir()
       expect(dir).toBeTruthy()
       expect(path.isAbsolute(dir)).toBe(true)
+    })
+  })
+
+  describe("getLatestVersion", () => {
+    const originalFetch = globalThis.fetch
+
+    afterEach(() => {
+      globalThis.fetch = originalFetch
+    })
+
+    test("selects the latest galeharness-cli release when another component release is newer", async () => {
+      globalThis.fetch = mock(async () => new Response(JSON.stringify([
+        {
+          tag_name: "cli-v2.2.0",
+          draft: false,
+          prerelease: false,
+          assets: [],
+        },
+        {
+          tag_name: "galeharness-cli-v2.2.0",
+          draft: false,
+          prerelease: false,
+          assets: [
+            {
+              name: `galeharness-cli-2.2.0-${detectPlatform()}.tar.gz`,
+              browser_download_url: "https://example.com/asset.tar.gz",
+              size: 1,
+            },
+          ],
+        },
+      ]), { status: 200 }))
+
+      const latest = await getLatestVersion("owner/repo")
+
+      expect(latest.version).toBe("2.2.0")
+      expect(latest.assetUrl).toBe("https://example.com/asset.tar.gz")
+      expect(latest.assetName).toBe(`galeharness-cli-2.2.0-${detectPlatform()}.tar.gz`)
+    })
+
+    test("reports missing platform asset from the matching release", async () => {
+      globalThis.fetch = mock(async () => new Response(JSON.stringify([
+        {
+          tag_name: "galeharness-cli-v2.2.0",
+          draft: false,
+          prerelease: false,
+          assets: [],
+        },
+      ]), { status: 200 }))
+
+      expect(getLatestVersion("owner/repo")).rejects.toThrow("No release asset found")
     })
   })
 })

@@ -420,6 +420,16 @@ gale-knowledge rebuild-index --full  # 全量
 
 ### 一键安装
 
+#### Release 二进制安装（推荐用于升级旧版 CLI）
+
+旧版 `bun link` / source-mode 安装无法通过 `gale-harness update` 自我替换。先运行一次 release 安装脚本迁移到编译二进制，之后再使用 `gale-harness update`。
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | bash
+```
+
+脚本会优先安装到当前 `gale-harness` 所在目录，并移除旧的 `bun link` symlink 后写入编译二进制。没有已安装命令时，默认安装到 `~/.local/bin`。
+
 #### macOS / Linux
 
 ```bash

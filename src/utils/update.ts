@@ -40,6 +40,13 @@ export interface UpdateResult {
   newVersion?: string
 }
 
+interface GitHubRelease {
+  tag_name: string
+  draft?: boolean
+  prerelease?: boolean
+  assets: Array<{ name: string; browser_download_url: string; size: number }>
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -113,7 +120,7 @@ export function isCompiledBinary(): boolean {
  * Query GitHub Release API for the latest version matching our tag prefix.
  */
 export async function getLatestVersion(repo: string): Promise<{ version: string; assetUrl: string; assetName: string }> {
-  const url = `https://api.github.com/repos/${repo}/releases/latest`
+  const url = `https://api.github.com/repos/${repo}/releases?per_page=20`
   const response = await fetch(url, {
     headers: {
       "User-Agent": "gale-harness-update",
@@ -128,14 +135,14 @@ export async function getLatestVersion(repo: string): Promise<{ version: string;
     throw new Error(`GitHub API error: ${response.status} ${response.statusText}`)
   }
 
-  const release = (await response.json()) as {
-    tag_name: string
-    assets: Array<{ name: string; browser_download_url: string; size: number }>
-  }
-
-  // Verify tag prefix
-  if (!release.tag_name.startsWith(TAG_PREFIX)) {
-    throw new Error(`Latest release tag '${release.tag_name}' does not match expected prefix '${TAG_PREFIX}'.`)
+  const releases = (await response.json()) as GitHubRelease[]
+  const release = releases.find((candidate) =>
+    !candidate.draft &&
+    !candidate.prerelease &&
+    candidate.tag_name.startsWith(TAG_PREFIX),
+  )
+  if (!release) {
+    throw new Error(`No releases found for ${repo}. Ensure at least one release exists with tag prefix '${TAG_PREFIX}'.`)
   }
 
   const version = release.tag_name.slice(TAG_PREFIX.length)
