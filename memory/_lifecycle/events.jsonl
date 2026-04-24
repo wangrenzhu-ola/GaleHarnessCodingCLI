@@ -1206,3 +1206,5 @@
 {"timestamp": "2026-04-24T09:38:43.516109+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-24T09:40:28.134168+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-24T09:40:28.149606+00:00", "type": "capture", "memory_id": "2026-04-24-174028-148", "scope": "topic:work-execution", "data": {"status": "active"}}
+{"timestamp": "2026-04-24T10:05:11.232329+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T10:05:11.247855+00:00", "type": "capture", "memory_id": "2026-04-24-180511-246", "scope": "topic:workflow-issues", "data": {"status": "active"}}

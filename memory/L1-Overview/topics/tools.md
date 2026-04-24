@@ -396,3 +396,17 @@
 **标签**: 通用
 
 ---
+### Karpathy guidelines should become phase-specific workflow guardrails
+
+- **时间**: 2026-04-24
+- **摘要**: Integrated Karpathy guidelines into GaleHarnessCLI as phase-specific workflow gu...
+- **重要性**: medium
+- **来源**: [2026-04-24-180511-246](../L2-Full/daily/)
+
+**关键要点**:
+
+- Integrated Karpathy guidelines into GaleHarnessCLI as phase-specific workflow gu
+
+**标签**: 通用
+
+---

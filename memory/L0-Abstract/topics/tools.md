@@ -146,3 +146,8 @@
 - **关键词**: workflow, 通用, karpathy, inspired, galeharnesscli
 - **核心**: Implemented Ka…
 - **来源**: 2026-04-24-174028-148
+### Karpathy guidelines should become phase-specific workflow guardrails
+- **时间**: 2026-04-24
+- **关键词**: workflow, 通用, phase, galeharnesscli, specific
+- **核心**: Integrated Kar…
+- **来源**: 2026-04-24-180511-246

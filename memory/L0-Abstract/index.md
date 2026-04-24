@@ -10,6 +10,9 @@
 
 ## 最新条目
 
+- [2026-04-24] **Karpathy guidelines should become phase-specific workflow guardrails** (tools): Integrated Kar…
+
+
 - [2026-04-24] **Work: Karpathy workflow guardrails integration** (tools): Implemented Ka…
 
 

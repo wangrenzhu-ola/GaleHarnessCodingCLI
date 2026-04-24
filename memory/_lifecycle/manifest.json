@@ -782,5 +782,34 @@
       "topic": "work-execution",
       "id": "2026-04-24-174028-148"
     }
+  },
+  "2026-04-24-180511-246": {
+    "memory_id": "2026-04-24-180511-246",
+    "title": "Karpathy guidelines should become phase-specific workflow guardrails",
+    "topic": "workflow-issues",
+    "scope": "topic:workflow-issues",
+    "layer_type": "daily",
+    "source_path": "memory/L2-Full/daily/2026-04-24.md",
+    "status": "active",
+    "created_at": "2026-04-24T10:05:11.247410+00:00",
+    "updated_at": "2026-04-24T10:05:11.247410+00:00",
+    "last_accessed": "2026-04-24T10:05:11.247410+00:00",
+    "access_count": 0,
+    "helpful_count": 0,
+    "feedback_stats": {
+      "useful": 0,
+      "wrong": 0,
+      "missing": 0
+    },
+    "importance": "medium",
+    "pinned": false,
+    "metadata": {
+      "importance": "medium",
+      "pinned": false,
+      "commit_hash": "c3cd9573826045fb5ae7795fd63eddaed53ab307",
+      "pr_id": null,
+      "topic": "workflow-issues",
+      "id": "2026-04-24-180511-246"
+    }
   }
 }

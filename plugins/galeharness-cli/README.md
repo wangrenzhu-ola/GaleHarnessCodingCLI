@@ -60,6 +60,8 @@ For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/RE
 
 The core `gh:` workflow includes Karpathy-inspired guardrails without requiring a separate skill. `gh:brainstorm` challenges problem framing and separates assumptions, non-goals, and success criteria; `gh:plan` requires complexity to trace to requirements, risks, or constraints; `gh:work` keeps non-trivial execution tied to a minimal change contract and surgical diffs; `gh:review` checks diff hygiene against intent and plan scope.
 
+For the source references and integration rationale, see `docs/brainstorms/2026-04-24-karpathy-guidelines-integration-requirements.md` and `docs/solutions/workflow-issues/karpathy-guidelines-workflow-guardrails-2026-04-24.md` in this repository.
+
 ### Research & Context
 
 | Skill | Description |
