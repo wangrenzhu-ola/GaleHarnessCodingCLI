@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url"
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
-const BINARY_NAMES = ["gale-harness", "compound-plugin", "gale-knowledge"] as const
+const BINARY_NAMES = ["gale-harness", "compound-plugin", "gale-knowledge", "gale-memory"] as const
 const TAG_PREFIX = "galeharness-cli-v"
 const DEFAULT_REPO = "wangrenzhu-ola/GaleHarnessCLI"
 const BACKUP_DIR = path.join(os.homedir(), ".galeharness", "backup")
@@ -113,7 +113,7 @@ export function isCompiledBinary(): boolean {
   if (!execPath) return false
   // If the executable name is one of our binaries, we're in compiled mode
   const basename = path.basename(execPath)
-  return BINARY_NAMES.includes(basename as any) || basename === "gale-harness" || basename === "compound-plugin" || basename === "gale-knowledge"
+  return BINARY_NAMES.includes(basename as any)
 }
 
 /**

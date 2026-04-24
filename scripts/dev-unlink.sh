@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Restore gale-harness, compound-plugin, and gale-knowledge to the release version.
+# Restore gale-harness, compound-plugin, gale-knowledge, and gale-memory to the release version.
 # Restores the saved symlinks from before dev-link was run.
 # If no backup exists, falls back to reinstalling from the bun global cache.
 set -euo pipefail
@@ -7,7 +7,7 @@ set -euo pipefail
 BIN_DIR="$HOME/.bun/bin"
 GLOBAL_PKG="$HOME/.bun/install/global/node_modules/@gale/harness-cli/src/index.ts"
 
-for bin in gale-harness compound-plugin gale-knowledge; do
+for bin in gale-harness compound-plugin gale-knowledge gale-memory; do
   LINK="$BIN_DIR/$bin"
   BACKUP="$BIN_DIR/${bin}.release-target"
 

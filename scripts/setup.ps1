@@ -394,6 +394,20 @@ if ($CI_MODE) {
         $cliOk = $false
     }
 
+    # 验证 gale-memory
+    try {
+        $gmResult = & gale-memory --help 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            ok "gale-memory CLI 启动正常"
+        } else {
+            err "gale-memory CLI 启动失败 (exit code: $LASTEXITCODE)"
+            $cliOk = $false
+        }
+    } catch {
+        err "gale-memory CLI 启动异常: $_"
+        $cliOk = $false
+    }
+
     if (-not $cliOk) {
         err "CI 验证失败：CLI 无法正常启动"
         exit 1
@@ -427,6 +441,9 @@ if ($CI_MODE) {
 
   gale-knowledge resolve-path --type solutions
     -> 期望: 输出全局知识仓库路径
+
+  gale-memory --help
+    -> 期望: 显示 task memory helper 帮助信息
 
   hkt-memory stats
     -> 期望: HKTMemory 统计信息

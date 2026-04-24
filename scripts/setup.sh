@@ -375,6 +375,9 @@ ${BOLD}  自检清单 — 配置生效后，依次运行以下命令验证:${NC}
   ${CYAN}gale-knowledge resolve-path --type solutions${NC}
     → 期望: 输出全局知识仓库路径
 
+  ${CYAN}gale-memory --help${NC}
+    → 期望: 显示 task memory helper 帮助信息
+
   ${CYAN}hkt-memory stats${NC}
     → 期望: HKTMemory 统计信息
 

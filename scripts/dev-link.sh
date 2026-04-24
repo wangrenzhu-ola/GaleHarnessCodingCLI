@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Link gale-harness, compound-plugin, and gale-knowledge to local source tree for development.
+# Link gale-harness, compound-plugin, gale-knowledge, and gale-memory to local source tree for development.
 # Creates wrapper scripts that invoke `bun run` on the source, so the commands
 # work the same as the release symlinks (which point to .ts with #!/usr/bin/env bun).
 # Run from repo root or pass the repo path as $1.
@@ -14,10 +14,12 @@ if [ ! -f "$DEFAULT_ENTRY" ]; then
   exit 1
 fi
 
-for bin in gale-harness compound-plugin gale-knowledge; do
+for bin in gale-harness compound-plugin gale-knowledge gale-memory; do
   # Select entry file per binary
   if [ "$bin" = "gale-knowledge" ]; then
     ENTRY="$REPO_ROOT/cmd/gale-knowledge/index.ts"
+  elif [ "$bin" = "gale-memory" ]; then
+    ENTRY="$REPO_ROOT/cmd/gale-memory/index.ts"
   else
     ENTRY="$DEFAULT_ENTRY"
   fi

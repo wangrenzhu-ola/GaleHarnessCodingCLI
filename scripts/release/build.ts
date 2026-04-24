@@ -70,6 +70,8 @@ if (fs.existsSync(archivePath)) {
   fs.unlinkSync(archivePath)
 }
 
+const releaseFiles = ["gale-harness", "compound-plugin", "gale-knowledge", "gale-memory", "VERSION"]
+
 console.error(`[build] Compiling binaries (v${version}, ${platform})...`)
 
 // 1. Compile gale-harness (src/index.ts)
@@ -93,18 +95,27 @@ execSync(
   },
 )
 
-// 4. Write VERSION file
+// 4. Compile gale-memory (cmd/gale-memory/index.ts)
+execSync(
+  `bun build --compile cmd/gale-memory/index.ts --outfile ${path.join(buildDir, "gale-memory")} --target bun`,
+  {
+    cwd: repoRoot,
+    stdio: "inherit",
+  },
+)
+
+// 5. Write VERSION file
 fs.writeFileSync(path.join(buildDir, "VERSION"), `${version}\n`, "utf-8")
 
-// 5. Package into tar.gz
+// 6. Package into tar.gz
 console.error(`[build] Packaging ${archiveName}...`)
-execSync(`tar -czf ${archivePath} -C ${buildDir} gale-harness compound-plugin gale-knowledge VERSION`, {
+execSync(`tar -czf ${archivePath} -C ${buildDir} ${releaseFiles.join(" ")}`, {
   cwd: repoRoot,
   stdio: "inherit",
 })
 
-// 6. Clean up build directory
+// 7. Clean up build directory
 fs.rmSync(buildDir, { recursive: true, force: true })
 
-// 7. Print archive path to stdout (for CI)
+// 8. Print archive path to stdout (for CI)
 console.log(archivePath)
