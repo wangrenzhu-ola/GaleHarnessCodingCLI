@@ -102,13 +102,22 @@ curl -fL "$url" -o "$tmpdir/$asset"
 tar -xzf "$tmpdir/$asset" -C "$tmpdir"
 
 mkdir -p "$install_dir"
-for bin in gale-harness compound-plugin gale-knowledge gale-memory; do
+for bin in gale-harness compound-plugin gale-knowledge; do
   dest="$install_dir/$bin"
   if [ -L "$dest" ]; then
     rm "$dest"
   fi
   install -m 0755 "$tmpdir/$bin" "$dest"
 done
+
+if [ -f "$tmpdir/gale-memory" ]; then
+  dest="$install_dir/gale-memory"
+  if [ -L "$dest" ]; then
+    rm "$dest"
+  fi
+  install -m 0755 "$tmpdir/gale-memory" "$dest"
+fi
+
 install -m 0644 "$tmpdir/VERSION" "$install_dir/VERSION"
 
 cat <<EOF
