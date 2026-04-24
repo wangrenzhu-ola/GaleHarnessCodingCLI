@@ -101,6 +101,8 @@ Real feedback blends types — "this is wrong, rename to Y" is both objection an
 
 **Invariant:** every attention-needing mark ends the pass with an agent reply in its thread. Unreplied = "still to do" — the next pass re-classifies it. This is what makes the loop idempotent without a sidecar: mark state *is* the state. Even when the agent disagrees or can't decide, reply (with reasoning or a question) rather than silently skip.
 
+**Parallelize independent thread ops.** `comment.reply` and `comment.resolve` operations on different marks do not conflict. When a pass has more than roughly three attention-needing marks that are clearly plain replies or resolves, dispatch those independent writes in parallel (`Agent`/`Task` in Claude, `spawn_agent` in Codex, subagent dispatch in Pi) and then re-read state once. Keep block-mutating edits sequential unless you can batch them into a single `/edit/v2` request.
+
 ### 2.4 Apply edits
 
 The user is collaborating in the doc, not waiting on approval. Every mutation works with live clients — only whole-doc `rewrite.apply` is gated. Pick the tool that matches intent:
@@ -130,19 +132,20 @@ curl -X POST "https://www.proofeditor.ai/api/agent/{slug}/edit/v2" \
   -d '{"by":"ai:galeharness-cli","baseToken":"<token>","operations":[...]}'
 ```
 
-Supported `op` kinds: `replace_block`, `insert_before`, `insert_after`, `delete_block`, `replace_range` (`fromRef`+`toRef`), `find_replace_in_block` (`occurrengh: "first"|"all"`).
-
-Op body shapes (block content must be wrapped in `block: {markdown}` — the server rejects flat `{op, ref, markdown}` shapes):
+Supported op body shapes:
 
 ```json
 {"op":"replace_block","ref":"b8","block":{"markdown":"new content"}}
-{"op":"insert_after","ref":"b3","block":{"markdown":"new block"}}
+{"op":"insert_after","ref":"b3","blocks":[{"markdown":"new block"}]}
+{"op":"insert_before","ref":"b3","blocks":[{"markdown":"new block"}]}
 {"op":"delete_block","ref":"b6"}
 {"op":"find_replace_in_block","ref":"b4","find":"old","replace":"new","occurrence":"first"}
-{"op":"replace_range","fromRef":"b2","toRef":"b5","block":{"markdown":"..."}}
+{"op":"replace_range","fromRef":"b2","toRef":"b5","blocks":[{"markdown":"..."}]}
 ```
 
-Block `ref` values drift across revisions — always re-fetch `/snapshot` for fresh refs before each `/edit/v2` call.
+Block `ref` values drift across revisions. If any write has landed since the last snapshot, re-fetch `/snapshot` for fresh refs before building `/edit/v2` operations.
+
+**Bulk mechanical sweep:** for uniform changes across more than roughly five blocks, prefer one `/edit/v2` request with a batch of operations over N separate `suggestion.add` calls. The batch commits atomically and avoids leaving the doc half-updated if one later edit fails.
 
 **Use pending `suggestion.add` (no status)** when the change is judgment-sensitive enough that the agent wants explicit user approval before commit — rare in HITL, since the point of auto-applied edits is to reduce round-trips. Most judgment-sensitive cases are better handled by leaving the thread open with a clarifying question.
 
@@ -151,10 +154,20 @@ Block `ref` values drift across revisions — always re-fetch `/snapshot` for fr
 **Mutation requirements (every write, including replies and resolves):**
 
 - Top-level field is `type` on `/ops`; `operations[].op` on `/edit/v2`. Do not mix.
-- Include `baseToken` from `/state.mutationBase.token` (or `/snapshot.mutationBase.token` for `/edit/v2`). On `STALE_BASE` or `BASE_TOKEN_REQUIRED`, re-read and retry once.
+- Include `baseToken` from `/state.mutationBase.token` (or `/snapshot.mutationBase.token` for `/edit/v2`).
 - Set `by: "ai:galeharness-cli"` and header `X-Agent-Id: ai:galeharness-cli`.
-- Include an `Idempotency-Key` header (fresh UUID per logical write) so retries stay safe.
+- Include an `Idempotency-Key` header. Use a fresh UUID per logical write; reuse the same key only when retrying the same payload after proving the first attempt did not commit.
 - Reply: `{"type":"comment.reply","markId":"<id>","by":"ai:galeharness-cli","text":"..."}`. Resolve: `{"type":"comment.resolve","markId":"<id>","by":"ai:galeharness-cli"}`. Reopen if needed: `{"type":"comment.unresolve", ...}`.
+
+**Retry after any error is verify-first.**
+
+- Token errors (`STALE_BASE`, `BASE_TOKEN_REQUIRED`, `MISSING_BASE`, `INVALID_BASE_TOKEN`) are safe to auto-retry once after a fresh `/state` or `/snapshot`.
+- Anchor errors (`QUOTE_NOT_FOUND`, `AMBIGUOUS_QUOTE`, missing block `ref`) mean the write did not commit, but re-read and update the quote/ref instead of retrying the same request.
+- Invalid payloads (`422`, invalid op shape, unsupported field) do not improve by retrying unchanged.
+- Ambiguous failures (`COLLAB_SYNC_FAILED`, `REWRITE_BARRIER_FAILED`, `PROJECTION_STALE`, `INTERNAL_ERROR`, `5xx`, network timeout, or any `202` with `collab.status: "pending"`) may already have written. Re-read `/state`, check whether the intended mark/edit exists, and retry only if it is absent.
+- Idempotency only protects the exact same request. Changing the body or key creates a new logical write.
+
+Break the loop and report a bug if verification cannot prove whether the write landed. Duplicate suggestions/comments usually come from retrying ambiguous failures without this state check.
 
 **When the loop breaks.** If a mutation keeps failing after a fresh read and one retry, or two reads disagree about state, call `POST https://www.proofeditor.ai/api/bridge/report_bug` with the request ID, slug, and raw response body before falling back. Don't silently skip — that loses the audit trail the user is relying on.
 
@@ -283,22 +296,56 @@ TOKEN=<accessToken>
 AGENT_ID=ai:galeharness-cli
 
 mutate() {
-  local PAYLOAD="$1"  # jq template without baseToken
-  local BASE
+  local PAYLOAD="$1"  # JSON object without baseToken
+  local BASE IDEM_KEY BODY RESP CODE ERR
+
   BASE=$(curl -s "https://www.proofeditor.ai/api/agent/$SLUG/state" \
     -H "x-share-token: $TOKEN" | jq -r '.mutationBase.token')
-  curl -s -X POST "https://www.proofeditor.ai/api/agent/$SLUG/ops" \
+  IDEM_KEY=$(uuidgen)
+  BODY=$(jq -n --arg base "$BASE" --argjson payload "$PAYLOAD" '$payload + {baseToken: $base}')
+
+  RESP=$(mktemp)
+  CODE=$(curl -s -o "$RESP" -w "%{http_code}" -X POST "https://www.proofeditor.ai/api/agent/$SLUG/ops" \
     -H "Content-Type: application/json" \
     -H "x-share-token: $TOKEN" \
     -H "X-Agent-Id: $AGENT_ID" \
-    -H "Idempotency-Key: $(uuidgen)" \
-    -d "$(jq -n --arg base "$BASE" --argjson payload "$PAYLOAD" '$payload + {baseToken: $base}')"
+    -H "Idempotency-Key: $IDEM_KEY" \
+    -d "$BODY")
+
+  if [ "$CODE" -ge 200 ] && [ "$CODE" -lt 300 ]; then
+    cat "$RESP"
+    rm "$RESP"
+    return 0
+  fi
+
+  ERR=$(jq -r '.error.code // .code // empty' "$RESP" 2>/dev/null)
+  case "$ERR" in
+    STALE_BASE|BASE_TOKEN_REQUIRED|MISSING_BASE|INVALID_BASE_TOKEN)
+      BASE=$(curl -s "https://www.proofeditor.ai/api/agent/$SLUG/state" \
+        -H "x-share-token: $TOKEN" | jq -r '.mutationBase.token')
+      BODY=$(jq -n --arg base "$BASE" --argjson payload "$PAYLOAD" '$payload + {baseToken: $base}')
+      # Reuse the same idempotency key: this is still the same logical write.
+      curl -s -X POST "https://www.proofeditor.ai/api/agent/$SLUG/ops" \
+        -H "Content-Type: application/json" \
+        -H "x-share-token: $TOKEN" \
+        -H "X-Agent-Id: $AGENT_ID" \
+        -H "Idempotency-Key: $IDEM_KEY" \
+        -d "$BODY"
+      ;;
+    *)
+      cat "$RESP" >&2
+      rm "$RESP"
+      return 1
+      ;;
+  esac
+
+  rm "$RESP"
 }
 ```
 
-Every mutation sends a fresh `Idempotency-Key` so retries on network hiccups do not double-apply the op. This is required when `/state.contract.idempotencyRequired` is true and harmless otherwise.
+Every logical mutation starts with a fresh `Idempotency-Key`; retries of the same logical mutation reuse that same key. This is required when `/state.contract.idempotencyRequired` is true and harmless otherwise.
 
-On `STALE_BASE` in the response, re-run — the state read picks up the fresh token automatically.
+For ambiguous failures (`5xx`, network timeout, `COLLAB_SYNC_FAILED`, `PROJECTION_STALE`, etc.), do not call `mutate` again immediately. Re-read `/state`, verify whether the intended reply/comment/edit is already present, and only issue a new logical write if it is absent.
 
 ### jq gotcha when inspecting responses
 

@@ -79,9 +79,19 @@ All operations go to `POST https://www.proofeditor.ai/api/agent/{slug}/ops`
 
 **Wire-format reminder.** `/api/agent/{slug}/ops` uses a top-level `type` field; `/api/agent/{slug}/edit/v2` uses an `operations` array where each entry has `op`. Do not mix — sending `op` to `/ops` returns 422.
 
-**Every mutation requires a `baseToken`.** Read it from `/state.mutationBase.token` (or `/snapshot.mutationBase.token`) immediately before each write, and include it in the request body. On `BASE_TOKEN_REQUIRED` or `STALE_BASE`, re-read and retry once. See the baseToken recipe in `references/hitl-review.md`.
+**Every mutation requires a `baseToken`.** Use the `mutationBase.token` from your most recent `/state` or `/snapshot` read and include it in the request body. These tokens do not go stale within seconds just because another write happened; `STALE_BASE` is recoverable. If you get `BASE_TOKEN_REQUIRED`, `MISSING_BASE`, `INVALID_BASE_TOKEN`, or `STALE_BASE`, re-read and retry once. Only do a pre-mutation read when you have not read `/state` or `/snapshot` in the current session. See the baseToken recipe in `references/hitl-review.md`.
 
-**`Idempotency-Key` header** is recommended on every mutation for safe automation retries; required when `/state.contract.idempotencyRequired` is true.
+**`Idempotency-Key` header** is recommended on every mutation and required when `/state.contract.idempotencyRequired` is true. Reuse the same key only when retrying the exact same logical write with the same body. A changed body or fresh key is a new logical write.
+
+**Retry discipline after mutation errors — verify before retrying.**
+
+- Token errors (`STALE_BASE`, `BASE_TOKEN_REQUIRED`, `MISSING_BASE`, `INVALID_BASE_TOKEN`) are safe to auto-retry once after a fresh `/state` or `/snapshot`.
+- Anchor errors (`QUOTE_NOT_FOUND`, `AMBIGUOUS_QUOTE`, missing block `ref`) mean the write did not commit, but do not blindly retry. Re-read, update the quote/ref, and decide whether the original intent still applies.
+- Payload errors (`422`, invalid op shape, unsupported field) should not be retried unchanged.
+- Ambiguous failures (`COLLAB_SYNC_FAILED`, `REWRITE_BARRIER_FAILED`, `PROJECTION_STALE`, `INTERNAL_ERROR`, `5xx`, network timeout, or any `202` with `collab.status: "pending"`) may already have written. Re-read `/state`, verify whether the intended mark/edit exists, and retry only if it is absent.
+- Idempotency only protects retries of the exact same request. If you change the body or key, the server treats it as a new write.
+
+Duplicate marks usually come from retrying after an ambiguous failure without first verifying current state.
 
 **Comment on text:**
 ```json
@@ -136,12 +146,23 @@ curl -X POST "https://www.proofeditor.ai/api/agent/{slug}/edit/v2" \
     "baseToken": "mt1:<token>",
     "operations": [
       {"op": "replace_block", "ref": "b3", "block": {"markdown": "Updated paragraph."}},
-      {"op": "insert_after", "ref": "b3", "block": {"markdown": "## New section"}}
+      {"op": "insert_after", "ref": "b3", "blocks": [{"markdown": "## New section"}]}
     ]
   }'
 ```
 
-Supported `op` kinds inside `operations`: `replace_block`, `insert_before`, `insert_after`, `delete_block`, `replace_range` (uses `fromRef` + `toRef`), `find_replace_in_block` (takes `occurrence: "first" | "all"`). Read `/snapshot` to get stable block `ref` IDs and the `mutationBase.token`.
+Supported `op` kinds inside `operations`:
+
+| op | Shape |
+|----|-------|
+| `replace_block` | `{"op":"replace_block","ref":"b8","block":{"markdown":"new content"}}` |
+| `insert_after` | `{"op":"insert_after","ref":"b3","blocks":[{"markdown":"new block"}]}` |
+| `insert_before` | `{"op":"insert_before","ref":"b3","blocks":[{"markdown":"new block"}]}` |
+| `delete_block` | `{"op":"delete_block","ref":"b6"}` |
+| `replace_range` | `{"op":"replace_range","fromRef":"b2","toRef":"b5","blocks":[{"markdown":"replacement"}]}` |
+| `find_replace_in_block` | `{"op":"find_replace_in_block","ref":"b4","find":"old","replace":"new","occurrence":"first"}` |
+
+`/edit/v2` commits the whole `operations` array atomically and can batch dozens of block edits in one request. Read `/snapshot` to get block `ref` IDs and the `mutationBase.token`; if any write has landed since the last snapshot, re-fetch `/snapshot` before building block operations.
 
 **Editing while a client is connected is fine.** `/edit/v2`, `suggestion.add` (including `status: "accepted"`), and all comment ops work during active collab. Only `rewrite.apply` is blocked by `LIVE_CLIENTS_PRESENT` — it would clobber in-flight Yjs edits.
 
@@ -193,13 +214,11 @@ When given a Proof URL like `https://www.proofeditor.ai/d/abc123?token=xxx`:
 4. The author sees changes in real-time
 
 ```bash
-# Read
-curl -s "https://www.proofeditor.ai/api/agent/abc123/state" \
-  -H "x-share-token: xxx"
-
-# Get baseToken for the next mutation
-BASE=$(curl -s "https://www.proofeditor.ai/api/agent/abc123/state" \
-  -H "x-share-token: xxx" | jq -r '.mutationBase.token')
+# Read once and reuse the mutationBase token from that response
+STATE=$(curl -s "https://www.proofeditor.ai/api/agent/abc123/state" \
+  -H "x-share-token: xxx")
+BASE=$(printf '%s' "$STATE" | jq -r '.mutationBase.token')
+# Inspect doc fields from "$STATE" as needed...
 
 # Comment
 curl -X POST "https://www.proofeditor.ai/api/agent/abc123/ops" \
@@ -291,4 +310,4 @@ rm "$STATE_TMP"
 - During active collab use `edit/v2` (direct block changes) or `suggestion.add` (tracked changes); reserve `rewrite.apply` for no-client scenarios since it's blocked by `LIVE_CLIENTS_PRESENT` when anyone is connected
 - Don't span table cells in a single replace
 - Always include `by: "ai:galeharness-cli"` on every op and `X-Agent-Id: ai:galeharness-cli` in headers for consistent attribution
-- Read a fresh `baseToken` before every mutation; on `STALE_BASE`, re-read and retry once
+- Reuse `baseToken` from your most recent `/state` or `/snapshot` read; on token errors, re-read and retry once
