@@ -4,6 +4,7 @@ import path from "path"
 import os from "os"
 import { mergeCodexConfig, renderCodexConfig, writeCodexBundle } from "../src/targets/codex"
 import type { CodexBundle } from "../src/types/codex"
+import { parseFrontmatter } from "../src/utils/frontmatter"
 
 async function exists(filePath: string): Promise<boolean> {
   try {
@@ -417,6 +418,46 @@ Workflow handoff:
     expect(installedSkill).not.toContain("/prompts:users")
     expect(installedSkill).not.toContain("/prompts:settings")
     expect(installedSkill).not.toContain("https://prompts:www.proofeditor.ai")
+  })
+
+  test("truncates copied skill descriptions to Codex's frontmatter limit", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "codex-skill-description-"))
+    const sourceSkillDir = path.join(tempRoot, "source-skill")
+    await fs.mkdir(sourceSkillDir, { recursive: true })
+
+    const longDescription = "A".repeat(1100)
+    await fs.writeFile(
+      path.join(sourceSkillDir, "SKILL.md"),
+      `---
+name: proof
+description: ${longDescription}
+---
+
+Share a markdown document with Proof.
+`,
+    )
+
+    const bundle: CodexBundle = {
+      prompts: [],
+      skillDirs: [{ name: "proof", sourceDir: sourceSkillDir }],
+      generatedSkills: [],
+      invocationTargets: {
+        promptTargets: {},
+        skillTargets: {},
+      },
+    }
+
+    await writeCodexBundle(tempRoot, bundle)
+
+    const installedSkill = await fs.readFile(
+      path.join(tempRoot, ".codex", "skills", "proof", "SKILL.md"),
+      "utf8",
+    )
+    const parsed = parseFrontmatter(installedSkill)
+
+    expect(typeof parsed.data.description).toBe("string")
+    expect((parsed.data.description as string).length).toBeLessThanOrEqual(1024)
+    expect(parsed.body).toContain("Share a markdown document with Proof.")
   })
 })
 
