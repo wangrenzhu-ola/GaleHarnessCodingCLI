@@ -119,6 +119,16 @@ async function writeMockGh(mockBin: string, json: string): Promise<void> {
   await fs.writeFile(path.join(mockBin, "gh.cmd"), `@echo off\r\necho ${json}\r\n`, "utf8")
 }
 
+function envWithMockBin(mockBin: string): NodeJS.ProcessEnv {
+  const originalPath = process.env.PATH ?? process.env.Path ?? ""
+  const mockPath = `${mockBin}${path.delimiter}${originalPath}`
+  return {
+    ...gitEnv,
+    PATH: mockPath,
+    Path: mockPath,
+  }
+}
+
 function createMinimalState(
   repoRoot: string,
   overrides: Record<string, any> = {},
@@ -638,10 +648,7 @@ describe("sync-cli.py", () => {
       })
       await writeState(repoRoot, state)
 
-      const envWithMockGh = {
-        ...gitEnv,
-        PATH: `${mockBin}:${process.env.PATH}`,
-      }
+      const envWithMockGh = envWithMockBin(mockBin)
       const r = await runSyncCli(["resume"], repoRoot, envWithMockGh)
       expect(r.exitCode).toBe(0)
       expect(r.stdout).toContain("审查中")
@@ -684,10 +691,7 @@ describe("sync-cli.py", () => {
       })
       await writeState(repoRoot, state)
 
-      const envWithMockGh = {
-        ...gitEnv,
-        PATH: `${mockBin}:${process.env.PATH}`,
-      }
+      const envWithMockGh = envWithMockBin(mockBin)
       const r = await runSyncCli(["resume"], repoRoot, envWithMockGh)
       expect(r.exitCode).toBe(0)
 
@@ -729,10 +733,7 @@ describe("sync-cli.py", () => {
       })
       await writeState(repoRoot, state)
 
-      const envWithMockGh = {
-        ...gitEnv,
-        PATH: `${mockBin}:${process.env.PATH}`,
-      }
+      const envWithMockGh = envWithMockBin(mockBin)
       const r = await runSyncCli(["resume"], repoRoot, envWithMockGh)
       expect(r.exitCode).toBe(0)
 
@@ -773,7 +774,7 @@ describe("sync-cli.py", () => {
 
       const r = await runSyncCli(["resume"], repoRoot, {
         ...gitEnv,
-        PATH: `${mockBin}:${process.env.PATH}`,
+        PATH: envWithMockBin(mockBin).PATH,
       })
       expect(r.exitCode).toBe(3)
       expect(r.stderr).toContain("upstream 对账失败")
@@ -964,7 +965,7 @@ describe("sync-cli.py", () => {
 
       const r = await runSyncCli(["skip", "--force-cleanup"], repoRoot, {
         ...gitEnv,
-        PATH: `${mockBin}:${process.env.PATH}`,
+        PATH: envWithMockBin(mockBin).PATH,
       })
       expect(r.exitCode).toBe(0)
       expect(r.stderr).toContain("PR 验真未通过")
@@ -1031,10 +1032,7 @@ describe("sync-cli.py", () => {
       })
       await writeState(repoRoot, state)
 
-      const envWithMockGh = {
-        ...gitEnv,
-        PATH: `${mockBin}:${process.env.PATH}`,
-      }
+      const envWithMockGh = envWithMockBin(mockBin)
       const r = await runSyncCli(["resume"], repoRoot, envWithMockGh)
       expect(r.exitCode).toBe(0)
 
