@@ -3,6 +3,8 @@ import { promises as fs } from "node:fs"
 import path from "node:path"
 import { randomUUID } from "node:crypto"
 import { HktClient, type HktTaskResult } from "./hkt-client.js"
+import { migrateLegacyMemory, migrationStatus } from "./migration.js"
+import { ensurePublicMemoryRoot, resolvePublicMemoryRoot, type PublicMemoryRoot } from "./public-root.js"
 
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000
 
@@ -55,6 +57,7 @@ export interface BuildEnvelopeOptions {
   prId?: string | null
   issueId?: string | null
   capturePolicy?: string[]
+  memoryDir?: string
 }
 
 export interface CaptureOptions extends BuildEnvelopeOptions {
@@ -98,18 +101,21 @@ export async function buildTaskEnvelope(options: BuildEnvelopeOptions): Promise<
 
 export async function startTaskMemory(
   options: BuildEnvelopeOptions,
-  client: Pick<HktClient, "taskRecall"> = new HktClient({ cwd: options.cwd }),
+  client?: Pick<HktClient, "taskRecall">,
 ): Promise<{ envelope: TaskEnvelope; recall: HktTaskResult }> {
   const envelope = await buildTaskEnvelope({ ...options, phase: options.phase ?? "start" })
-  const recall = await client.taskRecall(envelope)
+  const memory = prepareTaskMemory(options)
+  const hktClient = client ?? new HktClient({ cwd: options.cwd, memoryDir: memory.root.memoryDir, diagnostics: memory.diagnostics })
+  const recall = withMemoryDiagnostics(await hktClient.taskRecall(envelope as unknown as Record<string, unknown>), memory.diagnostics)
   return { envelope, recall }
 }
 
 export async function captureTaskMemory(
   options: CaptureOptions,
-  client: Pick<HktClient, "taskCapture"> = new HktClient({ cwd: options.cwd }),
+  client?: Pick<HktClient, "taskCapture">,
 ): Promise<{ event: Record<string, unknown>; capture: HktTaskResult }> {
   const envelope = await buildTaskEnvelope(options)
+  const memory = prepareTaskMemory(options)
   const event = {
     ...envelope,
     event_type: options.eventType,
@@ -117,7 +123,8 @@ export async function captureTaskMemory(
     summary: options.summary ?? options.inputSummary ?? "",
     payload: options.payload ?? {},
   }
-  const capture = await client.taskCapture(event)
+  const hktClient = client ?? new HktClient({ cwd: options.cwd, memoryDir: memory.root.memoryDir, diagnostics: memory.diagnostics })
+  const capture = withMemoryDiagnostics(await hktClient.taskCapture(event), memory.diagnostics)
   if (capture.success && capture.durable_memory_id && capture.memory_link_required !== false) {
     await logMemoryLinked({
       cwd: options.cwd ?? process.cwd(),
@@ -131,7 +138,7 @@ export async function captureTaskMemory(
 
 export async function feedbackTaskMemory(
   options: BuildEnvelopeOptions & { label: string; memoryId?: string; note?: string; source?: string },
-  client: Pick<HktClient, "taskCapture"> = new HktClient({ cwd: options.cwd }),
+  client?: Pick<HktClient, "taskCapture">,
 ): Promise<{ event: Record<string, unknown>; capture: HktTaskResult }> {
   return captureTaskMemory(
     {
@@ -148,6 +155,35 @@ export async function feedbackTaskMemory(
     },
     client,
   )
+}
+
+export function prepareTaskMemory(options: Pick<BuildEnvelopeOptions, "cwd" | "project" | "memoryDir">): {
+  root: PublicMemoryRoot
+  diagnostics: Record<string, unknown>
+} {
+  const cwd = options.cwd ?? process.cwd()
+  const root = resolvePublicMemoryRoot({ cwd, project: options.project, memoryDir: options.memoryDir })
+  ensurePublicMemoryRoot(root.memoryDir)
+  const migration = root.source === "derived" ? migrateLegacyMemory({ cwd, targetDir: root.memoryDir }) : null
+  const status = migration?.status === "none" ? migrationStatus(cwd, root.memoryDir) : (migration?.status ?? migrationStatus(cwd, root.memoryDir))
+  return {
+    root,
+    diagnostics: {
+      ...root.diagnostics,
+      status,
+      migration,
+    },
+  }
+}
+
+function withMemoryDiagnostics(result: HktTaskResult, diagnostics: Record<string, unknown>): HktTaskResult {
+  return {
+    ...result,
+    diagnostics: {
+      ...(result.diagnostics ?? {}),
+      ...diagnostics,
+    },
+  }
 }
 
 async function readCurrentTask(filePath: string): Promise<CurrentTask | null> {

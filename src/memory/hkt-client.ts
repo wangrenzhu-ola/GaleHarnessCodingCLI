@@ -4,6 +4,8 @@ export interface HktClientOptions {
   binary?: string
   cwd?: string
   timeoutMs?: number
+  memoryDir?: string
+  diagnostics?: Record<string, unknown>
 }
 
 export interface HktTaskResult {
@@ -21,11 +23,15 @@ export class HktClient {
   private binary: string
   private cwd: string
   private timeoutMs: number
+  private memoryDir?: string
+  private diagnostics: Record<string, unknown>
 
   constructor(options: HktClientOptions = {}) {
     this.binary = options.binary ?? process.env.HKT_MEMORY_BIN ?? "hkt-memory"
     this.cwd = options.cwd ?? process.cwd()
     this.timeoutMs = options.timeoutMs ?? 5000
+    this.memoryDir = options.memoryDir
+    this.diagnostics = options.diagnostics ?? {}
   }
 
   taskRecall(envelope: Record<string, unknown>, limit = 5): Promise<HktTaskResult> {
@@ -55,11 +61,12 @@ export class HktClient {
       const proc = spawn(this.binary, args, {
         cwd: this.cwd,
         stdio: ["ignore", "pipe", "pipe"],
+        env: this.memoryDir ? { ...process.env, HKT_MEMORY_DIR: this.memoryDir } : { ...process.env },
       })
 
       const timer = setTimeout(() => {
         proc.kill("SIGKILL")
-        finish(skippedResult(`hkt-memory timed out after ${this.timeoutMs}ms`))
+        finish(this.withDiagnostics(skippedResult(`hkt-memory timed out after ${this.timeoutMs}ms`)))
       }, this.timeoutMs)
 
       proc.stdout.on("data", (chunk: Buffer) => {
@@ -70,23 +77,34 @@ export class HktClient {
       })
       proc.on("error", (err) => {
         clearTimeout(timer)
-        finish(skippedResult(`hkt-memory unavailable: ${err.message}`))
+        finish(this.withDiagnostics(skippedResult(`hkt-memory unavailable: ${err.message}`)))
       })
       proc.on("close", (code) => {
         clearTimeout(timer)
         if (settled) return
         if (code !== 0) {
-          finish(skippedResult(`hkt-memory exited ${code}: ${stderr.trim()}`.trim()))
+          finish(this.withDiagnostics(skippedResult(`hkt-memory exited ${code}: ${stderr.trim()}`.trim())))
           return
         }
         try {
           const parsed = JSON.parse(stdout) as HktTaskResult
-          finish(parsed)
+          finish(this.withDiagnostics(parsed))
         } catch {
-          finish(skippedResult("hkt-memory returned malformed JSON"))
+          finish(this.withDiagnostics(skippedResult("hkt-memory returned malformed JSON")))
         }
       })
     })
+  }
+
+  private withDiagnostics(result: HktTaskResult): HktTaskResult {
+    return {
+      ...result,
+      diagnostics: {
+        ...(result.diagnostics ?? {}),
+        ...this.diagnostics,
+        memory_dir: this.memoryDir ?? process.env.HKT_MEMORY_DIR ?? null,
+      },
+    }
   }
 }
 

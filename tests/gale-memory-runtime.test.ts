@@ -1,5 +1,6 @@
 import { describe, expect, test, beforeEach, afterEach } from "bun:test"
-import { mkdtemp, rm, mkdir, writeFile } from "node:fs/promises"
+import { existsSync } from "node:fs"
+import { chmod, mkdtemp, rm, mkdir, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import {
@@ -42,14 +43,24 @@ class FakeHktClient {
 describe("Gale task memory runtime", () => {
   let tmpDir: string
   let contextFile: string
+  let oldKnowledgeHome: string | undefined
+  let oldMemoryDir: string | undefined
 
   beforeEach(async () => {
     tmpDir = await mkdtemp(path.join(tmpdir(), "gale-memory-runtime-"))
+    oldKnowledgeHome = process.env.GALE_KNOWLEDGE_HOME
+    oldMemoryDir = process.env.HKT_MEMORY_DIR
+    process.env.GALE_KNOWLEDGE_HOME = path.join(tmpDir, "knowledge")
+    delete process.env.HKT_MEMORY_DIR
     contextFile = path.join(tmpDir, ".context", "galeharness-cli", "current-task.json")
     await mkdir(path.dirname(contextFile), { recursive: true })
   })
 
   afterEach(async () => {
+    if (oldKnowledgeHome === undefined) delete process.env.GALE_KNOWLEDGE_HOME
+    else process.env.GALE_KNOWLEDGE_HOME = oldKnowledgeHome
+    if (oldMemoryDir === undefined) delete process.env.HKT_MEMORY_DIR
+    else process.env.HKT_MEMORY_DIR = oldMemoryDir
     await rm(tmpDir, { recursive: true, force: true })
   })
 
@@ -127,6 +138,33 @@ describe("Gale task memory runtime", () => {
     expect(result.recall.success).toBe(true)
     expect(client.recallEnvelope?.schema_version).toBe("gale-task-memory.v1")
     expect(client.recallEnvelope?.artifact_type).toBe("debug_session")
+    expect(result.recall.diagnostics?.memory_dir).toBe(path.join(tmpDir, "knowledge", "HKTMemory", "hkt-memory"))
+    expect(existsSync(path.join(tmpDir, "memory"))).toBe(false)
+  })
+
+  test("start migrates legacy local memory before recall", async () => {
+    await mkdir(path.join(tmpDir, "memory", "L2-Full", "daily"), { recursive: true })
+    await writeFile(path.join(tmpDir, "memory", "L2-Full", "daily", "legacy.md"), "legacy\n", "utf8")
+    await writeFile(path.join(tmpDir, "memory", "vector_store.db"), "db", "utf8")
+    const client = new FakeHktClient()
+
+    const result = await startTaskMemory(
+      {
+        cwd: tmpDir,
+        contextFile,
+        project: "HKTMemory",
+        repoRoot: tmpDir,
+        branch: "feature/task-memory",
+        skill: "gh:debug",
+      },
+      client,
+    )
+
+    const memoryDir = path.join(tmpDir, "knowledge", "HKTMemory", "hkt-memory")
+    expect(result.recall.diagnostics?.status).toBe("completed")
+    expect(existsSync(path.join(memoryDir, "L2-Full", "daily", "legacy.md"))).toBe(true)
+    expect(existsSync(path.join(memoryDir, "vector_store.db"))).toBe(false)
+    expect(existsSync(path.join(tmpDir, "memory", "L2-Full", "daily", "legacy.md"))).toBe(true)
   })
 
   test("capture sends structured events instead of raw store content", async () => {
@@ -190,5 +228,22 @@ describe("Gale task memory runtime", () => {
     expect(result.success).toBe(false)
     expect(result.skipped).toBe(true)
     expect(String(result.reason)).toContain("hkt-memory unavailable")
+  })
+
+  test("HktClient passes HKT_MEMORY_DIR to child process", async () => {
+    const script = path.join(tmpDir, "fake-hkt")
+    const memoryDir = path.join(tmpDir, "custom-memory")
+    await writeFile(
+      script,
+      "#!/usr/bin/env node\nconsole.log(JSON.stringify({ success: true, diagnostics: { child_memory_dir: process.env.HKT_MEMORY_DIR } }))\n",
+      "utf8",
+    )
+    await chmod(script, 0o755)
+    const client = new HktClient({ binary: script, cwd: tmpDir, timeoutMs: 1000, memoryDir })
+
+    const result = await client.taskRecall({ schema_version: "gale-task-memory.v1" })
+
+    expect(result.success).toBe(true)
+    expect(result.diagnostics?.child_memory_dir).toBe(memoryDir)
   })
 })

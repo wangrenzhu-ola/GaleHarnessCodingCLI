@@ -483,9 +483,34 @@ uv --version                     # 期望: uv x.x.x
 gale-harness --help              # 期望: 显示 CLI 帮助
 gale-knowledge init              # 初始化知识仓库
 gale-knowledge resolve-home      # 期望: ~/.galeharness/knowledge/
-hkt-memory stats                   # 期望: 统计信息
+gale-memory status               # 期望: 显示 Gale-managed HKTMemory 路径和迁移状态
+hkt-memory stats                 # 期望: 统计信息（裸命令使用自身默认路径）
 bun test                         # 期望: 测试通过
 ```
+
+---
+
+### Gale-managed HKTMemory 记忆根目录
+
+通过 GaleHarness 入口使用的 HKTMemory 默认写入公共知识库：
+
+```text
+~/.galeharness/knowledge/<project>/hkt-memory
+```
+
+`gale-memory` 是统一入口。`start`、`capture`、`feedback`、`status` 和 `migrate` 会解析同一个 root，并在首次发现项目本地 `memory/` 时执行 copy-first 迁移：Markdown 记忆和必要 manifest 会复制到公共知识库，`.db`、vector cache、session transcript index、`_lifecycle/events.jsonl` 等派生缓存不会复制，本地 `memory/` 保留为 legacy backup。
+
+覆盖优先级为：`gale-memory --memory-dir` -> 已有 `HKT_MEMORY_DIR` -> `~/.galeharness/config.{json,yaml}` 中的 `memory.hkt_memory_dir` -> 默认公共知识库 root。裸 `hkt-memory` 命令仍保留上游默认语义，通常会使用当前目录下的 `memory/`；需要进入公共知识库时请显式设置 `HKT_MEMORY_DIR` 或使用 `gale-memory`。
+
+常用诊断：
+
+```bash
+gale-memory status --json
+gale-memory migrate --cwd /path/to/project
+gale-memory resolve-root
+```
+
+状态可能为 `global`、`legacy-local`、`migration-needed`、`migrated`、`migration-conflict` 或 `unavailable`。冲突迁移不会覆盖目标文件，会在全局 root 写入 `MIGRATION_CONFLICTS.md`。
 
 ---
 

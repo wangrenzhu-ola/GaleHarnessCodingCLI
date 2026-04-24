@@ -9,7 +9,7 @@
 
 import { defineCommand } from "citty"
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { resolveKnowledgeHome } from "../../src/knowledge/home.js"
 
@@ -18,8 +18,20 @@ import { resolveKnowledgeHome } from "../../src/knowledge/home.js"
 // ---------------------------------------------------------------------------
 
 const GITIGNORE_CONTENT = `*.db
+*.db-shm
+*.db-wal
+vector_store/
+vector_store.db
+bm25_index.db
+entity_index.db
+session_transcript_index.db
 vector-index/
 .last-rebuild-commit
+_lifecycle/events.jsonl
+.cache/
+cache/
+tmp/
+temp/
 `
 
 // ---------------------------------------------------------------------------
@@ -35,6 +47,7 @@ export function initKnowledgeRepo(home: string): boolean {
   const gitDir = join(home, ".git")
 
   if (existsSync(gitDir)) {
+    ensureGitignoreRules(home)
     return false
   }
 
@@ -51,7 +64,7 @@ export function initKnowledgeRepo(home: string): boolean {
   }
 
   // 写入 .gitignore
-  writeFileSync(join(home, ".gitignore"), GITIGNORE_CONTENT, "utf8")
+  ensureGitignoreRules(home)
 
   // 配置本地 git 用户身份（CI 环境可能无全局配置）
   const emailResult = spawnSync("git", ["config", "user.email", "gale-knowledge@local"], { cwd: home, stdio: ["ignore", "ignore", "pipe"], timeout: 15000 })
@@ -74,6 +87,16 @@ export function initKnowledgeRepo(home: string): boolean {
   }
 
   return true
+}
+
+export function ensureGitignoreRules(home: string): void {
+  const gitignore = join(home, ".gitignore")
+  const existing = existsSync(gitignore) ? readFileSync(gitignore, "utf8") : ""
+  const lines = new Set(existing.split(/\r?\n/).filter(Boolean))
+  for (const line of GITIGNORE_CONTENT.split(/\r?\n/).filter(Boolean)) {
+    lines.add(line)
+  }
+  writeFileSync(gitignore, Array.from(lines).join("\n") + "\n", "utf8")
 }
 
 // ---------------------------------------------------------------------------

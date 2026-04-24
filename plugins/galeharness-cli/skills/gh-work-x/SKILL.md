@@ -46,7 +46,7 @@ If `gale-task` is unavailable, skip silently. This must never block execution.
 Before choosing a blueprint, retrieve related implementation context and historical Morph-X fingerprints:
 
 ```bash
-hkt-memory retrieve \
+HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory retrieve \
   --query "<task summary, iOS components, Swift/ObjC files, prior blueprint or strategy tags>" \
   --layer all --limit 10 --min-similarity 0.35 \
   --vector-weight 0.7 --bm25-weight 0.3
@@ -61,7 +61,7 @@ Use results only as context: extract constraints, avoided patterns, and prior bl
 Query related work sessions:
 
 ```bash
-hkt-memory session-search \
+HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory session-search \
   --query "gh:work-x <task title or iOS feature summary>" \
   --limit 5
 ```
@@ -148,7 +148,7 @@ After Swift/ObjC code is produced and before final summary:
 After implementation and Morph-X audit, store a concise memory record:
 
 ```bash
-hkt-memory store \
+HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory store \
   --content "<summary with repo-relative files, blueprint constraints, strategy fingerprint, audit status, degraded fallback notes>" \
   --title "<work-x title>" \
   --topic "work-x morph blueprint strategy fingerprint" \

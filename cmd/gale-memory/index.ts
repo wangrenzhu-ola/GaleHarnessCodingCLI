@@ -6,6 +6,8 @@ import {
   startTaskMemory,
 } from "../../src/memory/task-runtime.js"
 import { skippedResult } from "../../src/memory/hkt-client.js"
+import { migrateLegacyMemory, migrationStatus } from "../../src/memory/migration.js"
+import { ensurePublicMemoryRoot, resolvePublicMemoryRoot } from "../../src/memory/public-root.js"
 
 function parseFlags(argv: string[]): Record<string, string> {
   const flags: Record<string, string> = {}
@@ -57,12 +59,47 @@ async function main(): Promise<void> {
     project: flags.project,
     branch: flags.branch,
     taskId: flags["task-id"],
+    memoryDir: flags["memory-dir"],
   }
 
   try {
     if (command === "start") {
       const result = await startTaskMemory({ ...common, phase: flags.phase ?? "start" })
       process.stdout.write(JSON.stringify(result, null, 2) + "\n")
+      return
+    }
+
+    if (command === "resolve-root") {
+      const root = resolvePublicMemoryRoot({ cwd, project: flags.project, memoryDir: flags["memory-dir"] })
+      if (flags.json === "true") {
+        process.stdout.write(JSON.stringify(root, null, 2) + "\n")
+      } else {
+        process.stdout.write(`${root.memoryDir}\n`)
+      }
+      return
+    }
+
+    if (command === "status") {
+      const root = resolvePublicMemoryRoot({ cwd, project: flags.project, memoryDir: flags["memory-dir"] })
+      ensurePublicMemoryRoot(root.memoryDir)
+      const status = migrationStatus(cwd, root.memoryDir)
+      const result = {
+        success: true,
+        status,
+        project: root.project,
+        memory_dir: root.memoryDir,
+        source: root.source,
+        knowledge_home: root.knowledgeHome,
+        diagnostics: root.diagnostics,
+      }
+      process.stdout.write(JSON.stringify(result, null, 2) + "\n")
+      return
+    }
+
+    if (command === "migrate") {
+      const root = resolvePublicMemoryRoot({ cwd, project: flags.project, memoryDir: flags["memory-dir"] })
+      const migration = migrateLegacyMemory({ cwd, targetDir: root.memoryDir })
+      process.stdout.write(JSON.stringify({ success: migration.status !== "failed", ...root, migration }, null, 2) + "\n")
       return
     }
 
@@ -90,7 +127,15 @@ async function main(): Promise<void> {
       return
     }
 
-    process.stdout.write(JSON.stringify(skippedResult("Usage: gale-memory <start|capture|feedback> [flags]")) + "\n")
+    if (!command || command === "--help" || command === "-h") {
+      process.stdout.write(
+        "Usage: gale-memory <start|capture|feedback|status|resolve-root|migrate> [flags]\n" +
+        "Flags: --cwd <path> --project <name> --memory-dir <path> --json\n",
+      )
+      return
+    }
+
+    process.stdout.write(JSON.stringify(skippedResult("Usage: gale-memory <start|capture|feedback|status|resolve-root|migrate> [flags]")) + "\n")
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     process.stdout.write(JSON.stringify(skippedResult(message)) + "\n")

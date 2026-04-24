@@ -134,4 +134,9 @@ Then verify:
 
   gale-harness --version
   gale-harness update --check
+  gale-memory status
+
+Gale-managed HKTMemory uses ~/.galeharness/knowledge/<project>/hkt-memory by default.
+If hkt-memory is not on PATH, gale-memory status/start will report a diagnostic instead
+of failing the binary install.
 EOF

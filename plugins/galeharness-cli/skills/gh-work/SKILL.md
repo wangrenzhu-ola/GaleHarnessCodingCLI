@@ -69,7 +69,7 @@ Before Phase 1, query the vector memory database for related execution context:
 
 2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
    ```bash
-   hkt-memory retrieve \
+   HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory retrieve \
      --query "<extracted query>" \
      --layer all --limit 10 --min-similarity 0.35 \
      --vector-weight 0.7 --bm25-weight 0.3
@@ -100,7 +100,7 @@ In addition to vector retrieval, query related historical work session records:
 
 2. Run (requires env vars HKT_MEMORY_API_KEY, HKT_MEMORY_BASE_URL, HKT_MEMORY_MODEL):
    ```bash
-   hkt-memory session-search \
+   HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory session-search \
      --query "<skill name: gh:work — task title or feature description>" \
      --limit 5
    ```
@@ -398,7 +398,7 @@ After the work is complete and the shipping workflow has finished (PR created or
 
 2. Run:
    ```bash
-   hkt-memory store \
+   HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory store \
      --content "<execution summary with context>" \
      --title "Work: [plan title or feature description]" \
      --topic "work-execution" \

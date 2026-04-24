@@ -52,7 +52,7 @@ If the input references an issue tracker, fetch the issue when possible and extr
 Retrieve related bugs, root causes, implementation constraints, and prior Morph-X blueprint/strategy fingerprints:
 
 ```bash
-hkt-memory retrieve \
+HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory retrieve \
   --query "<error, symptom, iOS component, Swift/ObjC file, blueprint or strategy tags>" \
   --layer all --limit 10 --min-similarity 0.35 \
   --vector-weight 0.7 --bm25-weight 0.3
@@ -67,7 +67,7 @@ Use results as context only. They may inform hypotheses and blueprint constraint
 Search related historical debug sessions:
 
 ```bash
-hkt-memory session-search \
+HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory session-search \
   --query "gh:debug-x <error message or bug summary>" \
   --limit 5
 ```
@@ -144,7 +144,7 @@ After the fix is implemented:
 After diagnosis, or after the fix and Morph-X audit when a fix was applied, store a concise memory record:
 
 ```bash
-hkt-memory store \
+HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)" hkt-memory store \
   --content "<bug, root cause, fix or diagnosis-only result, repo-relative files, blueprint constraints, strategy fingerprint, audit status, degraded fallback notes>" \
   --title "<debug-x bug title>" \
   --topic "debug-x morph blueprint strategy fingerprint" \

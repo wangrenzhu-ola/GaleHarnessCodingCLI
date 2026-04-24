@@ -189,21 +189,14 @@ try {
 }
 
 # =====================================================
-#  6. HKTMemory Directory Structure
+#  6. HKTMemory Public Knowledge Root
 # =====================================================
-header "6. 创建 HKTMemory 目录结构"
+header "6. 配置 Gale-managed HKTMemory 公共知识库路径"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
-New-Item -ItemType Directory -Force -Path "memory/L0-Abstract/topics" | Out-Null
-New-Item -ItemType Directory -Force -Path "memory/L1-Overview/topics" | Out-Null
-New-Item -ItemType Directory -Force -Path "memory/L2-Full/daily" | Out-Null
-New-Item -ItemType Directory -Force -Path "memory/L2-Full/evergreen" | Out-Null
-New-Item -ItemType Directory -Force -Path "memory/L2-Full/episodes" | Out-Null
-New-Item -ItemType File -Force -Path "memory/L0-Abstract/index.md" | Out-Null
-New-Item -ItemType File -Force -Path "memory/L1-Overview/index.md" | Out-Null
-New-Item -ItemType File -Force -Path "memory/L2-Full/evergreen/MEMORY.md" | Out-Null
-ok "HKTMemory 目录结构就绪"
+info "Gale-managed HKTMemory now uses ~/.galeharness/knowledge/<project>/hkt-memory by default."
+info "Project-local memory/ is left untouched as a legacy backup for bare hkt-memory commands."
 
 # ── HKTMemory CLI installation (Windows) ──
 Write-Host ""
@@ -445,8 +438,11 @@ if ($CI_MODE) {
   gale-memory --help
     -> 期望: 显示 task memory helper 帮助信息
 
+  gale-memory status
+    -> 期望: 输出 Gale-managed HKTMemory 公共知识库路径和迁移状态
+
   hkt-memory stats
-    -> 期望: HKTMemory 统计信息
+    -> 期望: HKTMemory 统计信息（裸命令仍使用自身默认路径，必要时设置 HKT_MEMORY_DIR）
 
   bun test
     -> 期望: 测试通过

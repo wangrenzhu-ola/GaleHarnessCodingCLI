@@ -85,13 +85,16 @@ describe("collectMarkdownFiles", () => {
 
   it("collects .md files recursively", () => {
     mkdirSync(join(testDir, "sub"), { recursive: true })
+    mkdirSync(join(testDir, "Project", "hkt-memory", "L2-Full", "daily"), { recursive: true })
     writeFileSync(join(testDir, "root.md"), "# Root\n")
     writeFileSync(join(testDir, "sub", "nested.md"), "# Nested\n")
+    writeFileSync(join(testDir, "Project", "hkt-memory", "L2-Full", "daily", "memory.md"), "# Memory\n")
     writeFileSync(join(testDir, "other.txt"), "not md\n")
 
     const files = collectMarkdownFiles(testDir)
     expect(files).toContain("root.md")
     expect(files).toContain(join("sub", "nested.md"))
+    expect(files).toContain(join("Project", "hkt-memory", "L2-Full", "daily", "memory.md"))
     expect(files).not.toContain("other.txt")
   })
 
@@ -306,6 +309,21 @@ describe("rebuildIndex", () => {
     const result = rebuildIndex({ knowledgeHome: repoDir, full: true })
 
     expect(result.mode).toBe("full")
+    expect(result.indexMemoryDir).toContain(join(".galeharness", "vector-index", "knowledge-repo"))
+  })
+
+  it("uses an independent HKTMemory index root when rebuilding knowledge markdown", () => {
+    const repoDir = createInitializedRepo(testDir)
+    const indexMemoryDir = join(testDir, "knowledge-index")
+    addAndCommit(repoDir, {
+      "Project/hkt-memory/L2-Full/daily/memory.md": "# Memory\n",
+      "plans/plan.md": "# Plan\n",
+    }, "initial docs")
+
+    const result = rebuildIndex({ knowledgeHome: repoDir, full: true, indexMemoryDir })
+
+    expect(result.indexMemoryDir).toBe(indexMemoryDir)
+    expect(existsSync(join(indexMemoryDir, "L0-Abstract", "topics"))).toBe(true)
   })
 
   it("updates .last-rebuild-commit after processing when no errors", () => {

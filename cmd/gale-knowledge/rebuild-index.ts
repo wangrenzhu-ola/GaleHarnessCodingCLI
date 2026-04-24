@@ -18,6 +18,7 @@ import {
 import { join, relative } from "node:path"
 import { tmpdir } from "node:os"
 import { resolveKnowledgeHome } from "../../src/knowledge/home.js"
+import { ensurePublicMemoryRoot, resolveKnowledgeIndexMemoryRoot } from "../../src/memory/public-root.js"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -28,6 +29,7 @@ export interface RebuildIndexOptions {
   full?: boolean
   /** 知识仓库路径 */
   knowledgeHome?: string
+  indexMemoryDir?: string
 }
 
 export interface RebuildIndexResult {
@@ -39,6 +41,7 @@ export interface RebuildIndexResult {
   errors: number
   /** 模式 */
   mode: "full" | "incremental"
+  indexMemoryDir: string
 }
 
 // ---------------------------------------------------------------------------
@@ -175,6 +178,7 @@ function storeToHktMemory(
   filePath: string,
   content: string,
   title: string,
+  indexMemoryDir: string,
 ): boolean {
   // 将内容写入临时文件
   const tmpFile = join(
@@ -203,7 +207,7 @@ function storeToHktMemory(
       {
         stdio: ["ignore", "pipe", "pipe"],
         timeout: 30000,
-        env: { ...process.env },
+        env: { ...process.env, HKT_MEMORY_DIR: indexMemoryDir },
       },
     )
 
@@ -227,7 +231,7 @@ function storeToHktMemory(
           input: content,
           stdio: ["pipe", "pipe", "pipe"],
           timeout: 30000,
-          env: { ...process.env },
+          env: { ...process.env, HKT_MEMORY_DIR: indexMemoryDir },
         },
       )
       return result2.status === 0
@@ -269,6 +273,8 @@ export function saveLastRebuildCommit(
  */
 export function rebuildIndex(options?: RebuildIndexOptions): RebuildIndexResult {
   const knowledgeHome = options?.knowledgeHome ?? resolveKnowledgeHome()
+  const indexMemoryDir = options?.indexMemoryDir ?? resolveKnowledgeIndexMemoryRoot()
+  ensurePublicMemoryRoot(indexMemoryDir)
   const full = options?.full ?? false
 
   // Determine mode and files to process first (before checking uv availability)
@@ -339,7 +345,7 @@ export function rebuildIndex(options?: RebuildIndexOptions): RebuildIndexResult 
         const content = readFileSync(fullPath, "utf8")
         const title = file // Use relative path as title
 
-        const success = storeToHktMemory(scriptPath!, file, content, title)
+        const success = storeToHktMemory(scriptPath!, file, content, title, indexMemoryDir)
         if (success) {
           processed++
         } else {
@@ -372,6 +378,7 @@ export function rebuildIndex(options?: RebuildIndexOptions): RebuildIndexResult 
     skipped: totalFiles - processed - errors,
     errors,
     mode,
+    indexMemoryDir,
   }
 }
 
@@ -397,6 +404,7 @@ const rebuildIndexCommand = defineCommand({
 
       process.stdout.write(
         `[gale-knowledge] rebuild-index complete (${result.mode} mode)\n` +
+        `  Index root: ${result.indexMemoryDir}\n` +
         `  Processed: ${result.processed}\n` +
         `  Skipped:   ${result.skipped}\n` +
         `  Errors:    ${result.errors}\n`,

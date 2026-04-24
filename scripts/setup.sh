@@ -178,21 +178,14 @@ else
 fi
 
 # =====================================================
-#  6. HKTMemory Directory Structure
+#  6. HKTMemory Public Knowledge Root
 # =====================================================
-header "6. 创建 HKTMemory 目录结构"
+header "6. 配置 Gale-managed HKTMemory 公共知识库路径"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-mkdir -p memory/L0-Abstract/topics
-mkdir -p memory/L1-Overview/topics
-mkdir -p memory/L2-Full/daily
-mkdir -p memory/L2-Full/evergreen
-mkdir -p memory/L2-Full/episodes
-touch memory/L0-Abstract/index.md
-touch memory/L1-Overview/index.md
-touch memory/L2-Full/evergreen/MEMORY.md
-ok "HKTMemory 目录结构就绪"
+info "Gale-managed HKTMemory now uses ~/.galeharness/knowledge/<project>/hkt-memory by default."
+info "Project-local memory/ is left untouched as a legacy backup for bare hkt-memory commands."
 
 # ── HKTMemory CLI installation ──
 echo ""
@@ -378,8 +371,11 @@ ${BOLD}  自检清单 — 配置生效后，依次运行以下命令验证:${NC}
   ${CYAN}gale-memory --help${NC}
     → 期望: 显示 task memory helper 帮助信息
 
+  ${CYAN}gale-memory status${NC}
+    → 期望: 输出 Gale-managed HKTMemory 公共知识库路径和迁移状态
+
   ${CYAN}hkt-memory stats${NC}
-    → 期望: HKTMemory 统计信息
+    → 期望: HKTMemory 统计信息（裸命令仍使用自身默认路径，必要时设置 HKT_MEMORY_DIR）
 
   ${CYAN}bun test${NC}
     → 期望: 测试通过

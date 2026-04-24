@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test"
 import { execSync } from "node:child_process"
-import { existsSync, readFileSync, mkdirSync, rmSync } from "node:fs"
+import { existsSync, readFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { tmpdir } from "node:os"
 
@@ -56,8 +56,26 @@ describe("initKnowledgeRepo", () => {
 
     const content = readFileSync(gitignorePath, "utf8")
     expect(content).toContain("*.db")
+    expect(content).toContain("vector_store/")
+    expect(content).toContain("session_transcript_index.db")
+    expect(content).toContain("_lifecycle/events.jsonl")
     expect(content).toContain("vector-index/")
     expect(content).toContain(".last-rebuild-commit")
+    expect(content).not.toContain("hkt-memory/**/*.md")
+  })
+
+  it("appends missing .gitignore rules for an existing knowledge repo", () => {
+    const repoDir = join(testDir, "knowledge")
+    initKnowledgeRepo(repoDir)
+    writeFileSync(join(repoDir, ".gitignore"), "custom-rule\n*.db\n", "utf8")
+
+    const created = initKnowledgeRepo(repoDir)
+
+    expect(created).toBe(false)
+    const content = readFileSync(join(repoDir, ".gitignore"), "utf8")
+    expect(content).toContain("custom-rule")
+    expect(content).toContain("vector_store/")
+    expect(content).toContain("session_transcript_index.db")
   })
 
   it("creates an initial commit", () => {
