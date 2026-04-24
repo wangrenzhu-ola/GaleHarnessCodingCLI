@@ -18,9 +18,9 @@ import { fileURLToPath } from "node:url"
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
-const BINARY_NAMES = ["gale-harness", "compound-plugin", "gale-knowledge", "gale-memory"] as const
+const BINARY_NAMES = ["gale-harness", "compound-plugin", "gale-knowledge"] as const
 const TAG_PREFIX = "galeharness-cli-v"
-const DEFAULT_REPO = "wangrenzhu-ola/GaleHarnessCLI"
+const DEFAULT_REPO = "wangrenzhu-ola/GaleHarnessCodingCLI"
 const BACKUP_DIR = path.join(os.homedir(), ".galeharness", "backup")
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -38,13 +38,6 @@ export interface UpdateResult {
   message: string
   previousVersion?: string
   newVersion?: string
-}
-
-interface GitHubRelease {
-  tag_name: string
-  draft?: boolean
-  prerelease?: boolean
-  assets: Array<{ name: string; browser_download_url: string; size: number }>
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -113,14 +106,14 @@ export function isCompiledBinary(): boolean {
   if (!execPath) return false
   // If the executable name is one of our binaries, we're in compiled mode
   const basename = path.basename(execPath)
-  return BINARY_NAMES.includes(basename as any)
+  return BINARY_NAMES.includes(basename as any) || basename === "gale-harness" || basename === "compound-plugin" || basename === "gale-knowledge"
 }
 
 /**
  * Query GitHub Release API for the latest version matching our tag prefix.
  */
 export async function getLatestVersion(repo: string): Promise<{ version: string; assetUrl: string; assetName: string }> {
-  const url = `https://api.github.com/repos/${repo}/releases?per_page=20`
+  const url = `https://api.github.com/repos/${repo}/releases/latest`
   const response = await fetch(url, {
     headers: {
       "User-Agent": "gale-harness-update",
@@ -135,14 +128,14 @@ export async function getLatestVersion(repo: string): Promise<{ version: string;
     throw new Error(`GitHub API error: ${response.status} ${response.statusText}`)
   }
 
-  const releases = (await response.json()) as GitHubRelease[]
-  const release = releases.find((candidate) =>
-    !candidate.draft &&
-    !candidate.prerelease &&
-    candidate.tag_name.startsWith(TAG_PREFIX),
-  )
-  if (!release) {
-    throw new Error(`No releases found for ${repo}. Ensure at least one release exists with tag prefix '${TAG_PREFIX}'.`)
+  const release = (await response.json()) as {
+    tag_name: string
+    assets: Array<{ name: string; browser_download_url: string; size: number }>
+  }
+
+  // Verify tag prefix
+  if (!release.tag_name.startsWith(TAG_PREFIX)) {
+    throw new Error(`Latest release tag '${release.tag_name}' does not match expected prefix '${TAG_PREFIX}'.`)
   }
 
   const version = release.tag_name.slice(TAG_PREFIX.length)
