@@ -6,7 +6,7 @@
  *
  * Options:
  *   --version   Version string (defaults to package.json version)
- *   --platform  Platform suffix, e.g. darwin-arm64 (defaults to darwin-arm64)
+ *   --platform  Platform suffix, e.g. linux-x64 (defaults to current platform)
  *
  * Output:
  *   Writes galeharness-cli-{version}-{platform}.tar.gz to the repo root.
@@ -53,6 +53,13 @@ function detectPlatform(): string {
 }
 
 const platform = parsed.platform || detectPlatform()
+const bunTargetByPlatform: Record<string, string> = {
+  "darwin-arm64": "bun-darwin-arm64",
+  "darwin-x64": "bun-darwin-x64",
+  "linux-arm64": "bun-linux-arm64",
+  "linux-x64": "bun-linux-x64",
+}
+const bunTarget = bunTargetByPlatform[platform] || "bun"
 
 // ── Build ───────────────────────────────────────────────────────────────────
 
@@ -70,12 +77,10 @@ if (fs.existsSync(archivePath)) {
   fs.unlinkSync(archivePath)
 }
 
-const releaseFiles = ["gale-harness", "compound-plugin", "gale-knowledge", "gale-memory", "VERSION"]
-
-console.error(`[build] Compiling binaries (v${version}, ${platform})...`)
+console.error(`[build] Compiling binaries (v${version}, ${platform}, target ${bunTarget})...`)
 
 // 1. Compile gale-harness (src/index.ts)
-execSync(`bun build --compile src/index.ts --outfile ${path.join(buildDir, "gale-harness")} --target bun`, {
+execSync(`bun build --compile src/index.ts --outfile ${path.join(buildDir, "gale-harness")} --target ${bunTarget}`, {
   cwd: repoRoot,
   stdio: "inherit",
 })
@@ -88,34 +93,25 @@ fs.copyFileSync(
 
 // 3. Compile gale-knowledge (cmd/gale-knowledge/index.ts)
 execSync(
-  `bun build --compile cmd/gale-knowledge/index.ts --outfile ${path.join(buildDir, "gale-knowledge")} --target bun`,
+  `bun build --compile cmd/gale-knowledge/index.ts --outfile ${path.join(buildDir, "gale-knowledge")} --target ${bunTarget}`,
   {
     cwd: repoRoot,
     stdio: "inherit",
   },
 )
 
-// 4. Compile gale-memory (cmd/gale-memory/index.ts)
-execSync(
-  `bun build --compile cmd/gale-memory/index.ts --outfile ${path.join(buildDir, "gale-memory")} --target bun`,
-  {
-    cwd: repoRoot,
-    stdio: "inherit",
-  },
-)
-
-// 5. Write VERSION file
+// 4. Write VERSION file
 fs.writeFileSync(path.join(buildDir, "VERSION"), `${version}\n`, "utf-8")
 
-// 6. Package into tar.gz
+// 5. Package into tar.gz
 console.error(`[build] Packaging ${archiveName}...`)
-execSync(`tar -czf ${archivePath} -C ${buildDir} ${releaseFiles.join(" ")}`, {
+execSync(`tar -czf ${archivePath} -C ${buildDir} gale-harness compound-plugin gale-knowledge VERSION`, {
   cwd: repoRoot,
   stdio: "inherit",
 })
 
-// 7. Clean up build directory
+// 6. Clean up build directory
 fs.rmSync(buildDir, { recursive: true, force: true })
 
-// 8. Print archive path to stdout (for CI)
+// 7. Print archive path to stdout (for CI)
 console.log(archivePath)
