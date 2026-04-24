@@ -70,6 +70,12 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
 
 > **入口说明**：`/gh:brainstorm` 是主要入口 —— 它通过交互式问答将想法细化为需求文档，在不需要时自动跳过。`/gh:ideate` 效果显著但使用较少 —— 基于代码库主动发现改进建议。
 
+### 工作流 Guardrails
+
+核心 `gh:` 流程内置 Karpathy-inspired guardrails，不需要额外调用独立 skill。`/gh:brainstorm` 先挑战问题 framing 并拆分假设、非目标和成功标准；`/gh:plan` 要求复杂度能追溯到需求、风险或约束；`/gh:work` 把非平凡执行绑定到最小 execution contract 和 surgical diff；`/gh:review` 用意图摘要检查 diff hygiene，避免计划边界漂移和顺手重构。
+
+背景记录见 `docs/solutions/workflow-issues/karpathy-guidelines-workflow-guardrails-2026-04-24.md`。
+
 ### iOS Morph-X 降低代码重复风险
 
 `/gh:work-x` 和 `/gh:debug-x` 是面向 iOS Swift/ObjC 代码产出的特殊工作流。它们先根据项目 seed、历史模式标签和 `.morph-config.yaml` 选择实现蓝图，再在代码产出后运行 `gale-harness morph --apply` 与 `gale-harness audit --similarity`，输出相似度风险报告。
