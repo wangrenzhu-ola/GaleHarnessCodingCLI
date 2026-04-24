@@ -38,28 +38,45 @@ The schema below describes the **full artifact file format** (all fields require
 
 {schema}
 
-Confidence rubric (0.0-1.0 scale):
-- 0.00-0.29: Not confident / likely false positive. Do not report.
-- 0.30-0.49: Somewhat confident. Do not report -- too speculative for actionable review.
-- 0.50-0.59: Moderately confident. Real but uncertain. Do not report unless P0 severity.
-- 0.60-0.69: Confident enough to flag. Include only when the issue is clearly actionable.
-- 0.70-0.84: Highly confident. Real and important. Report with full evidence.
-- 0.85-1.00: Certain. Verifiable from the code alone. Report.
+**Schema conformance -- hard constraints:**
 
-Suppress threshold: 0.60. Do not emit findings below 0.60 confidence (except P0 at 0.50+).
+- `severity`: one of `"P0"`, `"P1"`, `"P2"`, `"P3"`.
+- `autofix_class`: one of `"safe_auto"`, `"gated_auto"`, `"manual"`, `"advisory"`.
+- `owner`: one of `"review-fixer"`, `"downstream-resolver"`, `"human"`, `"release"`.
+- `evidence`: an array of strings with at least one element.
+- `pre_existing`: boolean, never null.
+- `requires_verification`: boolean, never null.
+- `confidence`: one of exactly `0`, `25`, `50`, `75`, or `100` -- a discrete anchor, not a float. Values like `72`, `0.85`, or `"high"` are validation failures.
 
-False-positive categories to actively suppress:
-- Pre-existing issues unrelated to this diff (mark pre_existing: true for unchanged code the diff does not interact with; if the diff makes it newly relevant, it is secondary, not pre-existing)
-- Pedantic style nitpicks that a linter/formatter would catch
-- Code that looks wrong but is intentional (check comments, commit messages, PR description for intent)
-- Issues already handled elsewhere in the codebase (check callers, guards, middleware)
-- Suggestions that restate what the code already does in different words
-- Generic "consider adding" advice without a concrete failure mode
+**Confidence rubric -- use these exact behavioral anchors.** Pick the single anchor whose criterion you can honestly self-apply. Do not pick a value between anchors.
+
+- **`0` -- Not confident at all.** A false positive that does not stand up to light scrutiny, or a pre-existing issue this PR did not introduce. Do not emit; suppress silently.
+- **`25` -- Somewhat confident.** Might be real, but you could not verify from the diff and surrounding code alone. Do not emit; suppress silently.
+- **`50` -- Moderately confident.** You verified this is real, but it is a nitpick, narrow edge case, subjective improvement, or has minimal practical impact. This surfaces only through soft buckets, or when severity is P0.
+- **`75` -- Highly confident.** You double-checked the diff and surrounding code and confirmed the issue will affect users, downstream callers, or runtime behavior in normal usage.
+- **`100` -- Absolutely certain.** The issue is verifiable from the code itself: compile error, type mismatch, definitive logic bug, or explicit project-standards violation with a quotable rule. No interpretation required.
+
+Synthesis suppresses anchors `0` and `25`. Anchor `50` is dropped from primary findings unless severity is P0 or synthesis routes it to a soft bucket. Anchors `75` and `100` enter the actionable tier.
+
+False-positive categories to actively suppress. Do not emit a finding when any of these apply:
+
+- Pre-existing issues unrelated to this diff.
+- Pedantic style nitpicks that a linter or formatter would catch.
+- Code that looks wrong but is intentional; check comments, commit messages, PR description, and surrounding code before flagging.
+- Issues already handled elsewhere in the codebase; check callers, guards, middleware, framework defaults, and parallel handlers.
+- Suggestions that restate what the code already does in different words.
+- Generic "consider adding" advice without a concrete failure mode.
+- Issues with a relevant lint-ignore comment (`eslint-disable-next-line`, `# rubocop:disable`, `# noqa`, etc.), unless the suppression itself violates a project-standards rule.
+- General code-quality concerns not codified in CLAUDE.md or AGENTS.md.
+- Speculative future-work concerns with no current signal.
+
+Advisory observations can still be useful, but they must be routed as `autofix_class: advisory` with `confidence: 50`. If the shape matches the false-positive catalog, suppress it entirely instead of routing it as advisory.
 
 Rules:
 - You are a leaf reviewer inside an already-running galeharness-cli review workflow. Do not invoke galeharness-cli skills or agents unless this template explicitly instructs you to. Perform your analysis directly and return findings in the required output format only.
+- Suppress any finding you cannot honestly anchor at `50` or higher.
 - Every finding in the full artifact file MUST include at least one evidence item grounded in the actual code. The compact return omits evidence -- the evidence requirement applies to the disk artifact only.
-- Set pre_existing to true ONLY for issues in unchanged code that are unrelated to this diff. If the diff makes the issue newly relevant, it is NOT pre-existing.
+- Set `pre_existing` to true ONLY for issues in unchanged code that are unrelated to this diff. If the diff makes the issue newly relevant, it is NOT pre-existing.
 - You are operationally read-only. The one permitted exception is writing your full analysis to the `.context/` artifact path when a run ID is provided. You may also use non-mutating inspection commands, including read-oriented `git` / `gh` commands, to gather evidence. Do not edit project files, change branches, commit, push, create PRs, or otherwise mutate the checkout or repository state.
 - Set `autofix_class` accurately -- not every finding is `advisory`. Use this decision guide:
   - `safe_auto`: The fix is local and deterministic — the fixer can apply it mechanically without design judgment. Examples: extracting a duplicated helper, adding a missing nil/null check, fixing an off-by-one, adding a missing test for an untested code path, removing dead code.
