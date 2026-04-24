@@ -487,6 +487,13 @@ gale-harness install ./plugins/galeharness-cli --to kimi
 
 **支持的平台 (15个)：** `claude`, `opencode`, `codex`, `droid`, `pi`, `gemini`, `copilot`, `kiro`, `windsurf`, `openclaw`, `qwen`, `qoder`, `trae`, `cursor`, `kimi`
 
+**Pi 前置依赖。** Pi 没有内置 subagent 能力。安装到 Pi 时需要先安装 [nicobailon/pi-subagents](https://github.com/nicobailon/pi-subagents)，并建议安装 [edlsh/pi-ask-user](https://github.com/edlsh/pi-ask-user) 以支持阻塞式用户提问：
+
+```bash
+pi install npm:pi-subagents    # 必需：提供 skills 并行调度所需的 subagent 工具
+pi install npm:pi-ask-user     # 推荐：提供 ask_user；缺失时 skills 会退回聊天编号选项
+```
+
 **Claude Code 本地插件模式：**
 
 ```bash

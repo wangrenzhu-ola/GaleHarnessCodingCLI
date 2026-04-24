@@ -2,12 +2,11 @@ import { formatFrontmatter } from "../utils/frontmatter"
 import { type ClaudeAgent, type ClaudeCommand, type ClaudeMcpServer, type ClaudePlugin, filterSkillsByPlatform } from "../types/claude"
 import type {
   PiBundle,
-  PiGeneratedSkill,
+  PiGeneratedAgent,
   PiMcporterConfig,
   PiMcporterServer,
 } from "../types/pi"
 import type { ClaudeToOpenCodeOptions } from "./claude-to-opencode"
-import { PI_COMPAT_EXTENSION_SOURCE } from "../templates/pi/compat-extension"
 
 export type ClaudeToPiOptions = ClaudeToOpenCodeOptions
 
@@ -19,29 +18,27 @@ export function convertClaudeToPi(
 ): PiBundle {
   const platformSkills = filterSkillsByPlatform(plugin.skills, "pi")
   const promptNames = new Set<string>()
-  const usedSkillNames = new Set<string>(platformSkills.map((skill) => normalizeName(skill.name)))
+  // Pi agents and skills live in separate directories (.pi/agents/<name>.md vs
+  // .pi/skills/<name>/SKILL.md), so their names do not need to be deduplicated
+  // against each other. nicobailon/pi-subagents resolves agents by filename.
+  const usedAgentNames = new Set<string>()
 
   const prompts = plugin.commands
     .filter((command) => !command.disableModelInvocation)
     .map((command) => convertPrompt(command, promptNames))
 
-  const generatedSkills = plugin.agents.map((agent) => convertAgent(agent, usedSkillNames))
-
-  const extensions = [
-    {
-      name: "galeharness-cli-compat.ts",
-      content: PI_COMPAT_EXTENSION_SOURCE,
-    },
-  ]
+  const agents = plugin.agents.map((agent) => convertAgent(agent, usedAgentNames))
 
   return {
+    pluginName: plugin.manifest.name,
     prompts,
     skillDirs: platformSkills.map((skill) => ({
       name: skill.name,
       sourceDir: skill.sourceDir,
     })),
-    generatedSkills,
-    extensions,
+    generatedSkills: [],
+    agents,
+    extensions: [],
     mcporterConfig: plugin.mcpServers ? convertMcpToMcporter(plugin.mcpServers) : undefined,
   }
 }
@@ -53,8 +50,7 @@ function convertPrompt(command: ClaudeCommand, usedNames: Set<string>) {
     "argument-hint": command.argumentHint,
   }
 
-  let body = transformContentForPi(command.body)
-  body = appendCompatibilityNoteIfNeeded(body)
+  const body = transformContentForPi(command.body)
 
   return {
     name,
@@ -62,7 +58,7 @@ function convertPrompt(command: ClaudeCommand, usedNames: Set<string>) {
   }
 }
 
-function convertAgent(agent: ClaudeAgent, usedNames: Set<string>): PiGeneratedSkill {
+function convertAgent(agent: ClaudeAgent, usedNames: Set<string>): PiGeneratedAgent {
   const name = uniqueName(normalizeName(agent.name), usedNames)
   const description = sanitizeDescription(
     agent.description ?? `Converted from Claude agent ${agent.name}`,
@@ -93,6 +89,7 @@ function convertAgent(agent: ClaudeAgent, usedNames: Set<string>): PiGeneratedSk
 
 export function transformContentForPi(body: string): string {
   let result = body
+  result = normalizeSkillFrontmatterNameForPi(result)
 
   // Task repo-research-analyst(feature_description) or Task galeharness-cli:repo-research-analyst(args)
   // -> Run subagent with agent="repo-research-analyst" and task="feature_description"
@@ -106,8 +103,6 @@ export function transformContentForPi(body: string): string {
       : `${prefix}Run subagent with agent=\"${skillName}\".`
   })
 
-  // Claude-specific tool references
-  result = result.replace(/\bAskUserQuestion\b/g, "ask_user_question")
   // Claude Code task-tracking primitives: current Task* API (TaskCreate/TaskUpdate/TaskList/TaskGet/TaskStop/TaskOutput)
   // plus the deprecated legacy pair (TodoWrite/TodoRead). All map to the platform's task-tracking primitive.
   result = result.replace(
@@ -140,19 +135,18 @@ export function transformContentForPi(body: string): string {
   return result
 }
 
-function appendCompatibilityNoteIfNeeded(body: string): string {
-  if (!/\bmcp\b/i.test(body)) return body
+function normalizeSkillFrontmatterNameForPi(body: string): string {
+  if (!body.startsWith("---")) return body
 
-  const note = [
-    "",
-    "## Pi + MCPorter note",
-    "For MCP access in Pi, use MCPorter via the generated tools:",
-    "- `mcporter_list` to inspect available MCP tools",
-    "- `mcporter_call` to invoke a tool",
-    "",
-  ].join("\n")
+  const end = body.indexOf("\n---", 3)
+  if (end === -1) return body
 
-  return body + note
+  const frontmatter = body.slice(0, end)
+  const normalized = frontmatter.replace(/^name:\s*(["']?)([^"'\n]+)\1\s*$/m, (_match, _quote: string, name: string) => {
+    return `name: ${normalizeName(name)}`
+  })
+
+  return normalized + body.slice(end)
 }
 
 function convertMcpToMcporter(servers: Record<string, ClaudeMcpServer>): PiMcporterConfig {

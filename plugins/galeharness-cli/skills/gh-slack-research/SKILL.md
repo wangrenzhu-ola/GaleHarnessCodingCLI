@@ -27,7 +27,7 @@ The input can be a keyword, a natural language question, or include Slack search
 
 ## Execution
 
-If no argument is provided, ask what topic to research. Use the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, ask in plain text and wait for a reply.
+If no argument is provided, ask what topic to research. Use the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension)). If no question tool is available, ask in plain text and wait for a reply.
 
 Dispatch `galeharness-cli:slack-researcher` with the user's topic as the task prompt. Omit the `mode` parameter so the user's configured permission settings apply.
 

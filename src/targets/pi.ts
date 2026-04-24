@@ -20,10 +20,10 @@ const PI_AGENTS_BLOCK_BODY = `## Compound Engineering (Pi compatibility)
 This block is managed by compound-plugin.
 
 Compatibility notes:
-- Claude Task(agent, args) maps to the subagent extension tool
-- For parallel agent runs, batch multiple subagent calls with multi_tool_use.parallel
-- AskUserQuestion maps to the ask_user_question extension tool
-- MCP access uses MCPorter via mcporter_list and mcporter_call extension tools
+- Pi installs require nicobailon/pi-subagents for the subagent tool
+- Pi installs recommend edlsh/pi-ask-user for the ask_user tool
+- Claude Task(agent, args) maps to the pi-subagents subagent tool
+- AskUserQuestion maps to ask_user when pi-ask-user is installed; otherwise ask numbered options in chat
 - MCPorter config path: .pi/compound-engineering/mcporter.json (project) or ~/.pi/agent/compound-engineering/mcporter.json (global)
 `
 
@@ -33,6 +33,7 @@ export async function writePiBundle(outputRoot: string, bundle: PiBundle): Promi
   await ensureDir(paths.skillsDir)
   await ensureDir(paths.promptsDir)
   await ensureDir(paths.extensionsDir)
+  await ensureDir(paths.agentsDir)
 
   for (const prompt of bundle.prompts) {
     await writeText(path.join(paths.promptsDir, `${sanitizePathName(prompt.name)}.md`), prompt.content + "\n")
@@ -44,6 +45,10 @@ export async function writePiBundle(outputRoot: string, bundle: PiBundle): Promi
 
   for (const skill of bundle.generatedSkills) {
     await writeText(path.join(paths.skillsDir, sanitizePathName(skill.name), "SKILL.md"), skill.content + "\n")
+  }
+
+  for (const agent of bundle.agents) {
+    await writeText(path.join(paths.agentsDir, `${sanitizePathName(agent.name)}.md`), agent.content + "\n")
   }
 
   for (const extension of bundle.extensions) {
@@ -70,6 +75,7 @@ function resolvePiPaths(outputRoot: string) {
       skillsDir: path.join(outputRoot, "skills"),
       promptsDir: path.join(outputRoot, "prompts"),
       extensionsDir: path.join(outputRoot, "extensions"),
+      agentsDir: path.join(outputRoot, "agents"),
       mcporterConfigPath: path.join(outputRoot, "galeharness-cli", "mcporter.json"),
       agentsPath: path.join(outputRoot, "AGENTS.md"),
     }
@@ -81,6 +87,7 @@ function resolvePiPaths(outputRoot: string) {
       skillsDir: path.join(outputRoot, "skills"),
       promptsDir: path.join(outputRoot, "prompts"),
       extensionsDir: path.join(outputRoot, "extensions"),
+      agentsDir: path.join(outputRoot, "agents"),
       mcporterConfigPath: path.join(outputRoot, "galeharness-cli", "mcporter.json"),
       agentsPath: path.join(outputRoot, "AGENTS.md"),
     }
@@ -91,6 +98,7 @@ function resolvePiPaths(outputRoot: string) {
     skillsDir: path.join(outputRoot, ".pi", "skills"),
     promptsDir: path.join(outputRoot, ".pi", "prompts"),
     extensionsDir: path.join(outputRoot, ".pi", "extensions"),
+    agentsDir: path.join(outputRoot, ".pi", "agents"),
     mcporterConfigPath: path.join(outputRoot, ".pi", "galeharness-cli", "mcporter.json"),
     agentsPath: path.join(outputRoot, "AGENTS.md"),
   }

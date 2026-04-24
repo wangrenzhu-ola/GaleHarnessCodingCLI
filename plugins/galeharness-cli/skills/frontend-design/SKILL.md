@@ -52,7 +52,7 @@ Based on detected signals, choose a mode:
 
 ### Asking the User
 
-When context is ambiguous, use the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, assume "partial" mode and proceed conservatively.
+When context is ambiguous, use the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension)). If no question tool is available, assume "partial" mode and proceed conservatively.
 
 Example question: "I found [detected signals]. Should I follow your existing design patterns or create something distinctive?"
 
