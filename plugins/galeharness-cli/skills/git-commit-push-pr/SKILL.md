@@ -7,7 +7,7 @@ description: Commit, push, and open a PR with an adaptive, value-first descripti
 
 Go from working changes to an open pull request, or rewrite an existing PR description.
 
-**Asking the user:** When this skill says "ask the user", use the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If unavailable, present the question and wait for a reply.
+**Asking the user:** When this skill says "ask the user", use the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension)). If unavailable, present the question and wait for a reply.
 
 ## Mode detection
 
@@ -189,9 +189,15 @@ git diff <base-remote>/<base-branch>...HEAD
 
 Use this branch diff (not the working-tree diff) for the evidence decision. If the branch diff is empty (e.g., HEAD is already merged into the base or the branch has no unique commits), skip the evidence prompt and continue to delegation.
 
-**Evidence decision (before delegation).** If the branch diff changes observable behavior (UI, CLI output, API behavior with runnable code, generated artifacts, workflow output) and evidence is not otherwise blocked (unavailable credentials, paid services, deploy-only infrastructure, hardware), ask: "This PR has observable behavior. Capture evidence for the PR description?"
+**Evidence decision (before delegation).** Before running the full decision, two short-circuits:
 
-- **Capture now** -- load the `gh-demo-reel` skill with a target description inferred from the branch diff. gh-demo-reel returns `Tier`, `Description`, and `URL`. Note the captured evidence so it can be passed as free-text steering to `gh:pr-description` (e.g., "include the captured demo: <URL> as a `## Demo` section") or spliced into the returned body before apply. If capture returns `Tier: skipped` or `URL: "none"`, proceed with no evidence.
+1. **User explicitly asked for evidence.** If the user's invocation requested it ("ship with a demo", "include a screenshot"), proceed directly to capture. If capture turns out to be not possible (no runnable surface, missing credentials, docs-only diff) or clearly not useful, note that briefly and proceed without evidence -- do not force capture for its own sake.
+
+2. **Agent judgment on authored changes.** If you authored the commits in this session and know the change is clearly non-observable (internal plumbing, backend refactor without user-facing effect, type-level changes, etc.), skip the prompt without asking. The categorical skip list below is not exhaustive -- trust judgment about the change you just wrote.
+
+Otherwise, run the full decision: if the branch diff changes observable behavior (UI, CLI output, API behavior with runnable code, generated artifacts, workflow output) and evidence is not otherwise blocked (unavailable credentials, paid services, deploy-only infrastructure, hardware), ask: "This PR has observable behavior. Capture evidence for the PR description?"
+
+- **Capture now** -- load the `gh-demo-reel` skill with a target description inferred from the branch diff. gh-demo-reel returns `Tier`, `Description`, `URL`, and `Path`. Exactly one of `URL` or `Path` contains a real value; the other is `"none"`. If capture returns a public URL, pass it as steering to `gh:pr-description` (e.g., "include the captured demo: <URL> as a `## Demo` section") or splice into the returned body before apply. If capture returns a local `Path` instead (user chose local save), pass steering that notes evidence was captured but is local-only (e.g., "evidence was captured locally -- note in the PR that a demo was recorded but is not embedded because the user chose local save"). If capture returns `Tier: skipped` or both `URL` and `Path` are `"none"`, proceed with no evidence.
 - **Use existing evidence** -- ask for the URL or markdown embed, then pass it as free-text steering to `gh:pr-description` or splice in before apply.
 - **Skip** -- proceed with no evidence section.
 
@@ -199,7 +205,7 @@ When evidence is not possible (docs-only, markdown-only, changelog-only, release
 
 **Delegate title and body generation to `gh-pr-description`.** Load the `gh-pr-description` skill:
 
-- **For a new PR** (no existing PR found in Step 3): invoke with `base:<base-remote>/<base-branch>` using the already-resolved base from earlier in this step, so `gh-pr-description` describes the correct commit range even when the branch targets a non-default base (e.g., `develop`, `release/*`). Append any captured-evidence context or user focus as free-text steering (e.g., "include the captured demo: <URL> as a `## Demo` section").
+- **For a new PR** (no existing PR found in Step 3): invoke with `base:<base-remote>/<base-branch>` using the already-resolved base from earlier in this step, so `gh-pr-description` describes the correct commit range even when the branch targets a non-default base (e.g., `develop`, `release/*`). Append any captured-evidence context or user focus as free-text steering (e.g., "include the captured demo: <URL> as a `## Demo` section", or "evidence captured locally -- not embedded" for local saves).
 - **For an existing PR** (found in Step 3): invoke with the full PR URL from the Step 3 context (e.g., `https://github.com/owner/repo/pull/123`). The URL preserves repo/PR identity even when invoked from a worktree or subdirectory; the skill reads the PR's own `baseRefName` so no `base:` override is needed. Append any focus steering as free text after the URL.
 
 `gh-pr-description` returns a `{title, body_file}` block (body in an OS temp file). It applies the value-first writing principles, commit classification, sizing, narrative framing, writing voice, visual communication, numbering rules, and the GaleHarness CLI badge footer internally. Use the returned values verbatim in Step 7; do not layer manual edits onto them unless a focused adjustment is required (e.g., splicing an evidence block captured in this step that was not passed as steering text — in that case, edit the body file directly before applying).

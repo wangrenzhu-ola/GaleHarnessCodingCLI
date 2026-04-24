@@ -96,7 +96,10 @@ describe("ce-review contract", () => {
       "plugins/galeharness-cli/skills/gh-review/references/findings-schema.json",
     )
     const schema = JSON.parse(rawSchema) as {
-      _meta: { confidence_thresholds: { suppress: string } }
+      _meta: {
+        confidence_thresholds: { suppress: string; report: string }
+        confidence_anchors: Record<string, string>
+      }
       properties: {
         findings: {
           items: {
@@ -104,6 +107,7 @@ describe("ce-review contract", () => {
               autofix_class: { enum: string[] }
               owner: { enum: string[] }
               requires_verification: { type: string }
+              confidence: { type: string; enum: number[] }
             }
             required: string[]
           }
@@ -127,10 +131,132 @@ describe("ce-review contract", () => {
       "release",
     ])
     expect(schema.properties.findings.items.properties.requires_verification.type).toBe("boolean")
-    expect(schema._meta.confidence_thresholds.suppress).toContain("0.60")
+    expect(schema.properties.findings.items.properties.confidence.type).toBe("integer")
+    expect(schema.properties.findings.items.properties.confidence.enum).toEqual([0, 25, 50, 75, 100])
+    expect(schema._meta.confidence_thresholds.suppress).toContain("anchor 75")
+    expect(schema._meta.confidence_thresholds.suppress).toContain("anchor 50")
+    expect(schema._meta.confidence_thresholds.suppress).toMatch(/P0/)
+    expect(schema._meta.confidence_anchors["0"]).toBeDefined()
+    expect(schema._meta.confidence_anchors["25"]).toBeDefined()
+    expect(schema._meta.confidence_anchors["50"]).toBeDefined()
+    expect(schema._meta.confidence_anchors["75"]).toBeDefined()
+    expect(schema._meta.confidence_anchors["100"]).toBeDefined()
 
     // File-based todo skills removed in upstream sync patch 0010.
     // No durable todo handoff from gh:review autofix mode.
+  })
+
+  test("subagent template carries anchored confidence rubric and lint-ignore suppression", async () => {
+    const template = await readRepoFile(
+      "plugins/galeharness-cli/skills/gh-review/references/subagent-template.md",
+    )
+
+    expect(template).toMatch(/`0` -- Not confident/)
+    expect(template).toMatch(/`25` -- Somewhat confident/)
+    expect(template).toMatch(/`50` -- Moderately confident/)
+    expect(template).toMatch(/`75` -- Highly confident/)
+    expect(template).toMatch(/`100` -- Absolutely certain/)
+    expect(template).toContain("`0`, `25`, `50`, `75`, or `100`")
+    expect(template).toMatch(/0\.85.*validation failures/i)
+    expect(template).toMatch(/lint-ignore|lint disable|eslint-disable/i)
+    expect(template).toMatch(/unless the suppression itself violates/i)
+    expect(template).toMatch(/Advisory observations/i)
+  })
+
+  test("Stage 5 synthesis uses anchor gate and one-anchor promotion", async () => {
+    const content = await readRepoFile("plugins/galeharness-cli/skills/gh-review/SKILL.md")
+
+    expect(content).toMatch(/confidence:\s*integer in \{0, 25, 50, 75, 100\}/)
+    expect(content).toMatch(/suppress remaining findings below anchor 75/i)
+    expect(content).toMatch(/P0 findings at anchor 50\+ survive/)
+    expect(content).toMatch(/gate runs late deliberately/i)
+    expect(content).toMatch(/one anchor step.*50 -> 75.*75 -> 100/)
+    expect(content).not.toContain("boost the merged confidence by 0.10")
+    expect(content).toMatch(/anchor \(descending\)/)
+  })
+
+  test("Stage 5b validation pass dispatches conditionally and bounds parallelism", async () => {
+    const content = await readRepoFile("plugins/galeharness-cli/skills/gh-review/SKILL.md")
+    const validatorTemplate = await readRepoFile(
+      "plugins/galeharness-cli/skills/gh-review/references/validator-template.md",
+    )
+
+    expect(content).toContain("### Stage 5b: Validation pass")
+    expect(content).toContain("`headless`")
+    expect(content).toContain("`autofix`")
+    expect(content).toMatch(/interactive LFG/i)
+    expect(content).toMatch(/File-tickets/i)
+    expect(content).toMatch(/report-only/i)
+    expect(content).toMatch(/Per-finding parallel dispatch/i)
+    expect(content).toMatch(/Independence is the point/i)
+    expect(content).toMatch(/exceeds 15 findings/i)
+    expect(content).toMatch(/highest-severity 15/i)
+    expect(validatorTemplate).toContain("independent validator")
+    expect(validatorTemplate).toContain("operationally read-only")
+    expect(validatorTemplate).toContain('"validated": true | false')
+    expect(validatorTemplate).toMatch(/introduced by THIS diff/i)
+    expect(validatorTemplate).toMatch(/handled elsewhere/i)
+  })
+
+  test("PR-mode skip-condition pre-check stops without dispatching reviewers", async () => {
+    const content = await readRepoFile("plugins/galeharness-cli/skills/gh-review/SKILL.md")
+
+    expect(content).toContain("**Skip-condition pre-check.**")
+    expect(content).toMatch(/gh pr view.*--json state,title,body,files/)
+    expect(content).toMatch(/`state` is `CLOSED` or `MERGED`/)
+    expect(content).toMatch(/Draft PRs are reviewed normally/)
+    expect(content).toMatch(/lightweight sub-agent/)
+    expect(content).toMatch(/model: haiku/i)
+    expect(content).toMatch(/stop without dispatching reviewers/)
+    expect(content).toMatch(/Standalone branch mode and `base:` mode are unaffected/)
+  })
+
+  test("mode-aware demotion routes weak general-quality findings to soft buckets", async () => {
+    const content = await readRepoFile("plugins/galeharness-cli/skills/gh-review/SKILL.md")
+
+    expect(content).toMatch(/Mode-aware demotion of weak general-quality findings/i)
+    expect(content).toContain("`testing` or `maintainability`")
+    expect(content).toMatch(/Severity is P2 or P3/)
+    expect(content).toMatch(/`autofix_class` is `advisory`/)
+    expect(content).toMatch(/append `<file:line> -- <title>` to `testing_gaps`/)
+    expect(content).toMatch(/append the same shape to `residual_risks`/)
+    expect(content).toMatch(/title only/i)
+    expect(content).toMatch(/Headless and autofix modes.*Suppress/)
+    expect(content).toMatch(/mode-aware demotion/)
+  })
+
+  test("personas use anchored rubric language and no float references remain", async () => {
+    const personas = [
+      "correctness-reviewer",
+      "testing-reviewer",
+      "maintainability-reviewer",
+      "project-standards-reviewer",
+      "security-reviewer",
+      "performance-reviewer",
+      "api-contract-reviewer",
+      "data-migrations-reviewer",
+      "reliability-reviewer",
+      "adversarial-reviewer",
+      "cli-readiness-reviewer",
+      "previous-comments-reviewer",
+      "dhh-rails-reviewer",
+      "gale-rails-reviewer",
+      "gale-python-reviewer",
+      "gale-typescript-reviewer",
+      "julik-frontend-races-reviewer",
+      "swift-ios-reviewer",
+      "agent-native-reviewer",
+    ]
+
+    for (const persona of personas) {
+      const content = await readRepoFile(`plugins/galeharness-cli/agents/${persona}.md`)
+
+      expect(content).toMatch(/Anchor (75|100)/)
+      expect(content).toMatch(/Anchor 25 or below.*suppress/i)
+      expect(content).not.toMatch(/0\.\d{2}\+/)
+      expect(content).not.toMatch(/0\.60-0\.79/)
+      expect(content).not.toMatch(/below 0\.60/)
+    }
   })
 
   test("documents stack-specific conditional reviewers for the JSON pipeline", async () => {

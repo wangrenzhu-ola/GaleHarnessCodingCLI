@@ -15,7 +15,7 @@ async function exists(filePath: string): Promise<boolean> {
 }
 
 describe("writePiBundle", () => {
-  test("writes prompts, skills, extensions, mcporter config, and AGENTS.md block", async () => {
+  test("writes prompts, skills, agents, extensions, mcporter config, and AGENTS.md block", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "pi-writer-"))
     const outputRoot = path.join(tempRoot, ".pi")
 
@@ -27,8 +27,9 @@ describe("writePiBundle", () => {
           sourceDir: path.join(import.meta.dir, "fixtures", "sample-plugin", "skills", "skill-one"),
         },
       ],
-      generatedSkills: [{ name: "repo-research-analyst", content: "---\nname: repo-research-analyst\n---\n\nBody" }],
-      extensions: [{ name: "galeharness-cli-compat.ts", content: "export default function () {}" }],
+      generatedSkills: [],
+      agents: [{ name: "repo-research-analyst", content: "---\nname: repo-research-analyst\n---\n\nBody" }],
+      extensions: [{ name: "custom-extension.ts", content: "export default function () {}" }],
       mcporterConfig: {
         mcpServers: {
           context7: { baseUrl: "https://mcp.context7.com/mcp" },
@@ -40,14 +41,14 @@ describe("writePiBundle", () => {
 
     expect(await exists(path.join(outputRoot, "prompts", "workflows-plan.md"))).toBe(true)
     expect(await exists(path.join(outputRoot, "skills", "skill-one", "SKILL.md"))).toBe(true)
-    expect(await exists(path.join(outputRoot, "skills", "repo-research-analyst", "SKILL.md"))).toBe(true)
-    expect(await exists(path.join(outputRoot, "extensions", "galeharness-cli-compat.ts"))).toBe(true)
+    expect(await exists(path.join(outputRoot, "agents", "repo-research-analyst.md"))).toBe(true)
+    expect(await exists(path.join(outputRoot, "extensions", "custom-extension.ts"))).toBe(true)
     expect(await exists(path.join(outputRoot, "galeharness-cli", "mcporter.json"))).toBe(true)
 
     const agentsPath = path.join(outputRoot, "AGENTS.md")
     const agentsContent = await fs.readFile(agentsPath, "utf8")
     expect(agentsContent).toContain("BEGIN COMPOUND PI TOOL MAP")
-    expect(agentsContent).toContain("MCPorter")
+    expect(agentsContent).toContain("pi-subagents")
   })
 
   test("transforms Task calls in copied SKILL.md files", async () => {
@@ -74,6 +75,7 @@ Run these research agents:
       prompts: [],
       skillDirs: [{ name: "gh:plan", sourceDir: sourceSkillDir }],
       generatedSkills: [],
+      agents: [],
       extensions: [],
     }
 
@@ -87,6 +89,8 @@ Run these research agents:
     expect(installedSkill).toContain('Run subagent with agent="repo-research-analyst" and task="feature_description".')
     expect(installedSkill).toContain('Run subagent with agent="learnings-researcher" and task="feature_description".')
     expect(installedSkill).toContain('Run subagent with agent="code-simplicity-reviewer".')
+    expect(installedSkill).toContain("name: gh-plan")
+    expect(installedSkill).not.toContain("name: gh:plan")
     expect(installedSkill).not.toContain("Task compound-engineering:")
   })
 
@@ -98,6 +102,7 @@ Run these research agents:
       prompts: [{ name: "workflows-work", content: "Prompt content" }],
       skillDirs: [],
       generatedSkills: [],
+      agents: [],
       extensions: [],
     }
 
@@ -119,6 +124,7 @@ Run these research agents:
       prompts: [],
       skillDirs: [],
       generatedSkills: [],
+      agents: [],
       extensions: [],
       mcporterConfig: {
         mcpServers: {

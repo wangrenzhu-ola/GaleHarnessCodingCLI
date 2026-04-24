@@ -31,7 +31,7 @@ If artifact-backed mode was used:
 
 **Pipeline mode:** If invoked from an automated workflow such as LFG, SLFG, or any `disable-model-invocation` context, skip the interactive menu below and return control to the caller immediately. The plan file has already been written, the confidence check has already run, and document-review has already run — the caller (e.g., lfg, slfg) determines the next step.
 
-After document-review completes, present the options using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, present the numbered options in chat and wait for the user's reply before proceeding.
+After document-review completes, present the options using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension)). If no question tool is available, present the numbered options in chat and wait for the user's reply before proceeding.
 
 **Question:** "Plan ready at `docs/plans/YYYY-MM-DD-NNN-<type>-<name>-plan.md`. What would you like to do next?"
 
@@ -68,7 +68,7 @@ When the user selects "Create Issue", detect their project tracker:
    linear issue create --title "<title>" --description "$(cat <plan_path>)"
    ```
 
-4. If no tracker is configured, ask the user which tracker they use with the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, ask in chat and wait for the reply. Options: `GitHub`, `Linear`, `Skip`. Then:
+4. If no tracker is configured, ask the user which tracker they use with the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension)). If no question tool is available, ask in chat and wait for the reply. Options: `GitHub`, `Linear`, `Skip`. Then:
    - Proceed with the chosen tracker's command above
    - Offer to persist the choice by adding `project_tracker: <value>` to `AGENTS.md`, where `<value>` is the lowercase tracker key (`github` or `linear`) — not the display label — so future runs match the detector in step 1 and skip this prompt
    - If `Skip`, return to the options without creating an issue
