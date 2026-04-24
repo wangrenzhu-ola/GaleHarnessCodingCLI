@@ -392,9 +392,8 @@ describe("HKTMemory Compounding — Loop Completeness", () => {
 })
 
 // Session search patches: phase-0.Xb (补充在 retrieve 后)
-const SESSION_SEARCH_PATCHES: Record<"gh-work" | "gh-debug", string> = {
+const SESSION_SEARCH_PATCHES: Record<"gh-work", string> = {
   "gh-work": "phase-0.6b",
-  "gh-debug": "phase-0.4b",
 }
 
 describe("HKTMemory Session Search Integration", () => {
@@ -436,4 +435,37 @@ describe("HKTMemory Session Search Integration", () => {
       })
     })
   }
+})
+
+describe("Gale Task Memory Runtime Pilot", () => {
+  test("gh-debug start path calls gale-memory helper instead of raw HKT retrieve", async () => {
+    const content = await readFile(path.join(PLUGIN_ROOT, "gh-debug", "SKILL.md"), "utf8")
+    const ctx = extractPhaseContext(content, "phase-0.4")
+
+    expect(ctx).toContain("gale-memory start")
+    expect(ctx).toContain("--skill gh:debug")
+    expect(ctx).toContain("--mode debug")
+    expect(ctx).toContain("--artifact-type debug_session")
+    expect(ctx).not.toContain("hkt-memory retrieve")
+  })
+
+  test("gh-debug ledger resume avoids separate raw session-search main path", async () => {
+    const content = await readFile(path.join(PLUGIN_ROOT, "gh-debug", "SKILL.md"), "utf8")
+    const ctx = extractPhaseContext(content, "phase-0.4b")
+
+    expect(ctx).toContain("gale-memory start")
+    expect(ctx).toContain("trace_id")
+    expect(ctx).not.toContain("hkt-memory session-search")
+  })
+
+  test("gh-debug capture path writes structured task events through gale-memory", async () => {
+    const content = await readFile(path.join(PLUGIN_ROOT, "gh-debug", "SKILL.md"), "utf8")
+    const ctx = extractPhaseContext(content, "phase-3.5")
+
+    expect(ctx).toContain("gale-memory capture")
+    expect(ctx).toContain("--event-type verification_result")
+    expect(ctx).toContain("--event-type failed_attempt")
+    expect(ctx).toContain("--event-type root_cause")
+    expect(ctx).not.toContain("hkt-memory store")
+  })
 })

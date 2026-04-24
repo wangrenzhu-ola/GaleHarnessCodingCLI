@@ -7,7 +7,8 @@
   "bin": {
     "gale-harness": "src/index.ts",
     "compound-plugin": "src/index.ts",
-    "gale-knowledge": "cmd/gale-knowledge/index.ts"
+    "gale-knowledge": "cmd/gale-knowledge/index.ts",
+    "gale-memory": "cmd/gale-memory/index.ts"
   },
   "scripts": {
     "dev": "bun run src/index.ts",
@@ -19,6 +20,7 @@
     "release:sync-metadata": "bun run scripts/release/sync-metadata.ts --write",
     "release:validate": "bun run scripts/release/validate.ts",
     "build:gale-task": "bun build --compile cmd/gale-task/index.ts --outfile gale-task --target bun",
+    "build:gale-memory": "bun build --compile cmd/gale-memory/index.ts --outfile gale-memory --target bun",
     "install-gale-task": "bun run build:gale-task && mv gale-task ~/.local/bin/gale-task && echo 'gale-task installed to ~/.local/bin/gale-task'",
     "build:release": "bun run scripts/release/build.ts",
     "build:cli": "bun build --compile src/index.ts --outfile gale-harness --target bun"
