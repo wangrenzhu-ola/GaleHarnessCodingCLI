@@ -986,3 +986,153 @@
 {"timestamp": "2026-04-24T06:58:29.744361+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-24T06:59:30.398699+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
 {"timestamp": "2026-04-24T06:59:30.413478+00:00", "type": "capture", "memory_id": "2026-04-24-145930-411", "scope": "topic:debug", "data": {"status": "active"}}
+{"timestamp": "2026-04-23T09:12:47.589397+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:47.592275+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:47.641976+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:47.644797+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:47.691081+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:47.693775+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:47.917574+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:47.969585+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.021636+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.028994+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T09:12:48.029036+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T09:12:48.029067+00:00", "type": "recall", "memory_id": "2026-04-23-165707-632", "scope": "topic:code-review", "data": {}}
+{"timestamp": "2026-04-23T09:12:48.075549+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.121017+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.167587+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.213853+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.259848+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.306194+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.353069+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.398384+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.444415+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.494381+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.496608+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.541360+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.586094+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.593160+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T09:12:48.593203+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T09:12:48.593235+00:00", "type": "recall", "memory_id": "2026-04-23-165707-632", "scope": "topic:code-review", "data": {}}
+{"timestamp": "2026-04-23T09:12:48.638617+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.684080+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:12:48.730695+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.335820+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.338704+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.389164+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.391509+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.438034+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.440365+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.644493+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.695205+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.744832+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.752003+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T09:44:35.752048+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T09:44:35.752078+00:00", "type": "recall", "memory_id": "2026-04-23-165707-632", "scope": "topic:code-review", "data": {}}
+{"timestamp": "2026-04-23T09:44:35.797452+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.843016+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.889104+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.934423+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:35.981021+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.028496+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.085010+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.131335+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.177464+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.230138+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.232450+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.278005+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.324624+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.331850+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T09:44:36.331887+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T09:44:36.331917+00:00", "type": "recall", "memory_id": "2026-04-23-165707-632", "scope": "topic:code-review", "data": {}}
+{"timestamp": "2026-04-23T09:44:36.378095+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.425460+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T09:44:36.473204+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T10:02:46.129452+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T10:03:19.718204+00:00", "type": "capture", "memory_id": "2026-04-23-180246-141", "scope": "topic:integration_issue", "data": {"status": "active"}}
+{"timestamp": "2026-04-23T10:24:26.348020+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T10:24:26.350560+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T10:32:06.187971+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T10:32:06.197232+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T10:32:06.197274+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-23T10:32:06.197307+00:00", "type": "recall", "memory_id": "2026-04-23-165707-632", "scope": "topic:code-review", "data": {}}
+{"timestamp": "2026-04-23T10:32:06.197344+00:00", "type": "recall", "memory_id": "2026-04-17-094332-597", "scope": "topic:integrations", "data": {}}
+{"timestamp": "2026-04-23T10:32:06.197378+00:00", "type": "recall", "memory_id": "2026-04-20-172528-002", "scope": "topic:developer-experience", "data": {}}
+{"timestamp": "2026-04-23T10:35:12.139716+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-23T10:35:12.151553+00:00", "type": "capture", "memory_id": "2026-04-23-183512-150", "scope": "topic:brainstorm", "data": {"status": "active"}}
+{"timestamp": "2026-04-24T02:56:06.542364+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T03:01:50.924687+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T03:01:50.936386+00:00", "type": "capture", "memory_id": "2026-04-24-110150-934", "scope": "topic:feat", "data": {"status": "active"}}
+{"timestamp": "2026-04-24T03:08:27.787426+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T03:08:27.795678+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T03:08:27.795729+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T03:09:14.554804+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T03:09:14.560590+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T03:39:10.638044+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T03:39:10.652726+00:00", "type": "capture", "memory_id": "2026-04-24-113910-650", "scope": "topic:ideation", "data": {"status": "active"}}
+{"timestamp": "2026-04-24T03:41:09.550034+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T03:41:09.559259+00:00", "type": "recall", "memory_id": "2026-04-24-113910-650", "scope": "topic:ideation", "data": {}}
+{"timestamp": "2026-04-24T05:31:01.949676+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T05:31:01.960840+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T05:31:01.960890+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T05:31:01.960921+00:00", "type": "recall", "memory_id": "2026-04-24-110150-934", "scope": "topic:feat", "data": {}}
+{"timestamp": "2026-04-24T05:33:33.707793+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T05:33:33.725447+00:00", "type": "capture", "memory_id": "2026-04-24-133333-723", "scope": "topic:code-review", "data": {"status": "active"}}
+{"timestamp": "2026-04-24T05:41:07.824765+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T05:41:07.837096+00:00", "type": "capture", "memory_id": "2026-04-24-134107-835", "scope": "topic:brainstorm", "data": {"status": "active"}}
+{"timestamp": "2026-04-24T06:17:06.093734+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T06:17:06.156994+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T06:52:55.654085+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T06:52:55.663449+00:00", "type": "recall", "memory_id": "2026-04-24-134107-835", "scope": "topic:brainstorm", "data": {}}
+{"timestamp": "2026-04-24T06:52:55.663495+00:00", "type": "recall", "memory_id": "2026-04-24-113910-650", "scope": "topic:ideation", "data": {}}
+{"timestamp": "2026-04-24T06:54:53.290840+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T06:54:53.307716+00:00", "type": "capture", "memory_id": "2026-04-24-145453-305", "scope": "topic:integration-issues", "data": {"status": "active"}}
+{"timestamp": "2026-04-24T07:43:50.909429+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T07:43:50.920957+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T07:43:50.921099+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T07:49:32.721969+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T07:49:32.737924+00:00", "type": "capture", "memory_id": "2026-04-24-154932-736", "scope": "topic:debug", "data": {"status": "active"}}
+{"timestamp": "2026-04-24T08:11:46.118161+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:11:46.128076+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T08:11:46.128121+00:00", "type": "recall", "memory_id": "2026-04-24-143332-269", "scope": "topic:work-execution", "data": {}}
+{"timestamp": "2026-04-24T08:11:46.128150+00:00", "type": "recall", "memory_id": "2026-04-24-140106-940", "scope": "topic:feat", "data": {}}
+{"timestamp": "2026-04-24T08:11:46.128176+00:00", "type": "recall", "memory_id": "2026-04-23-110740-228", "scope": "topic:debug", "data": {}}
+{"timestamp": "2026-04-24T08:12:53.160889+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.164140+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.211710+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.214530+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.263626+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.266322+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.486746+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.542405+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.597158+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.607876+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T08:12:53.607951+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T08:12:53.607991+00:00", "type": "recall", "memory_id": "2026-04-23-165707-632", "scope": "topic:code-review", "data": {}}
+{"timestamp": "2026-04-24T08:12:53.608030+00:00", "type": "recall", "memory_id": "2026-04-24-122547-902", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T08:12:53.608060+00:00", "type": "recall", "memory_id": "2026-04-24-143332-269", "scope": "topic:work-execution", "data": {}}
+{"timestamp": "2026-04-24T08:12:53.608094+00:00", "type": "recall", "memory_id": "2026-04-24-145930-411", "scope": "topic:debug", "data": {}}
+{"timestamp": "2026-04-24T08:12:53.608152+00:00", "type": "recall", "memory_id": "2026-04-24-154932-736", "scope": "topic:debug", "data": {}}
+{"timestamp": "2026-04-24T08:12:53.656318+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.706165+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.754210+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.807192+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.856598+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.907414+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:53.956885+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.006493+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.054750+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.111000+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.113834+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": true, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.161177+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.210138+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.220516+00:00", "type": "recall", "memory_id": "2026-04-17-211245-144", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T08:12:54.220586+00:00", "type": "recall", "memory_id": "2026-04-20-101729-768", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T08:12:54.220621+00:00", "type": "recall", "memory_id": "2026-04-23-165707-632", "scope": "topic:code-review", "data": {}}
+{"timestamp": "2026-04-24T08:12:54.220657+00:00", "type": "recall", "memory_id": "2026-04-24-122547-902", "scope": "topic:integration-issues", "data": {}}
+{"timestamp": "2026-04-24T08:12:54.220686+00:00", "type": "recall", "memory_id": "2026-04-24-143332-269", "scope": "topic:work-execution", "data": {}}
+{"timestamp": "2026-04-24T08:12:54.220714+00:00", "type": "recall", "memory_id": "2026-04-24-145930-411", "scope": "topic:debug", "data": {}}
+{"timestamp": "2026-04-24T08:12:54.220771+00:00", "type": "recall", "memory_id": "2026-04-24-154932-736", "scope": "topic:debug", "data": {}}
+{"timestamp": "2026-04-24T08:12:54.267036+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.338616+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}
+{"timestamp": "2026-04-24T08:12:54.387496+00:00", "type": "cleanup", "memory_id": null, "scope": null, "data": {"dry_run": false, "deleted_count": 0, "retention_days": 90}}

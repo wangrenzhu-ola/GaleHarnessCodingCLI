@@ -31,7 +31,7 @@
 
 **标签**: 工具使用
 
-**实体关系**: 
+**实体关系**:
 - 当前更准确的判断 —[is]→ 部分兼容而非正式支持：仓库以 AGENTS
 
 **有效期至**: 2026-04-17
@@ -74,7 +74,7 @@
 
 **标签**: 技术方案, 问题排查
 
-**实体关系**: 
+**实体关系**:
 - 检查了进程 —[is]→ 否存活
 - 和实现文件 —[is]→ 否存在无关
 
@@ -201,6 +201,81 @@
 **关键要点**:
 
 - Codex copied skill directories could preserve SKILL.md descriptions longer than
+### Windows GBK emoji 编码与 file 模式 vector_backend 修复
+
+- **时间**: 2026-04-23
+- **摘要**: 修复 GaleHarnessCodingCLI Windows 兼容性问题：1) manager_v5.py 添加 file 模式 vector_backend...
+- **来源**: [2026-04-23-180246-141](../L2-Full/daily/)
+
+
+- 修复 GaleHarnessCodingCLI Windows 兼容性问题：1) manager_v5.py 添加 file 模式 vector_backend
+
+**标签**: 技术方案, 问题排查
+
+---
+### Upstream 逐 Commit 自动化同步 CLI 与 SKILL
+
+- **摘要**: 设计了一个基于CLI的自动化上游同步方案，支持逐commit处理、自动测试门禁、PR创建和人类验收。当前baseline b104ce46到上游HEAD 5e6...
+- **来源**: [2026-04-23-183512-150](../L2-Full/daily/)
+
+
+- 设计了一个基于CLI的自动化上游同步方案，支持逐commit处理、自动测试门禁、PR创建和人类验收。当前baseline b104ce46到上游HEAD 5e6
+
+**标签**: 技术方案, 工具使用
+
+### feat: Upstream Sync CLI 自动化工作流
+
+- **摘要**: 为 GaleHarnessCLI upstream 同步设计半自动化 CLI：init 负责生成 batch 与 state.json，next 消费 adap...
+- **来源**: [2026-04-24-110150-934](../L2-Full/daily/)
+
+
+- 为 GaleHarnessCLI upstream 同步设计半自动化 CLI：init 负责生成 batch 与 state.json，next 消费 adap
+
+**决策记录**:
+
+- 为 GaleHarnessCLI upstream 同步设计半自动化 CLI：init 负责生成 batch 与 state.json，next 消费 adapted patch 创建 worktre
+
+**涉及人员**: 关键决策
+
+**标签**: 会议纪要, 技术方案, 项目进度
+
+**实体关系**:
+- 关键决策 —[is]→ 把 state.json 作为主要事实来源
+
+### Ideation: Codex Sub-Agent 并行调用能力缺失
+
+- **摘要**: --- date: 2026-04-24 topic: codex-subagent-parallel-invocation focus: Codex 无法原生...
+- **来源**: [2026-04-24-113910-650](../L2-Full/daily/)
+
+
+- date: 2026-04-24
+- topic: codex-subagent-parallel-invocation
+- focus: Codex 无法原生并发调用 sub-agents，skill 静默降级
+- GaleHarnessCLI 是一个 Bun/TypeScript CLI，将 galeharness-cli 插件（~35 skills, ~50 agent
+- **核心问题：** 当 gh:plan、gh:ideate、gh:review 等 skill 在 Codex 上被调用时，它们描述需要运行 sub-agent
+
+
+- **Description:** 定义每个目标平台的结构化能力模式（`can_spawn_agents: boolean`, `model_override: "field" | "none"`, `
+- **Rationale:** 所有后续改进的前提条件。转换器是系统瓶颈（16 targets x 35 skills = 560 组合），一个能力模式改进可以在所有组合中复用。`transformCo
+- **Downsides:** 需要技能作者采用标记语法；转换器需要解析标记并选择性保留；向后兼容需处理无标记的旧 skill。
+
+**涉及人员**: 级置信度, 覆盖差距, 大小, 乘法因子, 转换器
+
+**标签**: 会议纪要, 技术方案, 问题排查
+
+- 大小 —[is]→ 乘法因子
+- 扩展到能力级过滤 —[is]→ 自然的下一步
+- 转换器 —[is]→ 系统瓶颈（16 targets x 35
+- 当前转换产出的 —[is]→ 不可执行的文本提示
+- 版本 —[is]→ 优化版本
+
+### Code Review: PR 55 Upstream Sync CLI
+
+- **摘要**: PR #55 review: Upstream Sync CLI. Verdict: Not ready. Key findings: Windows CI f...
+- **来源**: [2026-04-24-133333-723](../L2-Full/daily/)
+
+
+- PR #55 review: Upstream Sync CLI. Verdict: Not ready. Key findings: Windows CI f
 
 **标签**: 通用
 
@@ -215,6 +290,13 @@
 **关键要点**:
 
 - Platform Capability Manifest plan for GaleHarnessCLI. Adds target handler Platfo
+### Platform Capability Manifest
+
+- **摘要**: Platform Capability Manifest: 为 GaleHarnessCLI 转换器引入平台能力声明机制。TargetHandler 新增 ca...
+- **来源**: [2026-04-24-134107-835](../L2-Full/daily/)
+
+
+- Platform Capability Manifest: 为 GaleHarnessCLI 转换器引入平台能力声明机制。TargetHandler 新增 ca
 
 **标签**: 通用
 
@@ -235,15 +317,40 @@
 ---
 ### Fix Codex copied skill reference Markdown rewrite boundary
 
-- **时间**: 2026-04-24
 - **摘要**: Fixed PR #57 Codex copied-skill Markdown rewrite boundary. Root cause was src/ta...
-- **重要性**: medium
 - **来源**: [2026-04-24-145930-411](../L2-Full/daily/)
 
-**关键要点**:
 
 - Fixed PR #57 Codex copied-skill Markdown rewrite boundary. Root cause was src/ta
 
 **标签**: 工具使用
+### Platform capability manifest for Codex agent dispatch rewrites
+
+- **摘要**: Platform Capability Manifest 为 GaleHarnessCLI 转换器引入 target-level PlatformCapabil...
+- **来源**: [2026-04-24-145453-305](../L2-Full/daily/)
+
+
+- Platform Capability Manifest 为 GaleHarnessCLI 转换器引入 target-level PlatformCapabil
+
+**涉及人员**: 核心修复
+
+**标签**: 问题排查
+
+**实体关系**:
+- 核心修复 —[is]→ 把 Claude Task agent(a
+
+---
+### Fix 2.2.0 release missing compiled binary assets
+
+- **时间**: 2026-04-24
+- **摘要**: Fixed GaleHarnessCodingCLI 2.2.0 release asset publication. Root cause: .github/...
+- **重要性**: medium
+- **来源**: [2026-04-24-154932-736](../L2-Full/daily/)
+
+**关键要点**:
+
+- Fixed GaleHarnessCodingCLI 2.2.0 release asset publication. Root cause: .github/
+
+**标签**: 通用
 
 ---

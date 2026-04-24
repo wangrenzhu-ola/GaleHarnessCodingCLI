@@ -79,18 +79,54 @@
 - **来源**: 2026-04-24-122547-902
 
 ### feat: Add platform capability manifest
-- **时间**: 2026-04-24
 - **关键词**: 通用, plan, adds, manifest, galeharnesscli
 - **核心**: Platform Capab…
 - **来源**: 2026-04-24-140106-940
 
 ### Work: Platform Capability Manifest
-- **时间**: 2026-04-24
 - **关键词**: capability, galeharnesscli, manifest, platformcapab, platform
 - **核心**: Implemented Pl…
 - **来源**: 2026-04-24-143332-269
 ### Fix Codex copied skill reference Markdown rewrite boundary
-- **时间**: 2026-04-24
 - **关键词**: rewrite, boundary, copied, fixed, markdown
 - **核心**: Fixed PR #57 C…
 - **来源**: 2026-04-24-145930-411
+### Windows GBK emoji 编码与 file 模式 vector_backend 修复
+- **时间**: 2026-04-23
+- **关键词**: 技术方案, 问题排查, 修复, backend, file
+- **核心**: 修复 GaleHarness…
+- **来源**: 2026-04-23-180246-141
+
+### Upstream 逐 Commit 自动化同步 CLI 与 SKILL
+- **关键词**: commit, 自动, 自动化, 动化, cli
+- **核心**: 设计了一个基于CLI的自动化…
+- **来源**: 2026-04-23-183512-150
+
+### feat: Upstream Sync CLI 自动化工作流
+- **关键词**: 项目进度, 会议纪要, upstream, 动化, 自动
+- **核心**: 为 GaleHarnessC…
+- **来源**: 2026-04-24-110150-934
+
+### Ideation: Codex Sub-Agent 并行调用能力缺失
+- **关键词**: Description:, 会议纪要, Downsides:, 核心问题：, 技术方案
+- **核心**: --- date: 2026…
+- **来源**: 2026-04-24-113910-650
+
+### Code Review: PR 55 Upstream Sync CLI
+- **关键词**: sync, pr, not, upstream, 通用
+- **核心**: PR #55 review:…
+- **来源**: 2026-04-24-133333-723
+
+### Platform Capability Manifest
+- **关键词**: targethandler, ca, capability, 转换, galeharnesscli
+- **来源**: 2026-04-24-134107-835
+
+### Platform capability manifest for Codex agent dispatch rewrites
+- **关键词**: galeharnesscli, target, 问题排查, level, platformcapabil
+- **来源**: 2026-04-24-145453-305
+
+### Fix 2.2.0 release missing compiled binary assets
+- **时间**: 2026-04-24
+- **关键词**: galeharnesscodingcli, asset, publication, 通用, fixed
+- **核心**: Fixed GaleHarn…
+- **来源**: 2026-04-24-154932-736
