@@ -15,7 +15,7 @@ describe("loadClaudePlugin", () => {
     const plugin = await loadClaudePlugin(fixtureRoot)
 
     expect(plugin.manifest.name).toBe("galeharness-cli")
-    expect(plugin.agents.length).toBe(2)
+    expect(plugin.agents.length).toBe(3)
     expect(plugin.commands.length).toBe(7)
     expect(plugin.skills.length).toBe(3)
     expect(plugin.hooks).toBeDefined()
@@ -23,6 +23,9 @@ describe("loadClaudePlugin", () => {
 
     const researchAgent = plugin.agents.find((agent) => agent.name === "repo-research-analyst")
     expect(researchAgent?.capabilities).toEqual(["Capability A", "Capability B"])
+
+    const learningsAgent = plugin.agents.find((agent) => agent.name === "learnings-researcher")
+    expect(learningsAgent?.model).toBe("haiku")
 
     const reviewCommand = plugin.commands.find((command) => command.name === "workflows:review")
     expect(reviewCommand?.allowedTools).toEqual([

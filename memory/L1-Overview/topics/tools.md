@@ -191,3 +191,31 @@
 **标签**: 通用
 
 ---
+### feat: Add platform capability manifest
+
+- **时间**: 2026-04-24
+- **摘要**: Platform Capability Manifest plan for GaleHarnessCLI. Adds target handler Platfo...
+- **重要性**: medium
+- **来源**: [2026-04-24-140106-940](../L2-Full/daily/)
+
+**关键要点**:
+
+- Platform Capability Manifest plan for GaleHarnessCLI. Adds target handler Platfo
+
+**标签**: 通用
+
+---
+### Work: Platform Capability Manifest
+
+- **时间**: 2026-04-24
+- **摘要**: Implemented Platform Capability Manifest for GaleHarnessCLI. Added PlatformCapab...
+- **重要性**: medium
+- **来源**: [2026-04-24-143332-269](../L2-Full/daily/)
+
+**关键要点**:
+
+- Implemented Platform Capability Manifest for GaleHarnessCLI. Added PlatformCapab
+
+**标签**: 通用
+
+---

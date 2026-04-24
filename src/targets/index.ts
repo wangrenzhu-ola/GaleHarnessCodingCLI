@@ -31,6 +31,12 @@ import { writeQoderBundle } from "./qoder"
 import { writeTraeBundle } from "./trae"
 import { writeCursorBundle } from "./cursor"
 import { writeKiloBundle } from "./kilo"
+import {
+  CLAUDE_PLATFORM_CAPABILITIES,
+  CODEX_PLATFORM_CAPABILITIES,
+  DEFAULT_PLATFORM_CAPABILITIES,
+  type PlatformCapabilities,
+} from "../types/platform-capabilities"
 
 export type TargetScope = "global" | "workspace"
 
@@ -65,14 +71,20 @@ export type TargetHandler<TBundle = unknown> = {
   defaultScope?: TargetScope
   /** Valid scope values. If absent, the --scope flag is rejected for this target. */
   supportedScopes?: TargetScope[]
+  capabilities?: PlatformCapabilities
   convert: (plugin: ClaudePlugin, options: ClaudeToOpenCodeOptions) => TBundle | null
   write: (outputRoot: string, bundle: TBundle, scope?: TargetScope) => Promise<void>
+}
+
+export function resolveTargetCapabilities(target: Pick<TargetHandler, "capabilities">): PlatformCapabilities {
+  return target.capabilities ?? DEFAULT_PLATFORM_CAPABILITIES
 }
 
 export const targets: Record<string, TargetHandler> = {
   claude: {
     name: "claude",
     implemented: true,
+    capabilities: CLAUDE_PLATFORM_CAPABILITIES,
     convert: convertClaudeToClaude as TargetHandler["convert"],
     write: writeClaudeBundle as TargetHandler["write"],
   },
@@ -85,6 +97,7 @@ export const targets: Record<string, TargetHandler> = {
   codex: {
     name: "codex",
     implemented: true,
+    capabilities: CODEX_PLATFORM_CAPABILITIES,
     convert: convertClaudeToCodex as TargetHandler["convert"],
     write: writeCodexBundle as TargetHandler["write"],
   },

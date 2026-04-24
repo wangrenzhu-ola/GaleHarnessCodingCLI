@@ -72,3 +72,15 @@
 - **核心**: Code Review PR…
 - **来源**: 2026-04-23-165707-632
 
+### feat: Add platform capability manifest
+- **时间**: 2026-04-24
+- **关键词**: 通用, plan, adds, manifest, galeharnesscli
+- **核心**: Platform Capab…
+- **来源**: 2026-04-24-140106-940
+
+### Work: Platform Capability Manifest
+- **时间**: 2026-04-24
+- **关键词**: capability, galeharnesscli, manifest, platformcapab, platform
+- **核心**: Implemented Pl…
+- **来源**: 2026-04-24-143332-269
+

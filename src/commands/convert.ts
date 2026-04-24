@@ -2,7 +2,7 @@ import { defineCommand } from "citty"
 import os from "os"
 import path from "path"
 import { loadClaudePlugin } from "../parsers/claude"
-import { targets, validateScope } from "../targets"
+import { resolveTargetCapabilities, targets, validateScope, type TargetHandler } from "../targets"
 import type { ClaudeToOpenCodeOptions, PermissionMode } from "../converters/claude-to-opencode"
 import { ensureCodexAgentsFile } from "../utils/codex-agents"
 import { expandHome, resolveTargetHome } from "../utils/resolve-home"
@@ -131,7 +131,7 @@ export default defineCommand({
           console.warn(`Skipping ${tool.name}: not implemented.`)
           continue
         }
-        const bundle = handler.convert(plugin, options)
+        const bundle = handler.convert(plugin, optionsForTarget(options, handler))
         if (!bundle) {
           console.warn(`Skipping ${tool.name}: no output returned.`)
           continue
@@ -186,7 +186,7 @@ export default defineCommand({
       hasExplicitOutput,
       scope: resolvedScope,
     })
-    const bundle = target.convert(plugin, options)
+    const bundle = target.convert(plugin, optionsForTarget(options, target))
     if (!bundle) {
       throw new Error(`Target ${targetName} did not return a bundle.`)
     }
@@ -206,7 +206,7 @@ export default defineCommand({
         console.warn(`Skipping ${extra}: not implemented yet.`)
         continue
       }
-      const extraBundle = handler.convert(plugin, options)
+      const extraBundle = handler.convert(plugin, optionsForTarget(options, handler))
       if (!extraBundle) {
         console.warn(`Skipping ${extra}: no output returned.`)
         continue
@@ -250,4 +250,14 @@ function resolveOutputRoot(value: unknown): string {
     return path.resolve(expanded)
   }
   return process.cwd()
+}
+
+function optionsForTarget(
+  options: ClaudeToOpenCodeOptions,
+  target: TargetHandler,
+): ClaudeToOpenCodeOptions {
+  return {
+    ...options,
+    platformCapabilities: resolveTargetCapabilities(target),
+  }
 }

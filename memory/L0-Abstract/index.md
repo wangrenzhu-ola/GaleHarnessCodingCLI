@@ -10,6 +10,12 @@
 
 ## 最新条目
 
+- [2026-04-24] **Work: Platform Capability Manifest** (tools): Implemented Pl…
+
+
+- [2026-04-24] **feat: Add platform capability manifest** (tools): Platform Capab…
+
+
 - [2026-04-23] **PR #47 Review Fixes: Windows hkt-memory CLI install** (tools): Code Review PR…
 
 

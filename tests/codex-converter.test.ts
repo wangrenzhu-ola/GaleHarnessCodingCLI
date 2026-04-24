@@ -194,7 +194,7 @@ describe("convertClaudeToCodex", () => {
     expect(bundle.mcpServers?.local?.args).toEqual(["hello"])
   })
 
-  test("transforms Task agent calls to skill references", () => {
+  test("inlines known Task agent calls for Codex", () => {
     const plugin: ClaudePlugin = {
       ...fixturePlugin,
       commands: [
@@ -212,7 +212,26 @@ Task best-practices-researcher(topic)`,
           sourcePath: "/tmp/plugin/commands/plan.md",
         },
       ],
-      agents: [],
+      agents: [
+        {
+          name: "repo-research-analyst",
+          description: "Repo research",
+          body: "Research repository structure.",
+          sourcePath: "/tmp/plugin/agents/repo-research-analyst.md",
+        },
+        {
+          name: "learnings-researcher",
+          description: "Learning search",
+          body: "Search prior learnings.",
+          sourcePath: "/tmp/plugin/agents/learnings-researcher.md",
+        },
+        {
+          name: "best-practices-researcher",
+          description: "Best practices",
+          body: "Research best practices.",
+          sourcePath: "/tmp/plugin/agents/best-practices-researcher.md",
+        },
+      ],
       skills: [],
     }
 
@@ -226,17 +245,18 @@ Task best-practices-researcher(topic)`,
     expect(commandSkill).toBeDefined()
     const parsed = parseFrontmatter(commandSkill!.content)
 
-    // Task calls should be transformed to skill references
-    expect(parsed.body).toContain("Use the $repo-research-analyst skill to: feature_description")
-    expect(parsed.body).toContain("Use the $learnings-researcher skill to: feature_description")
-    expect(parsed.body).toContain("Use the $best-practices-researcher skill to: topic")
+    expect(parsed.body).toContain("Run the embedded agent section `Agent: repo-research-analyst` sequentially in this context. Input: feature_description")
+    expect(parsed.body).toContain("Run the embedded agent section `Agent: learnings-researcher` sequentially in this context. Input: feature_description")
+    expect(parsed.body).toContain("Run the embedded agent section `Agent: best-practices-researcher` sequentially in this context. Input: topic")
+    expect(parsed.body).toContain("## Embedded Agent Instructions")
+    expect(parsed.body).toContain("### Agent: repo-research-analyst")
 
-    // Original Task syntax should not remain
     expect(parsed.body).not.toContain("Task repo-research-analyst")
     expect(parsed.body).not.toContain("Task learnings-researcher")
+    expect(parsed.body).not.toContain("Use the $repo-research-analyst skill")
   })
 
-  test("transforms namespaced Task agent calls to skill references using final segment", () => {
+  test("inlines namespaced Task agent calls using final segment", () => {
     const plugin: ClaudePlugin = {
       ...fixturePlugin,
       commands: [
@@ -254,7 +274,26 @@ Task galeharness-cli:security-reviewer(code_diff)`,
           sourcePath: "/tmp/plugin/commands/plan.md",
         },
       ],
-      agents: [],
+      agents: [
+        {
+          name: "galeharness-cli:repo-research-analyst",
+          description: "Repo research",
+          body: "Research repository structure.",
+          sourcePath: "/tmp/plugin/agents/repo-research-analyst.md",
+        },
+        {
+          name: "galeharness-cli:learnings-researcher",
+          description: "Learning search",
+          body: "Search prior learnings.",
+          sourcePath: "/tmp/plugin/agents/learnings-researcher.md",
+        },
+        {
+          name: "galeharness-cli:security-reviewer",
+          description: "Security review",
+          body: "Review security.",
+          sourcePath: "/tmp/plugin/agents/security-reviewer.md",
+        },
+      ],
       skills: [],
     }
 
@@ -268,13 +307,13 @@ Task galeharness-cli:security-reviewer(code_diff)`,
     expect(commandSkill).toBeDefined()
     const parsed = parseFrontmatter(commandSkill!.content)
 
-    // Namespaced Task calls should use only the final segment as the skill name
-    expect(parsed.body).toContain("Use the $repo-research-analyst skill to: feature_description")
-    expect(parsed.body).toContain("Use the $learnings-researcher skill to: feature_description")
-    expect(parsed.body).toContain("Use the $security-reviewer skill to: code_diff")
+    expect(parsed.body).toContain("Run the embedded agent section `Agent: repo-research-analyst` sequentially in this context. Input: feature_description")
+    expect(parsed.body).toContain("Run the embedded agent section `Agent: learnings-researcher` sequentially in this context. Input: feature_description")
+    expect(parsed.body).toContain("Run the embedded agent section `Agent: security-reviewer` sequentially in this context. Input: code_diff")
+    expect(parsed.body).toContain("### Agent: security-reviewer")
 
-    // Original namespaced Task syntax should not remain
-    expect(parsed.body).not.toContain("Task compound-engineering:")
+    expect(parsed.body).not.toContain("Task galeharness-cli:")
+    expect(parsed.body).not.toContain("Use the $security-reviewer skill")
   })
 
   test("transforms zero-argument Task calls", () => {
@@ -288,7 +327,14 @@ Task galeharness-cli:security-reviewer(code_diff)`,
           sourcePath: "/tmp/plugin/commands/review.md",
         },
       ],
-      agents: [],
+      agents: [
+        {
+          name: "code-simplicity-reviewer",
+          description: "Simplicity review",
+          body: "Review for unnecessary complexity.",
+          sourcePath: "/tmp/plugin/agents/code-simplicity-reviewer.md",
+        },
+      ],
       skills: [],
     }
 
@@ -301,9 +347,64 @@ Task galeharness-cli:security-reviewer(code_diff)`,
     const commandSkill = bundle.generatedSkills.find((s) => s.name === "review")
     expect(commandSkill).toBeDefined()
     const parsed = parseFrontmatter(commandSkill!.content)
-    expect(parsed.body).toContain("Use the $code-simplicity-reviewer skill")
-    expect(parsed.body).not.toContain("compound-engineering:")
-    expect(parsed.body).not.toContain("skill to:")
+    expect(parsed.body).toContain("Run the embedded agent section `Agent: code-simplicity-reviewer` sequentially in this context.")
+    expect(parsed.body).not.toContain("Input:")
+    expect(parsed.body).not.toContain("Task galeharness-cli:")
+  })
+
+  test("preserves Task skill references when target can spawn agents", () => {
+    const plugin: ClaudePlugin = {
+      ...fixturePlugin,
+      commands: [
+        {
+          name: "plan",
+          description: "Planning with agents",
+          body: "- Task galeharness-cli:repo-research-analyst(feature_description)",
+          sourcePath: "/tmp/plugin/commands/plan.md",
+        },
+      ],
+      agents: [],
+      skills: [],
+    }
+
+    const bundle = convertClaudeToCodex(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+      platformCapabilities: { can_spawn_agents: true, model_override: "field" },
+    })
+
+    const commandSkill = bundle.generatedSkills.find((s) => s.name === "plan")
+    const parsed = parseFrontmatter(commandSkill!.content)
+    expect(parsed.body).toContain("Use the $repo-research-analyst skill to: feature_description")
+    expect(parsed.body).not.toContain("Embedded Agent Instructions")
+  })
+
+  test("uses diagnostic fallback for unknown Task agents", () => {
+    const plugin: ClaudePlugin = {
+      ...fixturePlugin,
+      commands: [
+        {
+          name: "plan",
+          description: "Planning with missing agent",
+          body: "- Task missing-agent(topic)",
+          sourcePath: "/tmp/plugin/commands/plan.md",
+        },
+      ],
+      agents: [],
+      skills: [],
+    }
+
+    const bundle = convertClaudeToCodex(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    const commandSkill = bundle.generatedSkills.find((s) => s.name === "plan")
+    const parsed = parseFrontmatter(commandSkill!.content)
+    expect(parsed.body).toContain("Agent instructions were not available in the converted bundle")
+    expect(parsed.body).not.toContain("Use the $missing-agent skill")
   })
 
   test("transforms slash commands to prompts syntax", () => {

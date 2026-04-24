@@ -4,6 +4,7 @@ import { backupFile, copyDir, copySkillDir, ensureDir, sanitizePathName, writeTe
 import type { CodexBundle } from "../types/codex"
 import type { ClaudeMcpServer } from "../types/claude"
 import { transformContentForCodex } from "../utils/codex-content"
+import { CODEX_PLATFORM_CAPABILITIES } from "../types/platform-capabilities"
 
 const MANAGED_START_MARKER = "# BEGIN Compound Engineering plugin MCP -- do not edit this block"
 const MANAGED_END_MARKER = "# END Compound Engineering plugin MCP"
@@ -25,13 +26,17 @@ export async function writeCodexBundle(outputRoot: string, bundle: CodexBundle):
 
   if (bundle.skillDirs.length > 0) {
     const skillsRoot = path.join(codexRoot, "skills")
+    const platformCapabilities = bundle.platformCapabilities ?? CODEX_PLATFORM_CAPABILITIES
     for (const skill of bundle.skillDirs) {
       await copySkillDir(
         skill.sourceDir,
         path.join(skillsRoot, sanitizePathName(skill.name)),
         (content) => transformContentForCodex(content, bundle.invocationTargets, {
           unknownSlashBehavior: "preserve",
+          platformCapabilities,
+          agentInstructions: bundle.agentInstructions,
         }),
+        true,
       )
     }
   }
