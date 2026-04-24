@@ -1,3 +1,5 @@
+import { formatFrontmatter, parseFrontmatter } from "./frontmatter"
+
 export type CodexInvocationTargets = {
   promptTargets: Record<string, string>
   skillTargets: Record<string, string>
@@ -6,6 +8,8 @@ export type CodexInvocationTargets = {
 export type CodexTransformOptions = {
   unknownSlashBehavior?: "prompt" | "preserve"
 }
+
+const CODEX_DESCRIPTION_MAX_LENGTH = 1024
 
 /**
  * Transform Claude Code content to Codex-compatible content.
@@ -20,11 +24,14 @@ export type CodexTransformOptions = {
  * 4. Claude config paths: .claude/ -> .codex/
  */
 export function transformContentForCodex(
-  body: string,
+  content: string,
   targets?: CodexInvocationTargets,
   options: CodexTransformOptions = {},
 ): string {
-  let result = body
+  const hasFrontmatter = content.startsWith("---\n") || content.startsWith("---\r\n")
+  const parsed = hasFrontmatter ? parseFrontmatter(content) : null
+
+  let result = parsed ? parsed.body : content
   const promptTargets = targets?.promptTargets ?? {}
   const skillTargets = targets?.skillTargets ?? {}
   const unknownSlashBehavior = options.unknownSlashBehavior ?? "prompt"
@@ -69,7 +76,16 @@ export function transformContentForCodex(
     return `$${skillName} skill`
   })
 
-  return result
+  if (!parsed) {
+    return result
+  }
+
+  const frontmatter = { ...parsed.data }
+  if (typeof frontmatter.description === "string") {
+    frontmatter.description = truncateCodexDescription(frontmatter.description)
+  }
+
+  return formatFrontmatter(frontmatter, result)
 }
 
 export function normalizeCodexName(value: string): string {
@@ -83,4 +99,12 @@ export function normalizeCodexName(value: string): string {
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "")
   return normalized || "item"
+}
+
+function truncateCodexDescription(description: string): string {
+  if (description.length <= CODEX_DESCRIPTION_MAX_LENGTH) {
+    return description
+  }
+
+  return `${description.slice(0, CODEX_DESCRIPTION_MAX_LENGTH - 3).trimEnd()}...`
 }
