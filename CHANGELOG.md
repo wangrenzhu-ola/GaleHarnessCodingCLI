@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.4.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.3.0...cli-v2.4.0) (2026-04-24)
+
+
+### Features
+
+* **release:** build binaries for all platforms ([41e43a1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/41e43a11ddf49089a8912fb98abc2d08e9280a3a))
+* **release:** 支持全平台 release 二进制 ([63369d0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/63369d0738a8ddd1d9d572987d7e099e37ebe5f1))
+* **workflow:** integrate Karpathy guardrails ([a277942](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a277942d85770d40a13907eec980efc13f9236ea))
+* **workflow:** 融入 Karpathy 全流程 guardrails ([c93891b](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c93891be3e55a6697815c6efccf8ea65302d656f))
+
 ## [2.3.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.2.0...cli-v2.3.0) (2026-04-24)
 
 

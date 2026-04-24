@@ -1,7 +1,7 @@
 {
   "name": "galeharness-cli",
   "displayName": "GaleHarnessCLI",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "AI-powered development tools for code review, research, design, and workflow automation.",
   "author": {
     "name": "wangrenzhu",
