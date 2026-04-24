@@ -9,6 +9,14 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.3.0...galeharness-cli-v2.4.0) (2026-04-24)
+
+
+### Features
+
+* **workflow:** integrate Karpathy guardrails ([a277942](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a277942d85770d40a13907eec980efc13f9236ea))
+* **workflow:** 融入 Karpathy 全流程 guardrails ([c93891b](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/c93891be3e55a6697815c6efccf8ea65302d656f))
+
 ## [2.3.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.2.0...galeharness-cli-v2.3.0) (2026-04-24)
 
 
