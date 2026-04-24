@@ -14,7 +14,9 @@ Gale-managed memory calls use `gale-memory` as the runtime boundary. By default,
 ~/.galeharness/knowledge/<project>/hkt-memory
 ```
 
-Run `gale-memory status` to see the active root, source, and migration state. Existing project-local `memory/` directories are copied into the public root on first Gale-managed use, but they are not deleted or renamed. The copy-first migration preserves Markdown memories and the migration manifest while skipping derived caches such as `*.db`, vector stores, session transcript indexes, and `_lifecycle/events.jsonl`.
+Run `gale-memory status` to see the active root, source, and migration state. `status` only diagnoses; it does not copy legacy files.
+
+Existing project-local `memory/` directories are copied into the public root by `gale-memory migrate` or task runtime on first migrating use, but they are not deleted or renamed. The copy-first migration preserves Markdown memories and the migration manifest while skipping derived caches such as `*.db`, vector stores, session transcript indexes, and `_lifecycle/events.jsonl`.
 
 Override order: `gale-memory --memory-dir`, existing `HKT_MEMORY_DIR`, `memory.hkt_memory_dir` in `~/.galeharness/config.{json,yaml}`, then the derived public root. Bare `hkt-memory` keeps its upstream default path behavior; use `gale-memory` or set `HKT_MEMORY_DIR` when you want the public knowledge root.
 

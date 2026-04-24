@@ -371,6 +371,18 @@ describe("HKTMemory Compounding — Non-Blocking on HKTMemory Failure", () => {
   }
 })
 
+describe("HKTMemory Compounding — Safe Root Fallback", () => {
+  for (const skill of COMPOUNDING_SKILLS) {
+    test(`${skill} never exports an empty resolved memory root`, async () => {
+      const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf8")
+
+      expect(content).not.toContain('HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)"')
+      expect(content).toContain('memory_root="$(gale-memory resolve-root 2>/dev/null || true)"')
+      expect(content).toContain('[ -n "$memory_root" ] && export HKT_MEMORY_DIR="$memory_root"')
+    })
+  }
+})
+
 describe("HKTMemory Compounding — Loop Completeness", () => {
   test("All compounding loop steps are documented in README", async () => {
     const readme = await readFile(path.join(process.cwd(), "README.md"), "utf8")

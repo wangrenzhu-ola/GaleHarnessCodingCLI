@@ -20,6 +20,8 @@ import { resolveKnowledgeHome } from "../../src/knowledge/home.js"
 const GITIGNORE_CONTENT = `*.db
 *.db-shm
 *.db-wal
+*.json
+!.gale-migration-manifest.json
 vector_store/
 vector_store.db
 bm25_index.db

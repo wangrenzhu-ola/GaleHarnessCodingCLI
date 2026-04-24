@@ -483,7 +483,7 @@ uv --version                     # 期望: uv x.x.x
 gale-harness --help              # 期望: 显示 CLI 帮助
 gale-knowledge init              # 初始化知识仓库
 gale-knowledge resolve-home      # 期望: ~/.galeharness/knowledge/
-gale-memory status               # 期望: 显示 Gale-managed HKTMemory 路径和迁移状态
+gale-memory status               # 期望: 诊断 Gale-managed HKTMemory 路径和迁移状态
 hkt-memory stats                 # 期望: 统计信息（裸命令使用自身默认路径）
 bun test                         # 期望: 测试通过
 ```
@@ -498,7 +498,7 @@ bun test                         # 期望: 测试通过
 ~/.galeharness/knowledge/<project>/hkt-memory
 ```
 
-`gale-memory` 是统一入口。`start`、`capture`、`feedback`、`status` 和 `migrate` 会解析同一个 root，并在首次发现项目本地 `memory/` 时执行 copy-first 迁移：Markdown 记忆和必要 manifest 会复制到公共知识库，`.db`、vector cache、session transcript index、`_lifecycle/events.jsonl` 等派生缓存不会复制，本地 `memory/` 保留为 legacy backup。
+`gale-memory` 是统一入口。`start`、`capture`、`feedback` 和 `migrate` 会解析同一个 root；`migrate` 或 task runtime 在首次发现项目本地 `memory/` 时执行 copy-first 迁移。`status` 只诊断 root 和迁移状态，不复制 legacy 文件。迁移时 Markdown 记忆和必要 manifest 会复制到公共知识库，`.db`、vector cache、session transcript index、`_lifecycle/events.jsonl` 等派生缓存不会复制，本地 `memory/` 保留为 legacy backup。
 
 覆盖优先级为：`gale-memory --memory-dir` -> 已有 `HKT_MEMORY_DIR` -> `~/.galeharness/config.{json,yaml}` 中的 `memory.hkt_memory_dir` -> 默认公共知识库 root。裸 `hkt-memory` 命令仍保留上游默认语义，通常会使用当前目录下的 `memory/`；需要进入公共知识库时请显式设置 `HKT_MEMORY_DIR` 或使用 `gale-memory`。
 

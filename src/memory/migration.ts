@@ -30,7 +30,7 @@ const CONFLICTS = "MIGRATION_CONFLICTS.md"
 const RULE_VERSION = 1
 
 const HKT_DIR_HINTS = ["L0-Abstract", "L1-Overview", "L2-Full"]
-const ALLOWED_EXTENSIONS = new Set([".md", ".json"])
+const ALLOWED_EXTENSIONS = new Set([".md"])
 const ALLOWED_BASENAMES = new Set([MANIFEST])
 const SKIPPED_PARTS = new Set([
   ".git",

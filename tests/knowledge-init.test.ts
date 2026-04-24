@@ -56,6 +56,8 @@ describe("initKnowledgeRepo", () => {
 
     const content = readFileSync(gitignorePath, "utf8")
     expect(content).toContain("*.db")
+    expect(content).toContain("*.json")
+    expect(content).toContain("!.gale-migration-manifest.json")
     expect(content).toContain("vector_store/")
     expect(content).toContain("session_transcript_index.db")
     expect(content).toContain("_lifecycle/events.jsonl")
@@ -74,6 +76,8 @@ describe("initKnowledgeRepo", () => {
     expect(created).toBe(false)
     const content = readFileSync(join(repoDir, ".gitignore"), "utf8")
     expect(content).toContain("custom-rule")
+    expect(content).toContain("*.json")
+    expect(content).toContain("!.gale-migration-manifest.json")
     expect(content).toContain("vector_store/")
     expect(content).toContain("session_transcript_index.db")
   })

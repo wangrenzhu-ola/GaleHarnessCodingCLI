@@ -84,6 +84,14 @@ describe("Morph-X skill contract", () => {
       expect(content).toMatch(/non-blocking|proceed silently|continue silently|skip silently/i)
     })
 
+    test(`${skill.dir} never exports an empty resolved memory root`, async () => {
+      const content = await readSkill(skill.dir)
+
+      expect(content).not.toContain('HKT_MEMORY_DIR="$(gale-memory resolve-root 2>/dev/null || true)"')
+      expect(content).toContain('memory_root="$(gale-memory resolve-root 2>/dev/null || true)"')
+      expect(content).toContain('[ -n "$memory_root" ] && export HKT_MEMORY_DIR="$memory_root"')
+    })
+
     test(`${skill.dir} retrieves before storing fingerprints`, async () => {
       const content = await readSkill(skill.dir)
       const retrieveLine = skill.dir === "gh-work-x" ? hktPatchLine(content, "phase-0.6") : hktPatchLine(content, "phase-0.4")

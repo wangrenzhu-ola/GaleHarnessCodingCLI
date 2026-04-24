@@ -18,12 +18,13 @@ describe("copy-first HKTMemory migration", () => {
     await rm(tmpDir, { recursive: true, force: true })
   })
 
-  test("copies markdown memory and skips derived databases", async () => {
+  test("copies markdown memory and skips derived databases and arbitrary json", async () => {
     await mkdir(path.join(tmpDir, "memory", "L0-Abstract"), { recursive: true })
     await mkdir(path.join(tmpDir, "memory", "L2-Full", "daily"), { recursive: true })
     await writeFile(path.join(tmpDir, "memory", "L0-Abstract", "index.md"), "abstract\n", "utf8")
     await writeFile(path.join(tmpDir, "memory", "L2-Full", "daily", "note.md"), "daily\n", "utf8")
     await writeFile(path.join(tmpDir, "memory", "vector_store.db"), "db", "utf8")
+    await writeFile(path.join(tmpDir, "memory", "state.json"), "{\"derived\":true}\n", "utf8")
 
     const result = migrateLegacyMemory({ cwd: tmpDir, targetDir })
 
@@ -31,8 +32,27 @@ describe("copy-first HKTMemory migration", () => {
     expect(existsSync(path.join(targetDir, "L0-Abstract", "index.md"))).toBe(true)
     expect(existsSync(path.join(targetDir, "L2-Full", "daily", "note.md"))).toBe(true)
     expect(existsSync(path.join(targetDir, "vector_store.db"))).toBe(false)
+    expect(existsSync(path.join(targetDir, "state.json"))).toBe(false)
     expect(existsSync(path.join(tmpDir, "memory", "L2-Full", "daily", "note.md"))).toBe(true)
     expect(existsSync(path.join(targetDir, ".gale-migration-manifest.json"))).toBe(true)
+  })
+
+  test("allows only the explicit migration manifest json basename", async () => {
+    await mkdir(path.join(tmpDir, "memory", "L1-Overview"), { recursive: true })
+    await writeFile(path.join(tmpDir, "memory", "L1-Overview", "index.md"), "overview\n", "utf8")
+    await writeFile(
+      path.join(tmpDir, "memory", ".gale-migration-manifest.json"),
+      "{\"status\":\"completed\"}\n",
+      "utf8",
+    )
+    await writeFile(path.join(tmpDir, "memory", "manifest.json"), "{\"status\":\"derived\"}\n", "utf8")
+
+    const result = migrateLegacyMemory({ cwd: tmpDir, targetDir })
+
+    expect(result.status).toBe("completed")
+    expect(existsSync(path.join(targetDir, ".gale-migration-manifest.json"))).toBe(true)
+    expect(readFileSync(path.join(targetDir, ".gale-migration-manifest.json"), "utf8")).toContain("\"status\": \"completed\"")
+    expect(existsSync(path.join(targetDir, "manifest.json"))).toBe(false)
   })
 
   test("does not overwrite conflicting target markdown", async () => {
