@@ -1,6 +1,6 @@
 # GaleHarnessCLI
 
-巨风科技研发团队提效工具 —— 基于 Compound Engineering 工作流与 HKTMemory 向量知识库的 AI 驱动开发套件。
+GaleHarnessCLI 是面向 coding agent 的 Compound Engineering 工作流系统：把需求收敛、技术规划、文档评审、执行、代码审查和知识沉淀串成可交接、可复用的工程流水线，并通过 HKTMemory / 公共知识库让每次实践沉淀为下一次工作的上下文。
 
 ## 快速安装 / 新手一键安装
 
@@ -20,6 +20,7 @@ Windows release binary installer 尚未进入 P0a 范围。当前不要把 sourc
 ## 目录
 
 - [核心理念](#核心理念)
+- [Compound Engineering 是什么](#compound-engineering-是什么)
 - [工作流](#工作流)
 - [工程师实战指南](#工程师实战指南)
   - [场景一：新需求开发](#场景一新需求开发)
@@ -55,15 +56,28 @@ Windows release binary installer 尚未进入 P0a 范围。当前不要把 sourc
 
 ---
 
+## Compound Engineering 是什么
+
+GaleHarnessCLI 不只是把一组命令转换到不同 agent 平台，而是把复杂研发任务拆成可审查的阶段：
+
+- **先想清楚再执行**：用 `/gh:brainstorm` 和 `/gh:plan` 把需求、非目标、风险和执行边界显式化。
+- **关键文档先评审**：用 `/document-review` 在实现前审查需求/计划，避免把模糊问题直接交给执行 agent。
+- **阶段化交接**：每个阶段输出文档或 handoff，让上下文压缩、跨会话延续和多 agent 协作更可控。
+- **经验复利**：通过 HKTMemory / 公共知识库在阶段开始前检索历史经验，在阶段结束后沉淀新的方案、踩坑和验证结果。
+
+这使一个工程师可以同时驱动多条研发流水线，同时保持计划、执行、审查和知识沉淀之间的边界。
+
+---
+
 ## 工作流
 
 ```
-Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
+Brainstorm -> Plan -> Document Review -> Work -> Review -> Compound -> Repeat
     ^
   Ideate (可选 -- 用于发现改进点)
 ```
 
-**每个阶段都与 HKTMemory 向量知识库双向交互**：阶段开始前检索相关记忆，阶段完成后存储新产生的知识。
+**每个阶段都与 HKTMemory 向量知识库双向交互**：阶段开始前检索相关记忆，阶段完成后存储新产生的知识。阶段之间通过需求文档、计划文档、review 报告和 handoff 压缩上下文，便于 Claude、Codex、Qoder、Kimi 等不同 agent 在公开边界内协作。
 
 ### 命令一览表
 
@@ -72,6 +86,7 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
 | `/gh:ideate` | 通过发散思维和对抗性过滤发现高影响力改进点 | 检索历史建议，存储新发现 |
 | `/gh:brainstorm` | 在规划前探索需求和方案，通过交互式问答细化想法 | 检索相关需求，存储需求文档 |
 | `/gh:plan` | 将功能想法转化为详细实施计划，带自动置信度检查 | 检索相似方案，存储技术规划 |
+| `/document-review` | 在实现前多角色评审需求/方案文档，挑战范围、风险和可行性 | 无 |
 | `/gh:work` | 系统化执行工作项，使用 worktree 和任务追踪 | 检索实现模式，存储实现总结 |
 | `/gh:work-x` | iOS Morph-X 实施模式：在保留工作流能力的同时降低模板化代码重复风险 | 检索历史模式标签，存储蓝图/策略指纹 |
 | `/gh:review` | 多代理代码审查，分层角色和置信度门控 | 检索审查模式，存储审查发现 |
@@ -79,7 +94,6 @@ Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
 | `/gh:debug` | 系统性查找根本原因并修复缺陷 | 检索类似问题，存储调试经验 |
 | `/gh:debug-x` | iOS Morph-X 调试模式：保持根因定位纪律，并在修复产出后执行变换和相似度审计 | 检索历史模式标签，存储蓝图/策略指纹 |
 | `/gh:optimize` | 迭代优化循环，并行实验和 LLM 评分 | 检索优化策略，存储优化结果 |
-| `/document-review` | 多角色并行评审需求/方案文档 | 无 |
 | `/gh:sessions` | 搜索历史 Claude Code/Codex/Cursor 会话 | 无 |
 | `/gh:slack-research` | 搜索 Slack 获取组织上下文 | 无 |
 
@@ -106,13 +120,14 @@ Morph-X 的定位是降低模板化代码重复风险并提供自检证据，不
 ### 场景一：新需求开发
 
 ```
-需求理解 -> 技术规划 -> 编码实现 -> 代码审查 -> 知识沉淀
+需求理解 -> 技术规划 -> 文档评审 -> 编码实现 -> 代码审查 -> 知识沉淀
 ```
 
 | 步骤 | 命令 | 产出 |
 |------|------|------|
 | 需求探索 | `/gh:brainstorm "实现用户登录功能"` | 检索历史案例，输出结构化需求文档到 `docs/brainstorms/` |
 | 技术规划 | `/gh:plan docs/brainstorms/user-login-requirements.md` | 检索相似方案，输出任务分解和置信度评估到 `docs/plans/` |
+| 文档评审 | `/document-review docs/plans/user-login-plan.md` | 在实现前审查方案范围、风险、可行性和遗漏项 |
 | 编码实现 | `/gh:work docs/plans/user-login-plan.md` | 创建 git worktree，检索实现模式，存储实现总结 |
 | 代码审查 | `/gh:review` | 多代理并行审查（安全/性能/正确性/可维护性） |
 | 知识沉淀 | `/gh:compound "用户登录功能的实现经验"` | 记录解决方案供未来参考 |
