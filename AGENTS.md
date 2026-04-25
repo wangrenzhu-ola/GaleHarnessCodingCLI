@@ -144,11 +144,12 @@ Only add a provider when the target format is stable, documented, and has a clea
 
 ## Agent References in Skills
 
-When referencing agents from within skill SKILL.md files (e.g., via the `Agent` or `Task` tool), always use the **fully-qualified namespace**: `galeharness-cli:<category>:<agent-name>`. Never use the short agent name alone.
+When referencing agents from within skill SKILL.md files (e.g., via the `Agent` or `Task` tool), always use the two-segment plugin namespace: `galeharness-cli:<agent-name>`. The `<agent-name>` must match a real file in `plugins/galeharness-cli/agents/<agent-name>.md`. Never use the short agent name alone, and do not add a category segment.
 
 Example:
-- `galeharness-cli:research:learnings-researcher` (correct)
+- `galeharness-cli:learnings-researcher` (correct)
 - `learnings-researcher` (wrong — will fail to resolve at runtime)
+- `galeharness-cli:<category>:<agent-name>` (wrong — GaleHarnessCLI agents are currently flat)
 
 This prevents resolution failures when the plugin is installed alongside other plugins that may define agents with the same short name.
 

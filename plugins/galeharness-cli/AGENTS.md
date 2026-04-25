@@ -33,11 +33,7 @@ Before committing ANY changes:
 
 ```
 agents/
-├── review/           # Code review agents
-├── document-review/  # Plan and requirements document review agents
-├── research/         # Research and analysis agents
-├── design/           # Design and UI agents
-└── docs/             # Documentation agents
+└── <agent-name>.md   # Flat agent files; reference as galeharness-cli:<agent-name>
 
 skills/
 ├── ce-*/          # Core workflow skills (gh:plan, gh:review, etc.)
@@ -208,7 +204,7 @@ grep -E '^description:' skills/*/SKILL.md
 ## Adding Components
 
 - **New skill:** Create `skills/<name>/SKILL.md` with required YAML frontmatter (`name`, `description`). Reference files go in `skills/<name>/references/`. Add the skill to the appropriate category table in `README.md` and update the skill count.
-- **New agent:** Create `agents/<category>/<name>.md` with frontmatter. Categories: `review`, `document-review`, `research`, `design`, `docs`, `workflow`. Add the agent to `README.md` and update the agent count.
+- **New agent:** Create `agents/<name>.md` with frontmatter. Reference it from skills as `galeharness-cli:<name>`. Add the agent to `README.md` and update the agent count.
 
 ## Beta Skills
 
