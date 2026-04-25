@@ -30,7 +30,7 @@ function collectMarkdownFiles(relativeDir: string): string[] {
         continue
       }
       if (!entry.name.endsWith(".md")) continue
-      results.push(path.relative(repoRoot, absolutePath))
+      results.push(path.relative(repoRoot, absolutePath).split(path.sep).join("/"))
     }
   }
 
