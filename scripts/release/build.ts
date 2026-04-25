@@ -83,7 +83,7 @@ execFileSync(
   ],
   {
     cwd: repoRoot,
-    stdio: "inherit",
+    stdio: ["ignore", "ignore", "inherit"],
   },
 )
 
@@ -111,7 +111,7 @@ for (const [basename, entrypoint] of [
     ],
     {
       cwd: repoRoot,
-      stdio: "inherit",
+      stdio: ["ignore", "ignore", "inherit"],
     },
   )
 }

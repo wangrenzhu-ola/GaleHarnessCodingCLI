@@ -2,6 +2,21 @@
 
 巨风科技研发团队提效工具 —— 基于 Compound Engineering 工作流与 HKTMemory 向量知识库的 AI 驱动开发套件。
 
+## 快速安装 / 新手一键安装
+
+### macOS / Linux
+
+普通用户优先安装 Release 二进制，不需要 clone 仓库：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | bash
+gale-harness --version
+```
+
+### Windows
+
+Windows release binary installer 尚未进入 P0a 范围。当前不要把 source-mode 的 `scripts/setup.ps1` 当作普通用户默认一键安装；需要在 Windows 上试用或参与开发时，请参考下方“安装方式”里的贡献者源码安装路径。Windows release 安装器会在后续阶段补齐。
+
 ## 目录
 
 - [核心理念](#核心理念)
@@ -430,7 +445,7 @@ gale-knowledge rebuild-index --full  # 全量
 - macOS 11+、Linux（主流发行版）或 Windows 10/11
 - 能联网的终端（macOS: Terminal / iTerm2，Linux: Bash/Zsh，Windows: PowerShell）
 
-> 不需要预先安装任何工具。一键脚本会自动检测并安装缺失的依赖。
+> Release 二进制安装不需要预先安装 Bun。下面的源码安装路径面向贡献者，会自动检测并安装缺失的开发依赖。
 
 ### 一键安装
 
@@ -444,7 +459,7 @@ curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI
 
 脚本会优先安装到当前 `gale-harness` 所在目录，并移除旧的 `bun link` symlink 后写入编译二进制。没有已安装命令时，默认安装到 `~/.local/bin`。Release assets 覆盖 macOS、Linux、Windows 的 arm64/x64 平台。
 
-#### macOS / Linux
+#### macOS / Linux 源码安装（贡献者路径）
 
 ```bash
 git clone https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
@@ -454,7 +469,9 @@ bash scripts/setup.sh
 
 > **Linux 说明：** 脚本会自动检测 `apt`、`dnf`、`yum`、`pacman` 或 `brew` 等包管理器。如果系统未预装 Git 或 Python，请确保有 `sudo` 权限以便自动安装。
 
-#### Windows
+#### Windows 源码安装（贡献者路径）
+
+Windows release binary installer 尚未进入 P0a 范围。以下 `setup.ps1` / `bootstrap.ps1` 路径用于贡献者源码安装或开发环境准备，不是普通用户默认一键 release 安装。
 
 **已有 Git：**
 

@@ -52,6 +52,36 @@ jobs:
       - name: Run tests
         run: bun test --path-ignore-patterns="**/resolve-base-script*"
 
+      - name: Smoke release archive install
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          archive_path="$(bun run scripts/release/build.ts --platform linux-x64)"
+          bun run scripts/release/verify-archive.ts "$archive_path"
+
+          install_dir="$(mktemp -d)"
+          home_dir="$(mktemp -d)"
+          old_target="$(mktemp)"
+          printf 'old\n' > "$old_target"
+          ln -s "$old_target" "$install_dir/gale-harness"
+          printf '0.0.0\n' > "$install_dir/VERSION"
+
+          INSTALL_DIR="$install_dir" \
+            HOME="$home_dir" \
+            PATH="$install_dir:$PATH" \
+            GALE_RELEASE_ARCHIVE="$archive_path" \
+            CI=1 \
+            bash scripts/install-release.sh
+
+          test ! -L "$install_dir/gale-harness"
+          test "$(cat "$install_dir/VERSION")" = "$(node -p "require('./package.json').version")"
+
+          PATH="$install_dir:$PATH" gale-harness --version
+          PATH="$install_dir:$PATH" compound-plugin --help
+          PATH="$install_dir:$PATH" gale-knowledge --help
+          PATH="$install_dir:$PATH" gale-memory --help
+
   test-windows:
     runs-on: windows-latest
     timeout-minutes: 15

@@ -5,6 +5,9 @@
 #
 # Environment:
 #   INSTALL_DIR=/path/to/bin   Override install directory
+#   GALE_RELEASE_ARCHIVE=/path/to/archive.tar.gz
+#                             Install from a local archive, only when CI=1 or
+#                             GALE_INSTALL_ALLOW_LOCAL_ARCHIVE=1
 
 set -euo pipefail
 
@@ -76,23 +79,13 @@ resolve_install_dir() {
   printf '%s\n' "$HOME/.local/bin"
 }
 
-need curl
 need tar
 
-tag="$(resolve_tag "${1:-}")"
-if [[ "$tag" != "$TAG_PREFIX"* ]]; then
-  err "release tag must start with $TAG_PREFIX: $tag"
-  exit 1
-fi
-
-version="${tag#$TAG_PREFIX}"
 platform="$(detect_platform)"
 exe=""
 if [[ "$platform" == windows-* ]]; then
   exe=".exe"
 fi
-asset="galeharness-cli-$version-$platform.tar.gz"
-url="https://github.com/$REPO/releases/download/$tag/$asset"
 tmpdir="$(mktemp -d -t galeharness-install-XXXXXX)"
 install_dir="$(resolve_install_dir)"
 
@@ -101,18 +94,117 @@ cleanup() {
 }
 trap cleanup EXIT
 
-printf 'Installing GaleHarnessCLI %s (%s)\n' "$version" "$platform"
-printf 'Download: %s\n' "$url"
+expected_files() {
+  printf '%s\n' \
+    "gale-harness$exe" \
+    "compound-plugin$exe" \
+    "gale-knowledge$exe" \
+    "gale-memory$exe" \
+    "VERSION"
+}
 
-curl -fL "$url" -o "$tmpdir/$asset"
-tar -xzf "$tmpdir/$asset" -C "$tmpdir"
+is_expected_file() {
+  local entry="$1"
+  case "$entry" in
+    "gale-harness$exe" | "compound-plugin$exe" | "gale-knowledge$exe" | "gale-memory$exe" | "VERSION")
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+validate_archive_listing() {
+  local archive="$1"
+  local list_file="$tmpdir/archive-files.txt"
+  local detail_file="$tmpdir/archive-details.txt"
+
+  if [ ! -f "$archive" ] || [ -L "$archive" ]; then
+    err "release archive must be a regular file: $archive"
+    exit 1
+  fi
+
+  tar -tzf "$archive" > "$list_file"
+  tar -tvzf "$archive" > "$detail_file"
+
+  while IFS= read -r entry; do
+    [ "$entry" != "" ] || continue
+    case "$entry" in
+      /* | *"/../"* | "../"* | *"/.." | *"/"* | *"\\.."* | "\\"*)
+        err "unsafe archive path: $entry"
+        exit 1
+        ;;
+    esac
+    if ! is_expected_file "$entry"; then
+      err "unexpected archive file: $entry"
+      exit 1
+    fi
+  done < "$list_file"
+
+  while IFS= read -r expected; do
+    if ! grep -Fx "$expected" "$list_file" >/dev/null; then
+      err "archive missing expected file: $expected"
+      exit 1
+    fi
+  done < <(expected_files)
+
+  if [ "$(sort "$list_file" | uniq -d | wc -l | tr -d ' ')" != "0" ]; then
+    err "archive contains duplicate entries"
+    exit 1
+  fi
+
+  if grep -v '^-' "$detail_file" >/dev/null; then
+    err "archive contains non-regular files"
+    exit 1
+  fi
+}
+
+if [ "${GALE_RELEASE_ARCHIVE:-}" != "" ]; then
+  if [ "${CI:-}" != "1" ] && [ "${GALE_INSTALL_ALLOW_LOCAL_ARCHIVE:-}" != "1" ]; then
+    err "GALE_RELEASE_ARCHIVE is only allowed when CI=1 or GALE_INSTALL_ALLOW_LOCAL_ARCHIVE=1"
+    exit 1
+  fi
+  archive_path="$GALE_RELEASE_ARCHIVE"
+  printf 'Installing GaleHarnessCLI from local archive (%s)\n' "$platform"
+  printf 'Archive: %s\n' "$archive_path"
+else
+  need curl
+  tag="$(resolve_tag "${1:-}")"
+  if [[ "$tag" != "$TAG_PREFIX"* ]]; then
+    err "release tag must start with $TAG_PREFIX: $tag"
+    exit 1
+  fi
+
+  version="${tag#$TAG_PREFIX}"
+  asset="galeharness-cli-$version-$platform.tar.gz"
+  url="https://github.com/$REPO/releases/download/$tag/$asset"
+  archive_path="$tmpdir/$asset"
+
+  printf 'Installing GaleHarnessCLI %s (%s)\n' "$version" "$platform"
+  printf 'Download: %s\n' "$url"
+  curl -fL "$url" -o "$archive_path"
+fi
+
+validate_archive_listing "$archive_path"
+tar -xzf "$archive_path" -C "$tmpdir"
+
+for bin in gale-harness compound-plugin gale-knowledge gale-memory; do
+  src="$tmpdir/$bin$exe"
+  if [ ! -f "$src" ] || [ -L "$src" ]; then
+    err "archive entry is not a regular file: $bin$exe"
+    exit 1
+  fi
+done
+
+if [ ! -f "$tmpdir/VERSION" ] || [ -L "$tmpdir/VERSION" ]; then
+  err "archive entry is not a regular file: VERSION"
+  exit 1
+fi
 
 mkdir -p "$install_dir"
 for bin in gale-harness compound-plugin gale-knowledge gale-memory; do
   src="$tmpdir/$bin$exe"
-  if [ ! -f "$src" ]; then
-    continue
-  fi
   dest="$install_dir/$bin$exe"
   if [ -L "$dest" ]; then
     rm "$dest"
