@@ -23,7 +23,8 @@
     "build:gale-memory": "bun build --compile cmd/gale-memory/index.ts --outfile gale-memory --target bun",
     "install-gale-task": "bun run build:gale-task && mv gale-task ~/.local/bin/gale-task && echo 'gale-task installed to ~/.local/bin/gale-task'",
     "build:release": "bun run scripts/release/build.ts",
-    "build:cli": "bun build --compile src/index.ts --outfile gale-harness --target bun"
+    "build:cli": "bun build --compile src/index.ts --outfile gale-harness --target bun",
+    "repo:health": "bun run scripts/check-repo-health.ts"
   },
   "dependencies": {
     "citty": "^0.1.6",
