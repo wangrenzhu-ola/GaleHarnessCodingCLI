@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { mkdir, mkdtemp, rm, writeFile } from "fs/promises"
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "fs/promises"
 import { tmpdir } from "os"
 import path from "path"
 import type { TrackedFileProvider } from "../scripts/check-repo-health"
@@ -234,13 +234,7 @@ describe("scanLocalArtifacts", () => {
       await mkdir(realDir)
       await writeFile(path.join(realDir, "secret.txt"), "should not be counted")
 
-      // Create symlink inside scan target pointing to real-data
-      const proc = Bun.spawn(["ln", "-s", realDir, path.join(subdir, "link")], {
-        cwd: dir,
-        stdout: "pipe",
-        stderr: "pipe",
-      })
-      await proc.exited
+      await symlink(realDir, path.join(subdir, "link"), "dir")
 
       const summaries = await scanLocalArtifacts(dir, ["scan-target"])
       expect(summaries).toHaveLength(1)

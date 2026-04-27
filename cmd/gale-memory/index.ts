@@ -4,6 +4,7 @@ import {
   captureTaskMemory,
   feedbackTaskMemory,
   startTaskMemory,
+  storeSessionTranscript,
 } from "../../src/memory/task-runtime.js"
 import { skippedResult } from "../../src/memory/hkt-client.js"
 import { migrateLegacyMemory, migrationStatus } from "../../src/memory/migration.js"
@@ -115,6 +116,22 @@ async function main(): Promise<void> {
       return
     }
 
+    if (command === "store-session-transcript") {
+      const result = await storeSessionTranscript({
+        ...common,
+        phase: flags.phase ?? "completed",
+        content: flags.content ?? flags.summary ?? common.inputSummary,
+        title: flags.title,
+        summary: flags.summary ?? common.inputSummary,
+        sourceMode: flags["source-mode"] ?? "phase_completed",
+        importance: (flags.importance ?? "medium") as "high" | "medium" | "low",
+        maxChars: flags["max-chars"] ? Number(flags["max-chars"]) : undefined,
+        metadata: parseJsonObject(flags.metadata),
+      })
+      process.stdout.write(JSON.stringify(result, null, 2) + "\n")
+      return
+    }
+
     if (command === "feedback") {
       const result = await feedbackTaskMemory({
         ...common,
@@ -129,13 +146,13 @@ async function main(): Promise<void> {
 
     if (!command || command === "--help" || command === "-h") {
       process.stdout.write(
-        "Usage: gale-memory <start|capture|feedback|status|resolve-root|migrate> [flags]\n" +
+        "Usage: gale-memory <start|capture|store-session-transcript|feedback|status|resolve-root|migrate> [flags]\n" +
         "Flags: --cwd <path> --project <name> --memory-dir <path> --json\n",
       )
       return
     }
 
-    process.stdout.write(JSON.stringify(skippedResult("Usage: gale-memory <start|capture|feedback|status|resolve-root|migrate> [flags]")) + "\n")
+    process.stdout.write(JSON.stringify(skippedResult("Usage: gale-memory <start|capture|store-session-transcript|feedback|status|resolve-root|migrate> [flags]")) + "\n")
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     process.stdout.write(JSON.stringify(skippedResult(message)) + "\n")

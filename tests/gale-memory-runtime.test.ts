@@ -8,12 +8,14 @@ import {
   captureTaskMemory,
   feedbackTaskMemory,
   startTaskMemory,
+  storeSessionTranscript,
 } from "../src/memory/task-runtime.js"
 import { HktClient } from "../src/memory/hkt-client.js"
 
 class FakeHktClient {
   recallEnvelope: Record<string, unknown> | null = null
   captureEvent: Record<string, unknown> | null = null
+  transcript: Record<string, unknown> | null = null
 
   async taskRecall(envelope: Record<string, unknown>) {
     this.recallEnvelope = envelope
@@ -35,6 +37,15 @@ class FakeHktClient {
       ledger_updated: true,
       durable_memory_id: null,
       memory_link_required: false,
+      diagnostics: {},
+    }
+  }
+
+  async storeSessionTranscript(transcript: Record<string, unknown>) {
+    this.transcript = transcript
+    return {
+      success: true,
+      L2: "memory-session-123",
       diagnostics: {},
     }
   }
@@ -192,6 +203,43 @@ describe("Gale task memory runtime", () => {
     expect(client.captureEvent?.payload).toEqual({ hypothesis: "cache issue" })
   })
 
+  test("storeSessionTranscript sends phase completion transcript with provenance", async () => {
+    const client = new FakeHktClient()
+
+    const result = await storeSessionTranscript(
+      {
+        cwd: tmpDir,
+        contextFile,
+        project: "HKTMemory",
+        repoRoot: tmpDir,
+        branch: "feature/task-memory",
+        skill: "gh:work",
+        mode: "implement",
+        phase: "completed",
+        content: "Implemented transcript hooks and verified tests",
+        summary: "Transcript hooks completed",
+        files: ["src/memory/task-runtime.ts"],
+        verification: { status: "passed", command: "bun test" },
+        importance: "high",
+      },
+      client,
+    )
+
+    expect(result.store.success).toBe(true)
+    expect(client.transcript?.source).toBe("galeharness")
+    expect(client.transcript?.source_mode).toBe("phase_completed")
+    expect(client.transcript?.project).toBe("HKTMemory")
+    expect(client.transcript?.repo_root).toBe(tmpDir)
+    expect(client.transcript?.branch).toBe("feature/task-memory")
+    expect(client.transcript?.importance).toBe("high")
+    expect(client.transcript?.metadata).toMatchObject({
+      skill: "gh:work",
+      phase: "completed",
+      artifact_type: "work_session_transcript",
+      summary: "Transcript hooks completed",
+    })
+  })
+
   test("feedback is captured as a structured task event", async () => {
     const client = new FakeHktClient()
 
@@ -231,19 +279,24 @@ describe("Gale task memory runtime", () => {
   })
 
   test("HktClient passes HKT_MEMORY_DIR to child process", async () => {
-    const script = path.join(tmpDir, "fake-hkt")
-    const memoryDir = path.join(tmpDir, "custom-memory")
-    await writeFile(
-      script,
-      "#!/usr/bin/env node\nconsole.log(JSON.stringify({ success: true, diagnostics: { child_memory_dir: process.env.HKT_MEMORY_DIR } }))\n",
-      "utf8",
-    )
-    await chmod(script, 0o755)
-    const client = new HktClient({ binary: script, cwd: tmpDir, timeoutMs: 1000, memoryDir })
+    const hktTmpDir = await mkdtemp(path.join(tmpdir(), "gale-memory-hkt-client-"))
+    try {
+      const script = path.join(hktTmpDir, "fake-hkt")
+      const memoryDir = path.join(hktTmpDir, "custom-memory")
+      await writeFile(
+        script,
+        "#!/usr/bin/env node\nconsole.log(JSON.stringify({ success: true, diagnostics: { child_memory_dir: process.env.HKT_MEMORY_DIR } })); process.exit(0)\n",
+        "utf8",
+      )
+      await chmod(script, 0o755)
+      const client = new HktClient({ binary: script, cwd: hktTmpDir, timeoutMs: 10000, memoryDir })
 
-    const result = await client.taskRecall({ schema_version: "gale-task-memory.v1" })
+      const result = await client.taskRecall({ schema_version: "gale-task-memory.v1" })
 
-    expect(result.success).toBe(true)
-    expect(result.diagnostics?.child_memory_dir).toBe(memoryDir)
+      expect(result.success).toBe(true)
+      expect(result.diagnostics?.child_memory_dir).toBe(memoryDir)
+    } finally {
+      await rm(hktTmpDir, { recursive: true, force: true })
+    }
   })
 })

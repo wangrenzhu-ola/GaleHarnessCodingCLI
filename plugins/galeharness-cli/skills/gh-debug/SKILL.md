@@ -283,6 +283,8 @@ Options (include only those that apply):
 <!-- HKT-PATCH:gale-task-end -->
 After presenting handoff options and completing this skill, log the completion event:
 
-1. Run `gale-task log skill_completed` to record the completion event.
-2. If `gale-task` is not on PATH or the command fails, skip and continue — this must never block the skill.
+1. Run `gale-memory store-session-transcript --skill gh:debug --mode debug --phase completed --source-mode phase_completed --importance high --summary "<confirmed root cause and fix status>" --content "<debug timeline, failed attempts, root cause, changed files, verification, remaining blockers>"` to make the completed debug session available to `list-recent` and `session-search`.
+2. If `gale-memory` is not on PATH or the command fails, skip and continue — this must never block the skill.
+3. Run `gale-task log skill_completed` to record the completion event.
+4. If `gale-task` is not on PATH or the command fails, skip and continue — this must never block the skill.
 <!-- /HKT-PATCH:gale-task-end -->

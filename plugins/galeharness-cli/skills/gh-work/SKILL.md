@@ -462,6 +462,8 @@ After the work is complete and the shipping workflow has finished (PR created or
 <!-- HKT-PATCH:gale-task-end -->
 After the work workflow is fully complete, log the completion event:
 
-1. Run `gale-task log skill_completed` to record the completion event.
-2. If `gale-task` is not on PATH or the command fails, skip and continue — this must never block the skill.
+1. Run `gale-memory store-session-transcript --skill gh:work --phase completed --source-mode phase_completed --importance high --summary "<concise work summary>" --content "<final summary, changed files, verification, blockers, PR/issue context>"` to make the completed work session available to `list-recent` and `session-search`.
+2. If `gale-memory` is not on PATH or the command fails, skip and continue — this must never block the skill.
+3. Run `gale-task log skill_completed` to record the completion event.
+4. If `gale-task` is not on PATH or the command fails, skip and continue — this must never block the skill.
 <!-- /HKT-PATCH:gale-task-end -->

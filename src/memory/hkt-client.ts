@@ -44,6 +44,41 @@ export class HktClient {
     return this.runJson(["task-capture", "--json", "--event", JSON.stringify(event)])
   }
 
+  storeSessionTranscript(transcript: Record<string, unknown>): Promise<HktTaskResult> {
+    const args = [
+      "store-session-transcript",
+      "--content",
+      String(transcript.content ?? ""),
+      "--session-id",
+      String(transcript.session_id ?? ""),
+      "--source",
+      String(transcript.source ?? "galeharness"),
+      "--source-mode",
+      String(transcript.source_mode ?? "phase_completed"),
+      "--importance",
+      String(transcript.importance ?? "medium"),
+    ]
+    for (const [flag, key] of [
+      ["--title", "title"],
+      ["--topic", "topic"],
+      ["--task-id", "task_id"],
+      ["--project", "project"],
+      ["--repo-root", "repo_root"],
+      ["--branch", "branch"],
+      ["--pr-id", "pr_id"],
+      ["--max-chars", "max_chars"],
+    ] as const) {
+      const value = transcript[key]
+      if (value !== undefined && value !== null && value !== "") {
+        args.push(flag, String(value))
+      }
+    }
+    if (transcript.metadata && typeof transcript.metadata === "object") {
+      args.push("--metadata", JSON.stringify(transcript.metadata))
+    }
+    return this.runJson(args)
+  }
+
   taskLedger(project: string, taskId: string): Promise<HktTaskResult> {
     return this.runJson(["task-ledger", "--json", "--project", project, "--task-id", taskId])
   }
