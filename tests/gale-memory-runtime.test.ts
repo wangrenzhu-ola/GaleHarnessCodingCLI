@@ -279,19 +279,24 @@ describe("Gale task memory runtime", () => {
   })
 
   test("HktClient passes HKT_MEMORY_DIR to child process", async () => {
-    const script = path.join(tmpDir, "fake-hkt")
-    const memoryDir = path.join(tmpDir, "custom-memory")
-    await writeFile(
-      script,
-      "#!/usr/bin/env node\nprocess.stdin.resume(); console.log(JSON.stringify({ success: true, diagnostics: { child_memory_dir: process.env.HKT_MEMORY_DIR } }))\n",
-      "utf8",
-    )
-    await chmod(script, 0o755)
-    const client = new HktClient({ binary: script, cwd: tmpDir, timeoutMs: 1000, memoryDir })
+    const hktTmpDir = await mkdtemp(path.join(tmpdir(), "gale-memory-hkt-client-"))
+    try {
+      const script = path.join(hktTmpDir, "fake-hkt")
+      const memoryDir = path.join(hktTmpDir, "custom-memory")
+      await writeFile(
+        script,
+        "#!/usr/bin/env node\nconsole.log(JSON.stringify({ success: true, diagnostics: { child_memory_dir: process.env.HKT_MEMORY_DIR } })); process.exit(0)\n",
+        "utf8",
+      )
+      await chmod(script, 0o755)
+      const client = new HktClient({ binary: script, cwd: hktTmpDir, timeoutMs: 10000, memoryDir })
 
-    const result = await client.taskRecall({ schema_version: "gale-task-memory.v1" })
+      const result = await client.taskRecall({ schema_version: "gale-task-memory.v1" })
 
-    expect(result.success).toBe(true)
-    expect(result.diagnostics?.child_memory_dir).toBe(memoryDir)
+      expect(result.success).toBe(true)
+      expect(result.diagnostics?.child_memory_dir).toBe(memoryDir)
+    } finally {
+      await rm(hktTmpDir, { recursive: true, force: true })
+    }
   })
 })
