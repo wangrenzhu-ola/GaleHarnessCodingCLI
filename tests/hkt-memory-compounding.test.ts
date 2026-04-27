@@ -480,4 +480,22 @@ describe("Gale Task Memory Runtime Pilot", () => {
     expect(ctx).toContain("--event-type root_cause")
     expect(ctx).not.toContain("hkt-memory store")
   })
+
+  for (const [skill, mode] of [
+    ["gh-work", "gh:work"],
+    ["gh-debug", "gh:debug"],
+    ["gh-compound", "gh:compound"],
+  ]) {
+    test(`${skill} completion stores a session transcript through gale-memory`, async () => {
+      const content = await readFile(path.join(PLUGIN_ROOT, skill, "SKILL.md"), "utf8")
+      const ctx = extractPhaseContext(content, "gale-task-end")
+
+      expect(ctx).toContain("gale-memory store-session-transcript")
+      expect(ctx).toContain(`--skill ${mode}`)
+      expect(ctx).toContain("--phase completed")
+      expect(ctx).toContain("list-recent")
+      expect(ctx).toContain("session-search")
+      expect(ctx).toMatch(/never block the skill/i)
+    })
+  }
 })

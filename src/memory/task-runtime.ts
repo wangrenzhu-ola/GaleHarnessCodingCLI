@@ -66,6 +66,17 @@ export interface CaptureOptions extends BuildEnvelopeOptions {
   payload?: Record<string, unknown>
 }
 
+export interface StoreSessionTranscriptOptions extends BuildEnvelopeOptions {
+  content: string
+  title?: string
+  summary?: string
+  phase?: string
+  sourceMode?: string
+  importance?: "high" | "medium" | "low"
+  maxChars?: number
+  metadata?: Record<string, unknown>
+}
+
 export async function buildTaskEnvelope(options: BuildEnvelopeOptions): Promise<TaskEnvelope> {
   const cwd = options.cwd ?? process.cwd()
   const context = await detectProjectContext(cwd, options)
@@ -134,6 +145,58 @@ export async function captureTaskMemory(
     })
   }
   return { event, capture }
+}
+
+export async function storeSessionTranscript(
+  options: StoreSessionTranscriptOptions,
+  client?: Pick<HktClient, "storeSessionTranscript">,
+): Promise<{ transcript: Record<string, unknown>; store: HktTaskResult }> {
+  const envelope = await buildTaskEnvelope({
+    ...options,
+    phase: options.phase ?? "completed",
+    artifactType: options.artifactType ?? `${options.skill.replace(/^gh:/, "")}_session_transcript`,
+  })
+  const memory = prepareTaskMemory(options)
+  const transcript = {
+    content: options.content,
+    session_id: envelope.task_id,
+    title: options.title ?? `${envelope.skill} session transcript`,
+    topic: "session",
+    task_id: envelope.task_id,
+    project: envelope.project,
+    repo_root: envelope.repo_root,
+    branch: envelope.branch,
+    pr_id: envelope.pr_id,
+    source: "galeharness",
+    source_mode: options.sourceMode ?? "phase_completed",
+    importance: options.importance ?? "medium",
+    max_chars: options.maxChars ?? 12000,
+    metadata: {
+      skill: envelope.skill,
+      phase: envelope.phase,
+      mode: envelope.mode,
+      issue_id: envelope.issue_id,
+      artifact_type: envelope.artifact_type,
+      files: envelope.files,
+      verification: envelope.verification,
+      summary: options.summary ?? envelope.input_summary,
+      ...(options.metadata ?? {}),
+    },
+  }
+  const hktClient = client ?? new HktClient({ cwd: options.cwd, memoryDir: memory.root.memoryDir, diagnostics: memory.diagnostics })
+  const store = withMemoryDiagnostics(await hktClient.storeSessionTranscript(transcript), memory.diagnostics)
+  if (store.success) {
+    const memoryId = String(store.L2 ?? store.memory_ids?.L2 ?? store.existing_memory_id ?? "")
+    if (memoryId) {
+      await logMemoryLinked({
+        cwd: options.cwd ?? process.cwd(),
+        skill: envelope.skill,
+        memoryId,
+        taskId: envelope.task_id,
+      })
+    }
+  }
+  return { transcript, store }
 }
 
 export async function feedbackTaskMemory(

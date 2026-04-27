@@ -621,6 +621,8 @@ Based on problem type, these agents can enhance documentation:
 
 After the compound workflow is fully complete (documentation written, discoverability check done), log the completion event:
 
-1. Run `gale-task log skill_completed` to record the completion event.
-2. If `gale-task` is not on PATH or the command fails, skip and continue — this must never block the skill.
+1. Run `gale-memory store-session-transcript --skill gh:compound --phase completed --source-mode compound_artifact --importance high --summary "<learning document title and reusable pattern>" --content "<problem, root cause, solution, artifacts written, verification, links>"` to make the completed compound artifact session available to `list-recent` and `session-search`.
+2. If `gale-memory` is not on PATH or the command fails, skip and continue — this must never block the skill.
+3. Run `gale-task log skill_completed` to record the completion event.
+4. If `gale-task` is not on PATH or the command fails, skip and continue — this must never block the skill.
 <!-- /HKT-PATCH:gale-task-end -->
