@@ -22,7 +22,8 @@ class FakeHktClient {
     return {
       success: true,
       trace_id: "trace-123",
-      injectable_markdown: "<untrusted-memory-evidence>debug context</untrusted-memory-evidence>",
+      injectable_markdown:
+        "<untrusted-memory-evidence>debug context</untrusted-memory-evidence>",
       items: [],
       diagnostics: {},
     }
@@ -56,14 +57,28 @@ describe("Gale task memory runtime", () => {
   let contextFile: string
   let oldKnowledgeHome: string | undefined
   let oldMemoryDir: string | undefined
+  let oldHermesMemoryDir: string | undefined
+  let oldHermesRecall: string | undefined
+  let oldHermesBin: string | undefined
 
   beforeEach(async () => {
     tmpDir = await mkdtemp(path.join(tmpdir(), "gale-memory-runtime-"))
     oldKnowledgeHome = process.env.GALE_KNOWLEDGE_HOME
     oldMemoryDir = process.env.HKT_MEMORY_DIR
+    oldHermesMemoryDir = process.env.HERMES_HKTMEMORY_DIR
+    oldHermesRecall = process.env.HERMES_HKTMEMORY_RECALL
+    oldHermesBin = process.env.HERMES_HKTMEMORY_BIN
     process.env.GALE_KNOWLEDGE_HOME = path.join(tmpDir, "knowledge")
     delete process.env.HKT_MEMORY_DIR
-    contextFile = path.join(tmpDir, ".context", "galeharness-cli", "current-task.json")
+    delete process.env.HERMES_HKTMEMORY_DIR
+    delete process.env.HERMES_HKTMEMORY_RECALL
+    delete process.env.HERMES_HKTMEMORY_BIN
+    contextFile = path.join(
+      tmpDir,
+      ".context",
+      "galeharness-cli",
+      "current-task.json",
+    )
     await mkdir(path.dirname(contextFile), { recursive: true })
   })
 
@@ -72,6 +87,14 @@ describe("Gale task memory runtime", () => {
     else process.env.GALE_KNOWLEDGE_HOME = oldKnowledgeHome
     if (oldMemoryDir === undefined) delete process.env.HKT_MEMORY_DIR
     else process.env.HKT_MEMORY_DIR = oldMemoryDir
+    if (oldHermesMemoryDir === undefined)
+      delete process.env.HERMES_HKTMEMORY_DIR
+    else process.env.HERMES_HKTMEMORY_DIR = oldHermesMemoryDir
+    if (oldHermesRecall === undefined)
+      delete process.env.HERMES_HKTMEMORY_RECALL
+    else process.env.HERMES_HKTMEMORY_RECALL = oldHermesRecall
+    if (oldHermesBin === undefined) delete process.env.HERMES_HKTMEMORY_BIN
+    else process.env.HERMES_HKTMEMORY_BIN = oldHermesBin
     await rm(tmpDir, { recursive: true, force: true })
   })
 
@@ -105,7 +128,13 @@ describe("Gale task memory runtime", () => {
     expect(envelope.project).toBe("HKTMemory")
     expect(envelope.branch).toBe("feature/task-memory")
     expect(envelope.extensions.gale).toEqual({
-      capture_policy: ["failed_attempt", "root_cause", "verification_result", "handoff_state", "next_action"],
+      capture_policy: [
+        "failed_attempt",
+        "root_cause",
+        "verification_result",
+        "handoff_state",
+        "next_action",
+      ],
       lineage_hints: { source: "current-task" },
     })
   })
@@ -124,7 +153,13 @@ describe("Gale task memory runtime", () => {
 
     expect(envelope.task_id).toBe("branch:hktmemory:feature-task-memory")
     expect(envelope.extensions.gale).toEqual({
-      capture_policy: ["failed_attempt", "root_cause", "verification_result", "handoff_state", "next_action"],
+      capture_policy: [
+        "failed_attempt",
+        "root_cause",
+        "verification_result",
+        "handoff_state",
+        "next_action",
+      ],
       lineage_hints: { source: "branch" },
     })
   })
@@ -149,14 +184,26 @@ describe("Gale task memory runtime", () => {
     expect(result.recall.success).toBe(true)
     expect(client.recallEnvelope?.schema_version).toBe("gale-task-memory.v1")
     expect(client.recallEnvelope?.artifact_type).toBe("debug_session")
-    expect(result.recall.diagnostics?.memory_dir).toBe(path.join(tmpDir, "knowledge", "HKTMemory", "hkt-memory"))
+    expect(result.recall.diagnostics?.memory_dir).toBe(
+      path.join(tmpDir, "knowledge", "HKTMemory", "hkt-memory"),
+    )
     expect(existsSync(path.join(tmpDir, "memory"))).toBe(false)
   })
 
   test("start migrates legacy local memory before recall", async () => {
-    await mkdir(path.join(tmpDir, "memory", "L2-Full", "daily"), { recursive: true })
-    await writeFile(path.join(tmpDir, "memory", "L2-Full", "daily", "legacy.md"), "legacy\n", "utf8")
-    await writeFile(path.join(tmpDir, "memory", "vector_store.db"), "db", "utf8")
+    await mkdir(path.join(tmpDir, "memory", "L2-Full", "daily"), {
+      recursive: true,
+    })
+    await writeFile(
+      path.join(tmpDir, "memory", "L2-Full", "daily", "legacy.md"),
+      "legacy\n",
+      "utf8",
+    )
+    await writeFile(
+      path.join(tmpDir, "memory", "vector_store.db"),
+      "db",
+      "utf8",
+    )
     const client = new FakeHktClient()
 
     const result = await startTaskMemory(
@@ -173,9 +220,13 @@ describe("Gale task memory runtime", () => {
 
     const memoryDir = path.join(tmpDir, "knowledge", "HKTMemory", "hkt-memory")
     expect(result.recall.diagnostics?.status).toBe("completed")
-    expect(existsSync(path.join(memoryDir, "L2-Full", "daily", "legacy.md"))).toBe(true)
+    expect(
+      existsSync(path.join(memoryDir, "L2-Full", "daily", "legacy.md")),
+    ).toBe(true)
     expect(existsSync(path.join(memoryDir, "vector_store.db"))).toBe(false)
-    expect(existsSync(path.join(tmpDir, "memory", "L2-Full", "daily", "legacy.md"))).toBe(true)
+    expect(
+      existsSync(path.join(tmpDir, "memory", "L2-Full", "daily", "legacy.md")),
+    ).toBe(true)
   })
 
   test("capture sends structured events instead of raw store content", async () => {
@@ -199,7 +250,9 @@ describe("Gale task memory runtime", () => {
 
     expect(result.capture.success).toBe(true)
     expect(client.captureEvent?.event_type).toBe("failed_attempt")
-    expect(client.captureEvent?.summary).toBe("Re-running the same test still fails")
+    expect(client.captureEvent?.summary).toBe(
+      "Re-running the same test still fails",
+    )
     expect(client.captureEvent?.payload).toEqual({ hypothesis: "cache issue" })
   })
 
@@ -269,9 +322,15 @@ describe("Gale task memory runtime", () => {
   })
 
   test("missing hkt-memory binary degrades to skipped result", async () => {
-    const client = new HktClient({ binary: "__definitely_missing_hkt_memory__", cwd: tmpDir, timeoutMs: 50 })
+    const client = new HktClient({
+      binary: "__definitely_missing_hkt_memory__",
+      cwd: tmpDir,
+      timeoutMs: 50,
+    })
 
-    const result = await client.taskRecall({ schema_version: "gale-task-memory.v1" })
+    const result = await client.taskRecall({
+      schema_version: "gale-task-memory.v1",
+    })
 
     expect(result.success).toBe(false)
     expect(result.skipped).toBe(true)
@@ -279,7 +338,9 @@ describe("Gale task memory runtime", () => {
   })
 
   test("HktClient passes HKT_MEMORY_DIR to child process", async () => {
-    const hktTmpDir = await mkdtemp(path.join(tmpdir(), "gale-memory-hkt-client-"))
+    const hktTmpDir = await mkdtemp(
+      path.join(tmpdir(), "gale-memory-hkt-client-"),
+    )
     try {
       const script = path.join(hktTmpDir, "fake-hkt")
       const memoryDir = path.join(hktTmpDir, "custom-memory")
@@ -289,12 +350,118 @@ describe("Gale task memory runtime", () => {
         "utf8",
       )
       await chmod(script, 0o755)
-      const client = new HktClient({ binary: script, cwd: hktTmpDir, timeoutMs: 10000, memoryDir })
+      const client = new HktClient({
+        binary: script,
+        cwd: hktTmpDir,
+        timeoutMs: 10000,
+        memoryDir,
+      })
 
-      const result = await client.taskRecall({ schema_version: "gale-task-memory.v1" })
+      const result = await client.taskRecall({
+        schema_version: "gale-task-memory.v1",
+      })
 
       expect(result.success).toBe(true)
       expect(result.diagnostics?.child_memory_dir).toBe(memoryDir)
+    } finally {
+      await rm(hktTmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test("HktClient prefers hermes-hktmemory provider recall when configured", async () => {
+    const hktTmpDir = await mkdtemp(
+      path.join(tmpdir(), "gale-memory-provider-"),
+    )
+    try {
+      const providerScript = path.join(hktTmpDir, "fake-hermes-hktmemory")
+      const hktScript = path.join(hktTmpDir, "fake-hkt")
+      const providerMemoryDir = path.join(hktTmpDir, "provider-memory")
+      await writeFile(
+        providerScript,
+        `#!/usr/bin/env node
+const args = process.argv.slice(2)
+console.log(JSON.stringify({
+  items: [{ content: "provider memory hit", query: args[args.indexOf("-q") + 1], dir: process.env.HERMES_HKTMEMORY_DIR }]
+}))
+`,
+        "utf8",
+      )
+      await writeFile(
+        hktScript,
+        "#!/usr/bin/env node\nconsole.log(JSON.stringify({ success: true, diagnostics: { backend: 'fallback' }, items: [{ content: 'fallback' }] }))\n",
+        "utf8",
+      )
+      await chmod(providerScript, 0o755)
+      await chmod(hktScript, 0o755)
+      const client = new HktClient({
+        binary: hktScript,
+        providerBinary: providerScript,
+        cwd: hktTmpDir,
+        timeoutMs: 10000,
+        providerMemoryDir,
+      })
+
+      const result = await client.taskRecall(
+        {
+          schema_version: "gale-task-memory.v1",
+          input_summary: "resume failing test",
+        },
+        3,
+      )
+
+      expect(result.success).toBe(true)
+      expect(result.diagnostics?.backend).toBe("provider_vector")
+      expect(result.diagnostics?.hermes_hktmemory_dir).toBe(providerMemoryDir)
+      expect(result.diagnostics?.provider_vector_query).toBe(
+        "resume failing test",
+      )
+      expect(result.injectable_markdown).toContain("provider memory hit")
+      expect(result.items?.[0]).toMatchObject({
+        content: "provider memory hit",
+        query: "resume failing test",
+        dir: providerMemoryDir,
+      })
+    } finally {
+      await rm(hktTmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test("HktClient falls back to hkt-memory task-recall when provider recall is empty", async () => {
+    const hktTmpDir = await mkdtemp(
+      path.join(tmpdir(), "gale-memory-provider-fallback-"),
+    )
+    try {
+      const providerScript = path.join(hktTmpDir, "fake-hermes-hktmemory")
+      const hktScript = path.join(hktTmpDir, "fake-hkt")
+      await writeFile(
+        providerScript,
+        "#!/usr/bin/env node\nprocess.exit(0)\n",
+        "utf8",
+      )
+      await writeFile(
+        hktScript,
+        "#!/usr/bin/env node\nconsole.log(JSON.stringify({ success: true, injectable_markdown: 'fallback markdown', items: [{ content: 'fallback' }], diagnostics: { backend: 'hkt_task_recall' } }))\n",
+        "utf8",
+      )
+      await chmod(providerScript, 0o755)
+      await chmod(hktScript, 0o755)
+      const client = new HktClient({
+        binary: hktScript,
+        providerBinary: providerScript,
+        cwd: hktTmpDir,
+        timeoutMs: 10000,
+        providerMemoryDir: path.join(hktTmpDir, "provider-memory"),
+      })
+
+      const result = await client.taskRecall({
+        schema_version: "gale-task-memory.v1",
+        input_summary: "resume failing test",
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.diagnostics?.backend).toBe("hkt_task_recall")
+      expect(result.injectable_markdown).toBe("fallback markdown")
+      expect(result.items?.[0]).toEqual({ content: "fallback" })
     } finally {
       await rm(hktTmpDir, { recursive: true, force: true })
     }
