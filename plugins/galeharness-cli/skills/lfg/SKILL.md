@@ -21,7 +21,7 @@ When invoking any skill referenced below, resolve its name against the available
 
    Pass the plan file path from step 1 so gh:review can verify requirements completeness.
 
-4. Invoke the `test-browser` skill.
+4. Invoke the `test-browser` skill with `mode:pipeline`.
 
 5. Invoke the `git-commit-push-pr` skill.
 

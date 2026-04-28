@@ -96,7 +96,9 @@ Build a list of URLs to test based on the mapping.
 
 ### 5. Detect and Claim a Free Port
 
-**This step is critical when multiple agents run in parallel.** Always find a port that is actually free — never assume 3000 is available.
+**Pipeline mode only (`mode:pipeline`):** When invoked from LFG or another automated pipeline, always find a port that is actually free — never assume 3000 is available, as multiple agents may be running in parallel on the same machine.
+
+**Manual mode (no `mode:pipeline`):** Use the preferred port as-is. Do not scan for alternatives — the user controls their own server.
 
 Determine the preferred port using this priority:
 
@@ -106,7 +108,7 @@ Determine the preferred port using this priority:
 4. **Environment files** — check `.env`, `.env.local`, `.env.development` for `PORT=`
 5. **Default** — fall back to `3000`
 
-Then **always verify the preferred port is free** and scan upward if not:
+**In pipeline mode**, verify the preferred port is free and scan upward if not. **In manual mode**, use the preferred port directly.
 
 ```bash
 # Step 1: Determine preferred port
@@ -125,59 +127,65 @@ if [ -z "$PORT" ]; then
 fi
 PORT="${PORT:-3000}"
 
-# Step 2: Find a free port starting from preferred port
-find_free_port() {
-  local p=$1
-  while lsof -i ":$p" -sTCP:LISTEN -t >/dev/null 2>&1; do
-    p=$((p + 1))
-  done
-  echo $p
-}
-PORT=$(find_free_port "$PORT")
+# Step 2 (pipeline mode only): scan for a free port
+if [ "${PIPELINE_MODE}" = "1" ]; then
+  find_free_port() {
+    local p=$1
+    while lsof -i ":$p" -sTCP:LISTEN -t >/dev/null 2>&1; do
+      p=$((p + 1))
+    done
+    echo $p
+  }
+  PORT=$(find_free_port "$PORT")
+fi
 echo "Using dev server port: $PORT"
 ```
 
+Set `PIPELINE_MODE=1` in your shell when the argument `mode:pipeline` is present.
+
 ### 6. Start Dev Server if Not Running, Then Verify
 
-If no server is already listening on `$PORT`, start one in the background using the project's standard dev command. Always pass the port explicitly so parallel agents don't collide.
+**Pipeline mode only:** If no server is already listening on `$PORT`, start one automatically in the background. In manual mode, inform the user and stop.
 
 ```bash
-# Check if server already running on the chosen port
 if lsof -i ":${PORT}" -sTCP:LISTEN -t >/dev/null 2>&1; then
   echo "Server already running on port ${PORT}"
 else
-  echo "Starting dev server on port ${PORT}..."
-  # Rails (Foreman/Overmind via bin/dev)
-  if [ -f "bin/dev" ]; then
-    PORT=${PORT} bin/dev > /tmp/dev-server-${PORT}.log 2>&1 &
-    DEV_SERVER_PID=$!
-  # Plain Rails server
-  elif [ -f "bin/rails" ]; then
-    bin/rails server -p ${PORT} > /tmp/dev-server-${PORT}.log 2>&1 &
-    DEV_SERVER_PID=$!
-  # Node / Next.js
-  elif [ -f "package.json" ]; then
-    PORT=${PORT} npm run dev > /tmp/dev-server-${PORT}.log 2>&1 &
-    DEV_SERVER_PID=$!
-  fi
-
-  # Wait up to 30 seconds for server to become ready
-  echo "Waiting for server to start..."
-  for i in $(seq 1 30); do
-    if lsof -i ":${PORT}" -sTCP:LISTEN -t >/dev/null 2>&1; then
-      echo "Server ready after ${i}s"
-      break
+  if [ "${PIPELINE_MODE}" = "1" ]; then
+    # Auto-start in pipeline — pick the right command for this project
+    echo "Starting dev server on port ${PORT}..."
+    if [ -f "bin/dev" ]; then
+      PORT=${PORT} bin/dev > /tmp/dev-server-${PORT}.log 2>&1 &
+    elif [ -f "bin/rails" ]; then
+      bin/rails server -p ${PORT} > /tmp/dev-server-${PORT}.log 2>&1 &
+    elif [ -f "package.json" ]; then
+      PORT=${PORT} npm run dev > /tmp/dev-server-${PORT}.log 2>&1 &
     fi
-    sleep 1
-  done
+    # Wait up to 30 seconds for server to become ready
+    for i in $(seq 1 30); do
+      lsof -i ":${PORT}" -sTCP:LISTEN -t >/dev/null 2>&1 && break
+      sleep 1
+    done
+    if ! lsof -i ":${PORT}" -sTCP:LISTEN -t >/dev/null 2>&1; then
+      echo "Server did not start in 30s. Last output:"
+      tail -20 /tmp/dev-server-${PORT}.log 2>/dev/null
+      exit 1
+    fi
+  else
+    # Manual mode — ask the user to start the server
+    echo "Server not running on port ${PORT}"
+    echo ""
+    echo "Please start your development server:"
+    echo "  Rails: bin/dev  or  rails server -p ${PORT}"
+    echo "  Node/Next.js: npm run dev"
+    echo "  Custom port: run this skill again with --port <your-port>"
+    exit 0
+  fi
 fi
 
-# Verify server responds
 agent-browser open http://localhost:${PORT}
 agent-browser snapshot -i
 ```
-
-If the server still does not respond after 30 seconds, report the last 20 lines of `/tmp/dev-server-${PORT}.log` and stop — do not proceed with browser tests against an unresponsive server.
 
 ### 7. Test Each Affected Page
 
