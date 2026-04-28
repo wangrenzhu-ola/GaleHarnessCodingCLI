@@ -94,23 +94,28 @@ Map changed files to testable routes:
 
 Build a list of URLs to test based on the mapping.
 
-### 5. Detect Dev Server Port
+### 5. Detect and Claim a Free Port
 
-Determine the dev server port using this priority:
+**This step is critical when multiple agents run in parallel.** Always find a port that is actually free — never assume 3000 is available.
 
-1. **Explicit argument** — if the user passed `--port 5000`, use that directly
+Determine the preferred port using this priority:
+
+1. **Explicit argument** — if the user passed `--port 5000`, use that directly (skip free-port scan)
 2. **Project instructions** — check `AGENTS.md`, `CLAUDE.md`, or other instruction files for port references
 3. **package.json** — check dev/start scripts for `--port` flags
 4. **Environment files** — check `.env`, `.env.local`, `.env.development` for `PORT=`
 5. **Default** — fall back to `3000`
 
+Then **always verify the preferred port is free** and scan upward if not:
+
 ```bash
+# Step 1: Determine preferred port
 PORT="${EXPLICIT_PORT:-}"
 if [ -z "$PORT" ]; then
   PORT=$(grep -Eio '(port\s*[:=]\s*|localhost:)([0-9]{4,5})' AGENTS.md 2>/dev/null | grep -Eo '[0-9]{4,5}' | head -1)
-  if [ -z "$PORT" ]; then
-    PORT=$(grep -Eio '(port\s*[:=]\s*|localhost:)([0-9]{4,5})' CLAUDE.md 2>/dev/null | grep -Eo '[0-9]{4,5}' | head -1)
-  fi
+fi
+if [ -z "$PORT" ]; then
+  PORT=$(grep -Eio '(port\s*[:=]\s*|localhost:)([0-9]{4,5})' CLAUDE.md 2>/dev/null | grep -Eo '[0-9]{4,5}' | head -1)
 fi
 if [ -z "$PORT" ]; then
   PORT=$(grep -Eo '\-\-port[= ]+[0-9]{4,5}' package.json 2>/dev/null | grep -Eo '[0-9]{4,5}' | head -1)
@@ -119,28 +124,60 @@ if [ -z "$PORT" ]; then
   PORT=$(grep -h '^PORT=' .env .env.local .env.development 2>/dev/null | tail -1 | cut -d= -f2)
 fi
 PORT="${PORT:-3000}"
+
+# Step 2: Find a free port starting from preferred port
+find_free_port() {
+  local p=$1
+  while lsof -i ":$p" -sTCP:LISTEN -t >/dev/null 2>&1; do
+    p=$((p + 1))
+  done
+  echo $p
+}
+PORT=$(find_free_port "$PORT")
 echo "Using dev server port: $PORT"
 ```
 
-### 6. Verify Server is Running
+### 6. Start Dev Server if Not Running, Then Verify
+
+If no server is already listening on `$PORT`, start one in the background using the project's standard dev command. Always pass the port explicitly so parallel agents don't collide.
 
 ```bash
+# Check if server already running on the chosen port
+if lsof -i ":${PORT}" -sTCP:LISTEN -t >/dev/null 2>&1; then
+  echo "Server already running on port ${PORT}"
+else
+  echo "Starting dev server on port ${PORT}..."
+  # Rails (Foreman/Overmind via bin/dev)
+  if [ -f "bin/dev" ]; then
+    PORT=${PORT} bin/dev > /tmp/dev-server-${PORT}.log 2>&1 &
+    DEV_SERVER_PID=$!
+  # Plain Rails server
+  elif [ -f "bin/rails" ]; then
+    bin/rails server -p ${PORT} > /tmp/dev-server-${PORT}.log 2>&1 &
+    DEV_SERVER_PID=$!
+  # Node / Next.js
+  elif [ -f "package.json" ]; then
+    PORT=${PORT} npm run dev > /tmp/dev-server-${PORT}.log 2>&1 &
+    DEV_SERVER_PID=$!
+  fi
+
+  # Wait up to 30 seconds for server to become ready
+  echo "Waiting for server to start..."
+  for i in $(seq 1 30); do
+    if lsof -i ":${PORT}" -sTCP:LISTEN -t >/dev/null 2>&1; then
+      echo "Server ready after ${i}s"
+      break
+    fi
+    sleep 1
+  done
+fi
+
+# Verify server responds
 agent-browser open http://localhost:${PORT}
 agent-browser snapshot -i
 ```
 
-If the server is not running, inform the user:
-
-```
-Server not running on port ${PORT}
-
-Please start your development server:
-- Rails: `bin/dev` or `rails server`
-- Node/Next.js: `npm run dev`
-- Custom port: run this skill again with `--port <your-port>`
-
-Then re-run this skill.
-```
+If the server still does not respond after 30 seconds, report the last 20 lines of `/tmp/dev-server-${PORT}.log` and stop — do not proceed with browser tests against an unresponsive server.
 
 ### 7. Test Each Affected Page
 
