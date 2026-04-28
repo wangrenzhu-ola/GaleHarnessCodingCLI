@@ -184,8 +184,7 @@ describe("ce-review contract", () => {
     expect(content).toContain("### Stage 5b: Validation pass")
     expect(content).toContain("`headless`")
     expect(content).toContain("`autofix`")
-    expect(content).toMatch(/interactive LFG/i)
-    expect(content).toMatch(/File-tickets/i)
+    // Stage 5b runs on headless/autofix only; interactive mode does not use LFG or File-tickets routing.
     expect(content).toMatch(/report-only/i)
     expect(content).toMatch(/Per-finding parallel dispatch/i)
     expect(content).toMatch(/Independence is the point/i)
@@ -196,6 +195,48 @@ describe("ce-review contract", () => {
     expect(validatorTemplate).toContain('"validated": true | false')
     expect(validatorTemplate).toMatch(/introduced by THIS diff/i)
     expect(validatorTemplate).toMatch(/handled elsewhere/i)
+  })
+
+  test("Stage 5 action derivation uses suggested_fix as the authoritative signal", async () => {
+    const content = await readRepoFile("plugins/galeharness-cli/skills/gh-review/SKILL.md")
+
+    // The mapping table documents the per-finding recommended action.
+    expect(content).toMatch(/manual.*yes.*Apply/)
+    expect(content).toMatch(/manual.*no.*Defer/)
+    expect(content).toMatch(/gated_auto.*yes.*Apply/)
+    expect(content).toMatch(/gated_auto.*no.*Defer/)
+    expect(content).toMatch(/advisory.*n\/a.*Acknowledge/)
+
+    // Cross-reviewer tie-break order is unchanged.
+    expect(content).toMatch(/Skip > Defer > Apply > Acknowledge/)
+  })
+
+  test("subagent template pushes suggested_fix aggressively", async () => {
+    const template = await readRepoFile(
+      "plugins/galeharness-cli/skills/gh-review/references/subagent-template.md",
+    )
+
+    expect(template).toMatch(/Propose a `suggested_fix` whenever any defensible code change is reachable/)
+    expect(template).toMatch(/Imperfect information is not grounds for omission/)
+    expect(template).toMatch(/Genuinely-omit cases are rare/)
+    expect(template).toMatch(/no fix proposed by reviewer/)
+  })
+
+  test("findings schema tightens suggested_fix description", async () => {
+    const rawSchema = await readRepoFile(
+      "plugins/galeharness-cli/skills/gh-review/references/findings-schema.json",
+    )
+    const schema = JSON.parse(rawSchema)
+
+    expect(schema.properties.findings.items.properties.suggested_fix.description).toMatch(
+      /Concrete minimal fix the reviewer can defend/,
+    )
+    expect(schema.properties.findings.items.properties.suggested_fix.description).toMatch(
+      /Imperfect information is not grounds for omission/,
+    )
+    expect(schema.properties.findings.items.properties.suggested_fix.description).toMatch(
+      /genuinely no code-level change to propose/,
+    )
   })
 
   test("PR-mode skip-condition pre-check stops without dispatching reviewers", async () => {

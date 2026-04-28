@@ -530,7 +530,20 @@ Convert multiple reviewer compact JSON returns into one deduplicated, confidence
 4b. **Classify diff-hygiene findings.** Treat drive-by refactors, speculative abstractions, unrequested behavior changes, adjacent formatting/comment churn, and files with no intent/plan/verification trace as primary findings unless they are purely pre-existing. Necessary cleanup is allowed when it removes orphans created by this diff, such as newly unused imports, variables, functions, or tests. Route surgical cleanup that is mechanical and local as `safe_auto`; route unrequested behavior or architecture changes as `gated_auto` or `manual`.
 5. **Resolve disagreements.** When reviewers flag the same code region but disagree on severity, autofix_class, or owner, annotate the Reviewer column with the disagreement (e.g., "security (P0), correctness (P1) -- kept P0"). This transparency helps the user understand why a finding was routed the way it was.
 6. **Normalize routing.** For each merged finding, set the final `autofix_class`, `owner`, and `requires_verification`. If reviewers disagree, keep the most conservative route. Synthesis may narrow a finding from `safe_auto` to `gated_auto` or `manual`, but must not widen it without new evidence.
-6b. **Tie-break the recommended action.** Interactive mode's walk-through and LFG paths present a per-finding recommended action (Apply / Defer / Skip / Acknowledge) derived from the normalized `autofix_class` and `suggested_fix`. When contributing reviewers implied different actions for the same merged finding, synthesis picks the most conservative using the order `Skip > Defer > Apply > Acknowledge`. This guarantees that identical review artifacts produce the same recommendation deterministically, so LFG results are auditable after the fact and the walk-through's recommendation is stable across re-runs. The user may still override per finding via the walk-through's options; this rule only determines what gets labeled "recommended."
+6b. **Derive the recommended action.** The recommended action (Apply / Defer / Skip / Acknowledge) is derived from the normalized `autofix_class` and the presence of `suggested_fix` using this mapping:
+
+| `autofix_class` | `suggested_fix` present? | Recommended action |
+|-----------------|--------------------------|--------------------|
+| `safe_auto`     | (auto-applied before the policy question; not surfaced to interactive policy) | Apply |
+| `gated_auto`    | yes                      | Apply |
+| `gated_auto`    | no                       | Defer |
+| `manual`        | **yes**                  | **Apply** |
+| `manual`        | no                       | Defer |
+| `advisory`      | n/a                      | Acknowledge |
+
+The presence of `suggested_fix` is the authoritative signal that the agent can act on the finding. A `manual` finding *with* a `suggested_fix` recommends Apply because the persona has committed to a concrete fix shape grounded in review context (per the subagent template's suggested_fix rule). A `manual` finding *without* a `suggested_fix` recommends Defer because the persona signaled that the fix genuinely needs cross-team input or business-rule context the reviewer cannot provide. `autofix_class` itself is not collapsed by this mapping — the report still records what the persona thought (`manual` vs `gated_auto`), and the distinction matters for downstream surfaces like the unified completion report.
+
+**Cross-reviewer tie-break.** When contributing reviewers implied different actions for the same merged finding, synthesis picks the most conservative using the order `Skip > Defer > Apply > Acknowledge`. This rule fires only on multi-reviewer disagreement; the per-finding mapping above is the single-reviewer default. Tie-break guarantees that identical review artifacts produce the same recommendation deterministically, so results are auditable after the fact and recommendations are stable across re-runs.
 6c. **Mode-aware demotion of weak general-quality findings.** Some persona output is real signal but does not warrant primary-findings attention. Reroute it to existing soft buckets so the primary findings table stays focused on actionable issues.
 
 A finding qualifies for demotion when all of these hold:
@@ -557,11 +570,11 @@ Demotion is intentionally narrow. Do not expand the rule by guessing which other
 
 Independent verification gate. Spawn one validator sub-agent per surviving finding using `references/validator-template.md`. The validator re-checks the finding against the diff and surrounding code with no commitment to the original persona's analysis. Findings the validator rejects are dropped; findings the validator confirms flow through unchanged.
 
-Stage 5b runs eagerly in `headless` and `autofix`, and it runs before externalizing interactive LFG or File-tickets actions. It does not run for interactive walk-through findings the user reviews one by one, interactive Report-only routing, or `report-only` mode.
+Stage 5b runs eagerly in `headless` and `autofix`. It does not run for interactive Report-only routing or `report-only` mode.
 
 Steps:
 
-1. **Select findings to validate.** In headless/autofix, validate all survivors of Stage 5. In interactive LFG and walk-through LFG-the-rest, validate the Apply / Defer action set. In File-tickets routing, validate all pending findings because every finding becomes a ticket.
+1. **Select findings to validate.** In headless/autofix, validate all survivors of Stage 5.
 2. **Apply dispatch budget cap.** If the selected set exceeds 15 findings, validate the highest-severity 15 (P0 first, then P1, then P2, then P3, breaking ties by anchor descending). Drop the remainder and record the over-budget count for Coverage.
 3. **Spawn validators in parallel.** One sub-agent per finding, dispatched concurrently using the validator template. Each validator receives the finding's title, severity, file, line, suggested_fix, original reviewer name, confidence anchor, the full diff, and `why_it_matters` when available from the artifact file.
 4. **Collect verdicts.** Each validator returns `{ "validated": true | false, "reason": "<one sentence>" }`. `validated: true` keeps the finding. `validated: false` drops it and records the reason. Validator timeout, dispatch error, or malformed JSON also drops the finding with reason "validator failed"; conservative bias is correct.
