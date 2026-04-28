@@ -20,10 +20,10 @@ Rejection criteria:
 - interesting but better handled as a brainstorm variant, not a product improvement
 - unjustified — no articulated warrant tagged `direct:`, `external:`, or `reasoned:`
 - unsupported — the stated warrant does not actually support the claimed move
-- subject-replacement — abandons or replaces the subject of ideation rather than operating on it
-- below ambition floor — fails the meeting-test, except when Phase 0.3 detected tactical focus signals
+- subject-replacement — abandons or replaces the subject of ideation rather than operating on it — e.g., "pivot to an unrelated domain," "become a different organization"
+- below ambition floor — fails the meeting-test: would not warrant team discussion — except when Phase 0.3 detected tactical focus signals, in which case this criterion is waived
 
-Score survivors using a consistent rubric weighing: groundedness in the current repo, warrant strength (`direct:` > `external:` > `reasoned:`, all else equal), expected value, novelty, pragmatism, leverage on future work, implementation burden, and overlap with stronger ideas.
+Score survivors using a consistent rubric weighing: groundedness in the current repo, **warrant strength** (`direct:` > `external:` > `reasoned:`; none excluded, but direct-evidence ideas score higher all else equal), expected value, novelty, pragmatism, leverage on future work, implementation burden, and overlap with stronger ideas.
 
 Target output:
 - keep 5-7 survivors by default
@@ -167,6 +167,9 @@ When ending:
 Before finishing, check:
 
 - the idea set is grounded in the actual repo
+- **every surviving idea has articulated warrant** (`direct:`, `external:`, or `reasoned:`) that actually supports the claimed move — speculation dressed as ambition was rejected, with reasons
+- **every surviving idea passes the meeting-test** unless Phase 0.3 detected tactical focus signals that waived the floor
+- **no surviving idea replaces the subject** rather than operating on it
 - the candidate list was generated before filtering
 - the original many-ideas -> critique -> survivors mechanism was preserved
 - if sub-agents were used, they improved diversity without replacing the core workflow
