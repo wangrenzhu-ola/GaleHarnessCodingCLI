@@ -89,7 +89,7 @@ function extractBashBlock(content: string, subcommand: "retrieve" | "store" | "s
 // Map skill -> [retrieve patch name, store patch name]
 const LOOP_PATCHES: Record<CompoundingSkill, readonly [string, string]> = {
   "gh-brainstorm": ["phase-0.4", "phase-3.3"],
-  "gh-plan": ["phase-0.7", "phase-5.4b"],
+  "gh-plan": ["phase-0.8", "phase-5.4b"],
   "gh-work": ["phase-0.6", "phase-4.5"],
   "gh-review": ["stage-0.5", "stage-6.5"],
   "gh-compound": ["phase-0.4", "phase-2.3"],
@@ -261,9 +261,9 @@ describe("HKTMemory Compounding — Skill-Specific Contracts", () => {
   })
 
   describe("gh:plan", () => {
-    test("Phase 0.7 retrieve searches for similar plans", async () => {
+    test("Phase 0.8 retrieve searches for similar plans", async () => {
       const content = await readFile(path.join(PLUGIN_ROOT, "gh-plan", "SKILL.md"), "utf8")
-      const ctx = extractPhaseContext(content, "phase-0.7")
+      const ctx = extractPhaseContext(content, "phase-0.8")
       expect(ctx.toLowerCase()).toContain("historical")
     })
 
