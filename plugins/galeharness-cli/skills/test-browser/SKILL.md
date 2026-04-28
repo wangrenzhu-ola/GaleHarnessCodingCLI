@@ -48,7 +48,9 @@ If not installed, inform the user: "`agent-browser` is not installed. Run `/gh:s
 
 ### 2. Ask Browser Mode
 
-Ask the user whether to run headed or headless (using the platform's question tool — e.g., `AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension) — or present options and wait for a reply):
+**Pipeline mode (`mode:pipeline`):** Skip this step entirely. Default to headless — no question, no blocking. Proceed directly to step 3.
+
+**Manual mode:** Ask the user whether to run headed or headless (using the platform's question tool — e.g., `AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension) — or present options and wait for a reply):
 
 ```
 Do you want to watch the browser tests run?
