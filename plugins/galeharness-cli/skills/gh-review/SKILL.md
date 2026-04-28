@@ -473,7 +473,7 @@ Spawn each selected persona reviewer as a parallel sub-agent using the subagent 
 6. Run ID and reviewer name for the artifact file path
 7. **For `project-standards` only:** the standards file path list from Stage 3b, wrapped in a `<standards-paths>` block appended to the review context
 
-Persona sub-agents are **read-only** with respect to the project: they review and return structured JSON. They do not edit project files or propose refactors. The one permitted write is saving their full analysis to the `.context/` artifact path specified in the output contract.
+Persona sub-agents are **read-only** with respect to the project: they review and return structured JSON. They do not edit project files or propose refactors. The one permitted write is saving their full analysis to the run-artifact path specified in the output contract (under `.context/galeharness-cli/gh-review/<run-id>/`).
 
 Read-only here means **non-mutating**, not "no shell access." Reviewer sub-agents may use non-mutating inspection commands when needed to gather evidence or verify scope, including read-oriented `git` / `gh` usage such as `git diff`, `git show`, `git blame`, `git log`, and `gh pr view`. They must not edit project files, change branches, commit, push, create PRs, or otherwise mutate the checkout or repository state.
 
@@ -787,7 +787,7 @@ After presenting findings and verdict (Stage 6), route the next steps by mode. R
 
 - Ask no questions.
 - Do not build a fixer queue.
-- Do not write `.context` artifacts.
+- Do not write run artifacts.
 - Stop after Stage 6. Everything remains in the report.
 
 **Headless mode**
