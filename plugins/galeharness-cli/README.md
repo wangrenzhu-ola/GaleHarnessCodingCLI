@@ -46,7 +46,7 @@ language: zh-CN  # zh-CN (Chinese, default) or en (English)
 | Component | Count |
 |-----------|-------|
 | Agents | 50+ |
-| Skills | 39 |
+| Skills | 38 |
 
 ## Skills
 
@@ -87,10 +87,9 @@ For the source references and integration rationale, see `docs/brainstorms/2026-
 
 | Skill | Description |
 |-------|-------------|
-| `gh:pr-description` | Write or regenerate a value-first PR title and body from the current branch or a specified PR; used directly or by other skills |
 | `git-clean-gone-branches` | Clean up local branches whose remote tracking branch is gone |
 | `git-commit` | Create a git commit with a value-communicating message |
-| `git-commit-push-pr` | Commit, push, and open a PR with an adaptive description; also update an existing PR description (delegates title/body generation to `gh:pr-description`) |
+| `git-commit-push-pr` | Commit, push, and open a PR with an adaptive description; also update an existing PR description, or generate a description on its own without committing |
 | `git-worktree` | Manage Git worktrees for parallel development |
 
 ### Upstream Sync Workflow
@@ -158,7 +157,7 @@ Recommended operating model:
 
 | Skill | Description |
 |-------|-------------|
-| `/gh:polish-beta` | Human-in-the-loop polish phase after /gh:review — verifies review + CI, starts a dev server from `.claude/launch.json`, generates a testable checklist, and dispatches polish sub-agents for fixes. Emits stacked-PR seeds for oversized work |
+| `gh:polish-beta` | Human-in-the-loop polish phase after /gh:review — verifies review + CI, starts a dev server from `.claude/launch.json`, generates a testable checklist, and dispatches polish sub-agents for fixes. Emits stacked-PR seeds for oversized work |
 | `/lfg` | Full autonomous engineering workflow |
 
 ### Morph-X CLI Utilities
