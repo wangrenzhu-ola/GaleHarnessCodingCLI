@@ -98,11 +98,11 @@ The repo can ground a settled subject, but being in a repo does not turn vague p
 
 **Detection — issue-tracker intent (subject-identifying).**
 
-Issue-tracker intent requires explicit tracker/report phrasing. If the prompt's primary intent is analyzing issue patterns — phrases like `bugs`, `github issues`, `open issues`, `issue patterns`, `what users are reporting`, `bug reports`, `issue themes` — the subject is "issues in the tracker." Proceed to 0.3 with issue-tracker intent flagged.
+Issue-tracker intent requires explicit tracker/report phrasing. Trigger only when the prompt explicitly references the tracker or reports filed in it — phrases like `github issues`, `open issues`, `issue patterns`, `issue themes`, `what users are reporting`, or `bug reports` — the subject is "issues in the tracker." Proceed to 0.3 with issue-tracker intent flagged.
 
-Do NOT trigger on arguments that merely mention bugs as a focus: `bug in auth`, `fix the login issue`, `the signup bug` — these are focus hints, not requests to analyze the issue tracker. A bare `bugs` prompt is vague subject input handled by the identifiability check above, not issue intelligence.
+Do NOT trigger on arguments that merely mention bugs as a focus: `bug in auth`, `fix the login issue`, `the signup bug`, `top 3 bugs in authentication` — these are focus hints on regular ideation, not requests to analyze the issue tracker. A bare `bugs` with no tracker phrasing is handled by the vagueness check below, not here. Note: `top 3 bugs in authentication` without explicit tracker wording is a regular bug-focused ideation prompts, not issue intelligence.
 
-When combined (e.g., `top 3 bugs in authentication`): detect issue-tracker intent first, volume override in 0.3, remainder is the focus hint. The focus narrows which issues matter; the volume override controls survivor count. Note: `top 3 bugs in authentication` without explicit tracker wording is a regular bug-focused ideation prompts, not issue intelligence.
+When combined (e.g., `top 3 issue themes in authentication`, `biggest bug reports about checkout`): detect issue-tracker intent first, volume override in 0.3, remainder is the focus hint. The focus narrows which issues matter; the volume override controls survivor count.
 
 **Detection — subject identifiability.**
 
@@ -133,7 +133,7 @@ Use the platform's blocking question tool: `AskUserQuestion` in Claude Code (cal
 Routing:
 
 - **Specify** → accept the user's follow-up as the subject. Re-apply the identifiability check once. If still ambiguous, ask once more with "Surprise me" still on the menu. Do not cascade toward specificity about *how* to solve — only about *what* the subject is.
-- **Surprise me** → mark the run as **surprise-me mode**. The agent will discover subjects from Phase 1 material rather than carry a user-specified subject. If CWD is inside a git repo, route deterministically to repo-grounded ideation and let the codebase supply the substance. If CWD is not inside a git repo, require at least one piece of substance before dispatching: a URL, a short description, a draft, or pasted material. If the user cannot provide substance outside a repo, end cleanly and ask them to re-run with material. This is a first-class mode — it changes how Phase 1 scans and how Phase 2 sub-agents operate (see those phases).
+- **Surprise me** → mark the run as **surprise-me mode**. The agent will discover subjects from Phase 1 material rather than carry a user-specified subject. If CWD is inside a git repo, route deterministically to repo-grounded ideation and let the codebase supply the substance. If CWD is not inside a git repo, require at least one piece of substance before dispatching: a URL, a short description, a draft, or pasted material. If the user cannot provide substance outside a repo, end cleanly and ask them to re-run with material. This is a first-class mode — it changes how Phase 1 scans and how Phase 2 sub-agents operate (see those phases). **Dispatch routing for surprise-me is deterministic:** outside a repo, substance is required before dispatching — "surprise me" without material is only viable once the user has supplied something to surprise them about.
 - **Cancel** → exit cleanly. Narrate that the user can rephrase and re-invoke.
 
 #### 0.3 Interpret Focus and Volume
