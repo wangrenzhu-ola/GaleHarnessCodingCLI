@@ -14,7 +14,7 @@ If document-review returns findings that were auto-applied, note them briefly wh
 
 When document-review returns "Review complete", proceed to Final Checks.
 
-**Pipeline mode:** If invoked from an automated workflow such as LFG, SLFG, or any `disable-model-invocation` context, run `document-review` with `mode:headless` and the plan path. Headless mode applies auto-fixes silently and returns structured findings without interactive prompts. Address any P0/P1 findings before returning control to the caller.
+**Pipeline mode:** If invoked from an automated workflow such as LFG or any `disable-model-invocation` context, run `document-review` with `mode:headless` and the plan path. Headless mode applies auto-fixes silently and returns structured findings without interactive prompts. Address any P0/P1 findings before returning control to the caller.
 
 ## 5.3.9 Final Checks and Cleanup
 
@@ -29,11 +29,13 @@ If artifact-backed mode was used:
 
 ## 5.4 Post-Generation Options
 
-**Pipeline mode:** If invoked from an automated workflow such as LFG, SLFG, or any `disable-model-invocation` context, skip the interactive menu below and return control to the caller immediately. The plan file has already been written, the confidence check has already run, and document-review has already run — the caller (e.g., lfg, slfg) determines the next step.
+**Pipeline mode:** If invoked from an automated workflow such as LFG or any `disable-model-invocation` context, skip the interactive menu below and return control to the caller immediately. The plan file has already been written, the confidence check has already run, and document-review has already run — the caller (e.g., lfg) determines the next step.
 
 After document-review completes, present the options using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension)). If no question tool is available, present the numbered options in chat and wait for the user's reply before proceeding.
 
-**Question:** "Plan ready at `docs/plans/YYYY-MM-DD-NNN-<type>-<name>-plan.md`. What would you like to do next?"
+**Path format:** Use absolute paths for chat-output file references — relative paths are not auto-linked as clickable in most terminals.
+
+**Question:** "Plan ready at `<absolute path to plan>`. What would you like to do next?"
 
 **Options:**
 1. **Start `/gh:work`** (recommended) - Begin implementing this plan in the current session

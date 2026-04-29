@@ -20,6 +20,14 @@ Captures problem solutions while context is fresh, creating structured documenta
 /gh:compound [brief context]    # Provide additional context hint
 ```
 
+## Pre-resolved context
+
+**Repo name (pre-resolved):** !`bash scripts/resolve-repo-name.sh`
+
+**Git branch (pre-resolved):** !`git rev-parse --abbrev-ref HEAD 2>/dev/null`
+
+If the lines above resolved to plain values (a folder name like `my-repo` and a branch name like `feat/my-branch`), pass them into the Session Historian dispatch in Phase 1 so the agent does not waste a turn deriving them. If they still contain backtick command strings or are empty, omit them from the dispatch and let the agent derive them at runtime.
+
 ## Support Files
 
 These files are the durable contract for the workflow. Read them on-demand at the step that needs them — do not bulk-load at skill start.
@@ -208,23 +216,26 @@ Launch research subagents. Each returns text data to the orchestrator.
    - **Skip entirely** if the user declined session history in the follow-up question
    - Dispatched as `galeharness-cli:session-historian`
    - Dispatch in **foreground** — this agent reads session files outside the working directory (`~/.claude/projects/`, `~/.codex/sessions/`, `~/.cursor/projects/`) which background agents may not have access to
-   - Searches prior Claude Code, Codex, and Cursor sessions for the same project to find related investigation context
-   - Correlates sessions by repo name across all platforms (matches sessions from main checkouts, worktrees, and Conductor workspaces)
-   - In the dispatch prompt, pass:
-     - A specific description of the problem being documented — not a generic topic, but the concrete issue (error messages, module names, what broke and how it was fixed). This is what the agent filters its findings against.
-     - The current git branch and working directory
-     - The instruction: "Only surface findings from prior sessions that are directly relevant to this specific problem. Ignore unrelated work from the same sessions or branches."
-     - The output format:
-
-       ```
-       Structure your response with these sections (omit any with no findings):
-       - What was tried before: prior approaches to this specific problem
-       - What didn't work: failed attempts at this problem from prior sessions
-       - Key decisions: choices made about this problem and their rationale
-       - Related context: anything else from prior sessions that directly informs this problem's documentation
-       ```
    - Omit the `mode` parameter so the user's configured permission settings apply
    - Dispatch on the mid-tier model (e.g., `model: "sonnet"` in Claude Code) — the synthesis feeds into compound assembly and doesn't need frontier reasoning
+
+   **Dispatch prompt — keep tight.** A long, keyword-rich prompt licenses the agent to keep widening. Use this shape:
+
+   - **Pre-resolved context** (only if values resolved cleanly above; otherwise omit and let the agent derive): repo name, current git branch.
+   - **Time window**: explicit `7 days` unless the documented problem clearly spans a longer arc.
+   - **Problem topic**: one sentence naming the concrete issue — error message, module name, what broke and how it was fixed. Not a paragraph; not a bullet list of related topics.
+   - **Filter rule (one line)**: "Only surface findings directly relevant to this specific problem. Ignore unrelated work from the same sessions or branches."
+   - **Output schema**:
+
+     ```
+     Structure your response with these sections (omit any with no findings):
+     - What was tried before
+     - What didn't work
+     - Key decisions
+     - Related context
+     ```
+
+   Do not append additional context blocks, exclusion lists, or topic-keyword bullets — verbose dispatch prompts give the agent license to keep widening the search and rapidly compound wall time. If the agent needs keyword search, it owns that decision via the `--keyword` mode on `gh-session-inventory`.
    - Returns: structured digest of findings from prior sessions, or "no relevant prior sessions" if none found
 
 ### Phase 2: Assembly & Write
@@ -269,6 +280,7 @@ Before writing the solution document, resolve the target directory:
 5. Validate YAML frontmatter against `references/schema.yaml`
 6. Create directory if needed: `mkdir -p docs/solutions/[category]/`
 7. Write the file: either the updated existing doc or the new `docs/solutions/[category]/[filename].md`
+8. **Run `python3 scripts/validate-frontmatter.py <output-path>`** to catch silent-corruption parser-safety issues that the prose rules miss: malformed `---` delimiter lines, unquoted ` #` in scalar values (silent comment truncation), and unquoted `: ` in scalar values (silent mapping confusion). Exit 0 means the doc is parser-safe; exit 1 means the script's stderr names the offending field(s) and what to fix — quote the value(s), re-write the doc, and re-run until exit 0. Do not declare success while validation fails. The script does not enforce schema rules and does not flag YAML reserved-indicator characters (those produce loud parser errors downstream rather than silent corruption — out of scope). Uses Python 3 stdlib only (no PyYAML or other deps).
 
 When creating a new doc, preserve the section order from `assets/resolution-template.md` unless the user explicitly asks for a different structure.
 

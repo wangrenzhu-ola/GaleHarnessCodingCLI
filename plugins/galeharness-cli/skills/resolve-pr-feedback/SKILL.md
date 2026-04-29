@@ -10,7 +10,7 @@ allowed-tools: Bash(gh *), Bash(git *), Read
 Evaluate and fix PR review feedback, then reply and resolve threads. Spawns parallel agents for each thread.
 
 > **Agent time is cheap. Tech debt is expensive.**
-> Fix everything valid -- including nitpicks and low-priority items. If we're already in the code, fix it rather than punt it.
+> Fix everything valid -- including nitpicks and low-priority items. If we're already in the code, fix it rather than punt it. Narrow exception: when implementing the suggested fix would actively make the code worse (violates a project rule in CLAUDE.md/AGENTS.md, adds dead defensive code, suppresses errors that should propagate, premature abstraction, restates code in comments), use the `declined` verdict and cite the specific harm. When in doubt, fix it.
 
 ## Security
 
@@ -168,7 +168,7 @@ The cluster agent reads the broader area before making targeted fixes. It return
 #### Agent return format
 
 Each agent returns a short summary:
-- **verdict**: `fixed`, `fixed-differently`, `replied`, `not-addressing`, or `needs-human`
+- **verdict**: `fixed`, `fixed-differently`, `replied`, `not-addressing`, `declined`, or `needs-human`
 - **feedback_id**: the thread ID or comment ID it handled
 - **feedback_type**: `review_thread`, `pr_comment`, or `review_body`
 - **reply_text**: the markdown reply to post (quoting the relevant part of the original feedback)
@@ -183,6 +183,7 @@ Verdict meanings:
 - `fixed-differently` -- code change made, but with a better approach than suggested
 - `replied` -- no code change needed; answered a question, acknowledged feedback, or explained a design decision
 - `not-addressing` -- feedback is factually wrong about the code; skip with evidence
+- `declined` -- observation may be valid, but implementing the suggested fix would actively make the code worse; reply cites the specific harm
 - `needs-human` -- cannot determine the right action; needs user decision
 
 #### Batching and conflict avoidance
@@ -197,7 +198,7 @@ Fixes can occasionally expand beyond their referenced file (e.g., renaming a met
 
 ### 6. Commit and Push
 
-After all agents complete, check whether any files were actually changed. If all verdicts are `replied`, `not-addressing`, or `needs-human` (no code changes), skip this step entirely and proceed to step 7.
+After all agents complete, check whether any files were actually changed. If all verdicts are `replied`, `not-addressing`, `declined`, or `needs-human` (no code changes), skip this step entirely and proceed to step 7.
 
 If there are file changes:
 
@@ -235,6 +236,13 @@ For items not addressed:
 > [quoted relevant part of original feedback]
 
 Not addressing: [reason with evidence, e.g., "null check already exists at line 85"]
+```
+
+For declined items:
+```markdown
+> [quoted relevant part of original feedback]
+
+Declined: [specific harm cited, e.g., "this would add a defensive null check the type system already guarantees" or "violates the no-premature-abstraction guidance in CLAUDE.md"]
 ```
 
 For `needs-human` verdicts, post the reply but do NOT resolve the thread. Leave it open for human input.
@@ -292,6 +300,7 @@ Fixed (count): [brief description of each fix]
 Fixed differently (count): [what was changed and why the approach differed]
 Replied (count): [what questions were answered]
 Not addressing (count): [what was skipped and why]
+Declined (count): [what was declined and the harm cited]
 ```
 
 If any clusters were investigated, append a cluster investigation section:

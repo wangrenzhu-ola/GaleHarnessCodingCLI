@@ -305,9 +305,9 @@ describe("Karpathy workflow guardrails contract", () => {
     }
 
     expect(content).toContain("user-facing checklist")
-    expect(content).toContain("Probe rigor gaps before Phase 2")
-    expect(content).toContain("separate short prose probe")
-    expect(content).toContain("not a menu or fixed questionnaire")
+    expect(content).toContain("Rigor probes fire before Phase 2 and are prose, not menus")
+    expect(content).toContain("direct prose probe")
+    expect(content).toContain("Prose forces them to produce real observation")
     expect(content).toContain("record it as an explicit assumption")
   })
 

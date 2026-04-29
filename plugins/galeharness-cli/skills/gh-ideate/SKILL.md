@@ -83,13 +83,46 @@ If continuing:
 
 #### 0.2 Subject-Identification Gate
 
-Before interpreting focus, volume, or issue-tracker intent, check whether the subject of ideation is identifiable. The repo can ground a settled subject, but being in a repo does not turn vague prompts like `improvements`, `ideas`, `quick wins`, `things to fix`, or an empty prompt into a coherent topic. Downstream agents need to know what they are ideating about before they scan or generate.
-
-**Subject identifiability test:** would a reader, seeing only the prompt, know what subject the agent should ideate on? Judge what the words refer to, not phrase length. `browser sniff` can be identifiable if it names a feature or subsystem; `quick wins` is vague because it only names a quality.
+Before classifying focus or dispatching any grounding, check whether the subject of ideation is identifiable. Every downstream agent — grounding and ideation — needs to know what it's working on. If the subject is ambiguous enough that reasonable sub-agents would diverge on what the topic even is (bare words like `improvements`, `ideas`, `quick wins`, `things to fix`), the output will be scattered.
 
 If the prompt explicitly asks the agent to choose the focus, such as `surprise me`, `pick for me`, or `you decide`, mark the run as **surprise-me mode** immediately and use the Surprise me routing below. Do not ask the user to confirm the same choice again.
 
-If the subject is vague, ask one scope question using the blocking question tool when available:
+The repo can ground a settled subject, but being in a repo does not turn vague prompts like `improvements`, `ideas`, `quick wins`, `things to fix`, or an empty prompt into a coherent topic. Downstream agents need to know what they are ideating about before they scan or generate.
+
+**Questioning principles (apply in this phase and in 0.3):**
+
+- Questions exist only to supply what sub-agents need to operate: an identifiable subject (this phase) and enough context for the agent to say something specific about it (0.3, elsewhere modes only). Nothing else.
+- Never ask about solution direction, constraints, audience, tone, success criteria, or anything that characterizes the subject — those belong to `gh:brainstorm`.
+- Always keep "Surprise me" (letting the agent decide the focus) as a real option, not a fallback for when the user can't name a subject. Ideation is allowed to be greenfield by design.
+- Stop as soon as the subject is identifiable or the user has delegated to "Surprise me." More than 3 total questions across 0.2 and 0.3 is a smell that ideation is not the right workflow — consider suggesting `gh:brainstorm`.
+
+**Detection — issue-tracker intent (subject-identifying).**
+
+Issue-tracker intent requires explicit tracker/report phrasing. Trigger only when the prompt explicitly references the tracker or reports filed in it — phrases like `github issues`, `open issues`, `issue patterns`, `issue themes`, `what users are reporting`, or `bug reports` — the subject is "issues in the tracker." Proceed to 0.3 with issue-tracker intent flagged.
+
+Do NOT trigger on arguments that merely mention bugs as a focus: `bug in auth`, `fix the login issue`, `the signup bug`, `top 3 bugs in authentication` — these are focus hints on regular ideation, not requests to analyze the issue tracker. A bare `bugs` with no tracker phrasing is handled by the vagueness check below, not here. Note: `top 3 bugs in authentication` without explicit tracker wording is a regular bug-focused ideation prompts, not issue intelligence.
+
+When combined (e.g., `top 3 issue themes in authentication`, `biggest bug reports about checkout`): detect issue-tracker intent first, volume override in 0.3, remainder is the focus hint. The focus narrows which issues matter; the volume override controls survivor count.
+
+**Detection — subject identifiability.**
+
+The test: would a reader, seeing only this prompt, know what subject the agent should ideate on? Apply judgment to what the words *refer to*, not to their length or surface form.
+
+- **Vague — ask the scope question.** The prompt refers to a quality, category, or placeholder without naming a specific thing. Reasonable readers would pick different subjects. Illustrative cases: `improvements`, `ideas`, `things to fix`, `quick wins`, `what to build`, `bugs` (as the whole prompt, not as a topic like "bugs in auth"), an empty prompt. These are examples of the pattern, not a lookup table — recognize vagueness by what the words point to (a catch-all quality), not by matching specific words.
+
+- **Identifiable — proceed to 0.3.** The prompt names or plausibly names a specific subject: a feature, concept, document, subsystem, page, flow, or concrete topic. A reader would know where to direct thought even without knowing the domain. Illustrative cases: `authentication system`, `our sign-up page`, `browser sniff`, `dark mode`, `cache invalidation`.
+
+**Key distinction:** vagueness is about what the words *refer to*, not phrase length. `browser sniff` is two words but plausibly names a feature, so it is identifiable. `quick wins` is two words but refers only to a quality, so it is vague. Do not treat short phrases as vague by default.
+
+**Being inside a repo does not settle vagueness.** `improvements` in any repo is still scattered across DX, reliability, features, docs, tests, architecture. The repo provides material for grounding *after* a subject is settled, not the subject itself. Do not silently interpret a vague prompt as "about this repo" and proceed.
+
+**Genuine ambiguity (repo mode).** When judgment leaves real doubt on a short phrase — it could be a named feature or a vague concept — a single cheap check settles it: Glob for the phrase in filenames, or Grep for it in README/docs. If it appears anywhere, treat as identifiable and proceed. If it has no repo footprint and still reads vaguely, ask the scope question.
+
+When in doubt otherwise, err toward asking — one question is trivial compared to dispatching agents on a scattered interpretation.
+
+**The scope question.**
+
+Use the platform's blocking question tool: `AskUserQuestion` in Claude Code (call `ToolSearch` with `select:AskUserQuestion` first if its schema isn't loaded), `request_user_input` in Codex, `ask_user` in Gemini, `ask_user` in Pi (requires the `pi-ask-user` extension). Fall back to numbered options in chat only when no blocking tool exists or the call errors — not because a schema load is required. Never silently skip.
 
 - **Stem:** "What should the agent ideate about?"
 - **Options:**
@@ -98,25 +131,17 @@ If the subject is vague, ask one scope question using the blocking question tool
   - "Cancel — let me rephrase"
 
 Routing:
-- **Specify** -> accept the user's follow-up as the subject and re-apply the identifiability test once. If it is still ambiguous, ask once more with "Surprise me" still available. Do not drift into solution direction, audience, success criteria, or constraints; those belong to `gh:brainstorm`.
-- **Surprise me** -> mark the run as **surprise-me mode**. This is a first-class mode, not a fallback. If CWD is inside a git repo, route deterministically to repo-grounded ideation and let the codebase supply the substance. If CWD is not inside a git repo, require at least one piece of substance before dispatching: a URL, a short description, a draft, or pasted material. If the user cannot provide substance outside a repo, end cleanly and ask them to re-run with material.
-- **Cancel** -> exit cleanly so the user can rephrase.
 
-If judgment leaves real doubt in a repo on a short phrase, do one cheap check before asking: search filenames or README/docs for the phrase. If it has repo footprint, treat it as identifiable; otherwise ask the scope question.
+- **Specify** → accept the user's follow-up as the subject. Re-apply the identifiability check once. If still ambiguous, ask once more with "Surprise me" still on the menu. Do not cascade toward specificity about *how* to solve — only about *what* the subject is.
+- **Surprise me** → mark the run as **surprise-me mode**. The agent will discover subjects from Phase 1 material rather than carry a user-specified subject. If CWD is inside a git repo, route deterministically to repo-grounded ideation and let the codebase supply the substance. If CWD is not inside a git repo, require at least one piece of substance before dispatching: a URL, a short description, a draft, or pasted material. If the user cannot provide substance outside a repo, end cleanly and ask them to re-run with material. This is a first-class mode — it changes how Phase 1 scans and how Phase 2 sub-agents operate (see those phases). **Dispatch routing for surprise-me is deterministic:** outside a repo, substance is required before dispatching — "surprise me" without material is only viable once the user has supplied something to surprise them about.
+- **Cancel** → exit cleanly. Narrate that the user can rephrase and re-invoke.
 
 #### 0.3 Interpret Focus and Volume
 
-Infer three things from the argument:
+Infer two things from the argument and any intake so far:
 
-- **Focus context** - concept, path, constraint, or open-ended
-- **Volume override** - any hint that changes candidate or survivor counts
-- **Issue-tracker intent** - whether the user wants issue/bug data as an input source
-
-Issue-tracker intent requires explicit tracker/report phrasing. Trigger only when the argument's primary intent is about analyzing issue patterns from an issue tracker: `github issues`, `open issues`, `issue patterns`, `issue themes`, `what users are reporting`, or `bug reports`.
-
-Do NOT trigger on arguments that merely mention bugs as a focus: `bug in auth`, `fix the login issue`, `the signup bug`, `top 3 bugs in authentication` — these are regular bug-focused ideation prompts, not requests to analyze the issue tracker. A bare `bugs` prompt is vague subject input handled by Phase 0.2, not issue intelligence.
-
-When combined with explicit tracker/report wording (e.g., `top 3 issue themes in authentication`, `biggest bug reports about checkout`), detect issue-tracker intent first, volume override second, and treat the remainder as the focus hint. The focus narrows which issues matter; the volume override controls survivor count.
+- **Focus context** — concept, path, constraint, or open-ended
+- **Volume override** — any hint that changes candidate or survivor counts
 
 Default volume:
 - each ideation sub-agent generates about 8-10 ideas (yielding ~30 raw ideas across agents, ~20-25 after dedupe)
@@ -127,7 +152,8 @@ Honor clear overrides such as:
 - `100 ideas`
 - `go deep`
 - `raise the bar`
-- tactical scope signals such as `quick wins`, `polish`, `typos`, `small fixes`, or `cleanup`; these lower the Phase 2 meeting-test floor without removing the warrant requirement
+
+**Tactical scope detection.** Parse the focus hint (and any intake answers from 0.2 specify path) for tactical signals: `polish`, `typo`, `typos`, `quick wins`, `small improvements`, `cleanup`, `small fixes`. When present, lower the Phase 2 ambition floor — the user has explicitly opted into tactical scope. Default otherwise is step-function (see Phase 2 meeting-test floor).
 
 Use reasonable interpretation rather than formal parsing.
 
@@ -185,7 +211,7 @@ Run agents in parallel in the **foreground** (do not use background dispatch —
 
 2. **Learnings search** — dispatch `galeharness-cli:learnings-researcher` with a brief summary of the ideation focus.
 
-3. **Issue intelligence** (conditional) — if issue-tracker intent was detected in Phase 0.3, dispatch `galeharness-cli:issue-intelligence-analyst` with the focus hint. If a focus hint is present, pass it so the agent can weight its clustering toward that area. Run this in parallel with agents 1 and 2.
+3. **Issue intelligence** (conditional) — if issue-tracker intent was detected in Phase 0.2, dispatch `galeharness-cli:issue-intelligence-analyst` with the focus hint. If a focus hint is present, pass it so the agent can weight its clustering toward that area. Run this in parallel with agents 1 and 2.
 
    If the agent returns an error (gh not installed, no remote, auth failure), log a warning to the user ("Issue analysis unavailable: {reason}. Proceeding with standard ideation.") and continue with the existing two-agent grounding.
 
@@ -221,20 +247,35 @@ Assign each sub-agent a different ideation frame as a **starting bias, not a con
 - **When issue-tracker intent is active and themes were returned:** Each high/medium-confidence theme becomes a frame. Pad with default frames if fewer than 3 cluster-derived frames. Cap at 4 total.
 - **Default frames (no issue-tracker intent):** (1) user/operator pain and friction, (2) inversion, removal, or automation of a painful step, (3) assumption-breaking or reframing, (4) leverage and compounding effects.
 
-Ask each sub-agent to return a compact structure per idea: title, summary, warrant, why_it_matters, meeting_test, optional boldness or focus_fit signal.
+**Per-idea warrant contract (uniform across all frames, all modes):**
 
-**Per-idea warrant contract:** every candidate carries articulated warrant tagged with exactly one of:
-- `direct:` quoted line, specific file, named issue, or explicit user-provided context
-- `external:` named prior art, domain research, or adjacent pattern with source
-- `reasoned:` written-out first-principles argument for why this move likely applies
+Each sub-agent returns this structure per idea:
 
-Warrant is required, not optional. If a sub-agent cannot articulate warrant of at least one type, the idea should not surface. The warrant must support the actual move, not merely decorate it. In surprise-me mode, the warrant may also justify why the agent selected that subject from Phase 1 material.
+- **title**
+- **summary** (2-4 sentences)
+- **warrant** (required, tagged) — one of:
+  - `direct:` quoted line / specific file / named issue / explicit user-supplied context
+  - `external:` named prior art, domain research, adjacent pattern, with source
+  - `reasoned:` explicit first-principles argument for why this move likely applies — not a gesture; the argument is written out
+- **why_it_matters** — connects the warrant to the move's significance
+- **meeting_test** — one line confirming this would warrant team discussion (waived when Phase 0.3 detected tactical focus signals)
 
-Apply the meeting-test as a default floor: would this idea warrant team discussion? If not, it should not surface. Waive only the ambition floor for tactical focus signals from Phase 0.3; do not waive grounding or warrant. Stay within the subject's identity. Product expansions, retirements, and architectural pivots are fair game when warrant supports them, but subject-replacement moves are out.
+Warrant is required, not optional. If a sub-agent cannot articulate warrant of at least one type, the idea does not surface. The failure mode to prevent is generic "AI-slop" ideas that sound plausible but lack a basis the user can verify.
+
+**Generation rules (uniform across frames, all modes):**
+
+- Every idea carries articulated warrant. Unjustified speculation does not surface, regardless of how plausible it sounds.
+- Bias toward the warrant type your frame naturally produces — pain/inversion/leverage tend toward `direct:`; analogy and constraint-flipping tend toward `reasoned:`; assumption-breaking is mixed — but don't exclude other warrant types.
+- Apply the meeting-test as a default floor: would this idea warrant team discussion? If not, it's below the floor and does not surface. The floor is relaxed only when Phase 0.3 detected tactical focus signals.
+- Stay within the subject's identity. Product expansions, new surfaces, new markets, retirements, and architectural pivots are fair game when warrant supports them. Subject-replacement moves (abandoning the project, pivoting to unrelated domains, becoming a different organization) are out regardless of warrant. In other words, subject-replacement moves are out.
+
+**Surprise-me mode addendum.** When Phase 0.2 routed to surprise-me, include this additional instruction in each sub-agent's dispatch prompt:
+
+> No user-specified subject. Through your frame's lens, explore the Phase 1 material and identify the subject(s) you find most interesting for this frame. Different frames finding different subjects is the feature — cross-subject divergence is what makes surprise-me valuable. Each idea still carries warrant; warrant may include identification of the subject itself (why *this* subject is worth ideating on through your lens, citing what in the Phase 1 material signals it).
 
 After all sub-agents return:
 1. Merge and dedupe into one master candidate list.
-2. Synthesize cross-cutting combinations -- scan for ideas from different frames that combine into something stronger (expect 3-5 additions at most; in surprise-me mode, spend extra attention on combinations where different frames converged on the same subject).
+2. Synthesize cross-cutting combinations -- scan for ideas from different frames that combine into something stronger. In specified mode, expect 3-5 additions at most. **In surprise-me mode, cross-cutting is the magic layer** — frames often converge on overlapping subjects or find complementary angles; expect 5-8 additions and give this step more attention. Surface combinations that span multiple frame-chosen subjects as a distinctive surprise-me output pattern.
 3. If a focus was provided, weight the merged list toward it without excluding stronger adjacent ideas.
 4. Spread ideas across multiple dimensions when justified: workflow/DX, reliability, extensibility, missing capabilities, docs/knowledge compounding, quality/maintenance, leverage on future work.
 

@@ -16,7 +16,7 @@ describe("ce-review contract", () => {
     expect(content).toContain("mode:report-only")
     expect(content).toContain("mode:headless")
     expect(content).toContain(".context/galeharness-cli/gh-review/<run-id>/")
-    expect(content).toContain("Do not write `.context` artifacts.")
+    expect(content).toContain("Do not write run artifacts.")
     expect(content).toContain(
       "Do not start a mutating review round concurrently with browser testing on the same checkout.",
     )
@@ -163,6 +163,34 @@ describe("ce-review contract", () => {
     expect(template).toMatch(/Advisory observations/i)
   })
 
+  test("autofix_class decision guide includes safe_auto operational test and boundary cases", async () => {
+    const template = await readRepoFile(
+      "plugins/galeharness-cli/skills/gh-review/references/subagent-template.md",
+    )
+
+    // Symmetry-of-error framing: classifying a mechanical fix as gated_auto has cost
+    expect(template).toMatch(/wrong-side cost is symmetric/i)
+    expect(template).toMatch(/Bias toward `safe_auto`/i)
+
+    // Operational test for safe_auto: one-sentence + no-contract-change exclusion list
+    expect(template).toMatch(/one sentence with no .depends on. clauses/i)
+    expect(template).toMatch(/function signature.*public-API.*error contract.*security posture.*permission model/i)
+
+    // The four boundary cases that often feel risky but are still safe_auto
+    expect(template).toMatch(/Boundary cases that often feel risky but are still `safe_auto`/i)
+    expect(template).toMatch(/nil guard that turns a crash into a nil-return is `safe_auto`/i)
+    expect(template).toMatch(/off-by-one fix is `safe_auto`/i)
+    expect(template).toMatch(/Dead-code removal is `safe_auto`/i)
+    expect(template).toMatch(/Helper extraction is `safe_auto`/i)
+
+    // Cross-file extraction discriminator (the F4b case from the calibration eval)
+    expect(template).toMatch(/naming or placement requires a design conversation/i)
+
+    // Anti-default guards on both sides
+    expect(template).toMatch(/Do not default to `advisory`/i)
+    expect(template).toMatch(/Do not default to `gated_auto` when the fix is mechanical/i)
+  })
+
   test("Stage 5 synthesis uses anchor gate and one-anchor promotion", async () => {
     const content = await readRepoFile("plugins/galeharness-cli/skills/gh-review/SKILL.md")
 
@@ -184,8 +212,7 @@ describe("ce-review contract", () => {
     expect(content).toContain("### Stage 5b: Validation pass")
     expect(content).toContain("`headless`")
     expect(content).toContain("`autofix`")
-    expect(content).toMatch(/interactive LFG/i)
-    expect(content).toMatch(/File-tickets/i)
+    // Stage 5b runs on headless/autofix only; interactive mode does not use LFG or File-tickets routing.
     expect(content).toMatch(/report-only/i)
     expect(content).toMatch(/Per-finding parallel dispatch/i)
     expect(content).toMatch(/Independence is the point/i)
@@ -196,6 +223,48 @@ describe("ce-review contract", () => {
     expect(validatorTemplate).toContain('"validated": true | false')
     expect(validatorTemplate).toMatch(/introduced by THIS diff/i)
     expect(validatorTemplate).toMatch(/handled elsewhere/i)
+  })
+
+  test("Stage 5 action derivation uses suggested_fix as the authoritative signal", async () => {
+    const content = await readRepoFile("plugins/galeharness-cli/skills/gh-review/SKILL.md")
+
+    // The mapping table documents the per-finding recommended action.
+    expect(content).toMatch(/manual.*yes.*Apply/)
+    expect(content).toMatch(/manual.*no.*Defer/)
+    expect(content).toMatch(/gated_auto.*yes.*Apply/)
+    expect(content).toMatch(/gated_auto.*no.*Defer/)
+    expect(content).toMatch(/advisory.*n\/a.*Acknowledge/)
+
+    // Cross-reviewer tie-break order is unchanged.
+    expect(content).toMatch(/Skip > Defer > Apply > Acknowledge/)
+  })
+
+  test("subagent template pushes suggested_fix aggressively", async () => {
+    const template = await readRepoFile(
+      "plugins/galeharness-cli/skills/gh-review/references/subagent-template.md",
+    )
+
+    expect(template).toMatch(/Propose a `suggested_fix` whenever any defensible code change is reachable/)
+    expect(template).toMatch(/Imperfect information is not grounds for omission/)
+    expect(template).toMatch(/Genuinely-omit cases are rare/)
+    expect(template).toMatch(/no fix proposed by reviewer/)
+  })
+
+  test("findings schema tightens suggested_fix description", async () => {
+    const rawSchema = await readRepoFile(
+      "plugins/galeharness-cli/skills/gh-review/references/findings-schema.json",
+    )
+    const schema = JSON.parse(rawSchema)
+
+    expect(schema.properties.findings.items.properties.suggested_fix.description).toMatch(
+      /Concrete minimal fix the reviewer can defend/,
+    )
+    expect(schema.properties.findings.items.properties.suggested_fix.description).toMatch(
+      /Imperfect information is not grounds for omission/,
+    )
+    expect(schema.properties.findings.items.properties.suggested_fix.description).toMatch(
+      /genuinely no code-level change to propose/,
+    )
   })
 
   test("PR-mode skip-condition pre-check stops without dispatching reviewers", async () => {
