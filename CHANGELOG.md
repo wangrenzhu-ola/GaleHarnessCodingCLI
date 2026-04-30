@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.7.0...cli-v2.8.0) (2026-04-30)
+
+
+### Features
+
+* **knowledge:** dual-write global and project docs ([d8768e6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d8768e64833e6e508420b36c7078ae3d571a0ff0))
+
 ## [2.7.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.6.0...cli-v2.7.0) (2026-04-27)
 
 
