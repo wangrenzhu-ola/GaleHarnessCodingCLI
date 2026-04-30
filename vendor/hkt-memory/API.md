@@ -13,9 +13,11 @@ uv run scripts/hkt_memory_v5.py <command> [options]
 全局参数：
 
 ```bash
---memory-dir <path>                     # 默认 memory
+--memory-dir <path>                     # 显式 memory root，优先级最高
 --llm-provider <zhipu|openai|minimax>   # 默认 zhipu
 ```
+
+Memory root 解析优先级：`--memory-dir` / `HKTMv5(memory_dir=...)` > `HKT_MEMORY_ROOT` > `HKT_MEMORY_DIR` > `HKT_MEMORY_PUBLIC_ROOT` > `config/default.json` 的 `storage.public_root` / `storage.base_dir` > 项目本地 `memory`。
 
 ---
 
@@ -92,6 +94,17 @@ uv run scripts/hkt_memory_v5.py sync --full
 ```bash
 uv run scripts/hkt_memory_v5.py stats
 ```
+
+---
+
+## status / doctor - Root 与索引状态
+
+```bash
+uv run scripts/hkt_memory_v5.py status
+uv run scripts/hkt_memory_v5.py doctor --json
+```
+
+输出当前实际使用的 memory root、root 来源、LLM provider、可写性、L0/L1/L2 目录、索引文件、vector backend 与 vector store 可用性。`doctor` 是 `status` 的语义别名，适合脚本或 GaleHarness 调用侧在运行前确认 public root。
 
 ---
 
@@ -202,7 +215,9 @@ uv run scripts/hkt_memory_v5.py test
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| `HKT_MEMORY_DIR` | 记忆存储目录 | `memory` |
+| `HKT_MEMORY_ROOT` | 首选记忆存储目录 | - |
+| `HKT_MEMORY_DIR` | 兼容旧版的记忆存储目录 | - |
+| `HKT_MEMORY_PUBLIC_ROOT` | 公共知识库 root | - |
 | `L1_EXTRACTOR_PROVIDER` | L1 提取 Provider | `zhipu` |
 | `ZHIPU_API_KEY` | 智谱 API Key | - |
 | `OPENAI_API_KEY` | OpenAI API Key | - |

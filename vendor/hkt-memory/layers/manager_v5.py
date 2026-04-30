@@ -12,6 +12,7 @@ import sys
 import json
 import re
 import hashlib
+import uuid
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set
 from datetime import datetime
@@ -74,15 +75,12 @@ class LayerManagerV5:
             if vector_backend == "sqlite":
                 from vector_store.sqlite_backend import SQLiteVectorBackend
                 self.vector_store = SQLiteVectorBackend(str(self.base_path / "vector_store.db"))
-                print(f"[OK] Using SQLiteVectorBackend")
-            elif vector_backend == "file":
-                self.vector_store = None
-                print("[OK] Using file mode (vector store unavailable)")
+                print(f"✅ Using SQLiteVectorBackend")
             else:
                 self.vector_store = VectorStore(str(self.base_path / "vector_store.db"))
         except Exception as e:
             self._vector_store_error = str(e)
-            print(f"[WARN] Vector store unavailable: {e}")
+            print(f"⚠️ Vector store unavailable: {e}")
         self.lifecycle = MemoryLifecycleManager(self.base_path, self.config.get("lifecycle", {}))
         self.learnings = LearningTracker(self.base_path / "governance")
         self.errors = ErrorTracker(self.base_path / "governance")
@@ -97,7 +95,7 @@ class LayerManagerV5:
             self.session_transcript_index = BM25Index(str(self.base_path / "session_transcript_index.db"))
         except Exception as e:
             self._session_transcript_index_error = str(e)
-            print(f"[WARN] Session transcript index unavailable: {e}")
+            print(f"⚠️ Session transcript index unavailable: {e}")
         
         # 触发器（延迟加载，避免循环导入）
         self._trigger = None
@@ -315,46 +313,107 @@ class LayerManagerV5:
         topic: str = "session",
         task_id: Optional[str] = None,
         project: Optional[str] = None,
+        repo_root: Optional[str] = None,
         branch: Optional[str] = None,
         pr_id: Optional[str] = None,
         source: str = "auto_capture",
         source_mode: str = "direct",
+        importance: str = "medium",
+        max_chars: int = 12000,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, str]:
+    ) -> Dict[str, Any]:
+        if not (content or "").strip():
+            return {"success": False, "skipped": True, "reason": "empty transcript content", "memory_ids": {}}
+        resolved_session_id = (session_id or "").strip() or f"session-{uuid.uuid4().hex[:12]}"
+        normalized_importance = str(importance or "medium").lower()
+        if normalized_importance not in {"high", "medium", "low"}:
+            normalized_importance = "medium"
         safety_analysis = self.safety_gate.sanitize_for_storage(content)
+        stored_content = self._compress_session_transcript(safety_analysis["content"], max_chars=max_chars)
+        content_hash = hashlib.sha256(stored_content.encode("utf-8")).hexdigest()
         transcript_metadata = dict(metadata or {})
+        dedupe_key = transcript_metadata.get("dedupe_key") or "|".join(
+            [str(project or ""), str(task_id or ""), resolved_session_id, content_hash]
+        )
+        existing = self._find_existing_session_transcript(str(dedupe_key))
+        if existing:
+            return {
+                "success": True,
+                "deduplicated": True,
+                "existing_memory_id": existing,
+                "memory_ids": {"L2": existing},
+                "dedupe_key": dedupe_key,
+            }
+        captured_at = transcript_metadata.get("captured_at") or datetime.utcnow().isoformat()
         transcript_metadata.update(
             {
-                "scope": transcript_metadata.get("scope") or f"session:{session_id}",
+                "scope": transcript_metadata.get("scope") or f"session:{resolved_session_id}",
                 "artifact_type": "session_transcript",
-                "session_id": session_id,
+                "session_id": resolved_session_id,
                 "task_id": task_id,
                 "project": project,
+                "repo_root": repo_root,
                 "branch": branch,
                 "pr_id": pr_id,
                 "source": source,
                 "source_mode": source_mode,
+                "captured_at": captured_at,
+                "content_hash": content_hash,
+                "dedupe_key": dedupe_key,
+                "importance": normalized_importance,
+                "compression": {
+                    "original_chars": len(safety_analysis["content"]),
+                    "stored_chars": len(stored_content),
+                    "max_chars": max_chars,
+                    "truncated": len(stored_content) < len(safety_analysis["content"]),
+                },
                 "safety": self.safety_gate.summarize_for_metadata(safety_analysis),
             }
         )
         result = self.store(
-            content=safety_analysis["content"],
-            title=title or f"Session transcript: {session_id}",
+            content=stored_content,
+            title=title or f"Session transcript: {resolved_session_id}",
             layer="L2",
             topic=topic,
             metadata=transcript_metadata,
             auto_extract=False,
         )
+        memory_id = result.get("L2")
+        if memory_id:
+            self._sync_session_transcript_index_memory(memory_id)
+        result["success"] = True
+        result["deduplicated"] = False
+        result["dedupe_key"] = dedupe_key
         result["safety"] = transcript_metadata["safety"]
         result["redacted_before_store"] = bool(safety_analysis.get("redactions"))
+        result["metadata"] = transcript_metadata
         return result
+
+    def _compress_session_transcript(self, content: str, max_chars: int = 12000) -> str:
+        normalized = re.sub(r"\n{3,}", "\n\n", (content or "").strip())
+        if max_chars <= 0 or len(normalized) <= max_chars:
+            return normalized
+        head_budget = max(int(max_chars * 0.7), 1)
+        tail_budget = max(max_chars - head_budget - 80, 1)
+        return (
+            normalized[:head_budget].rstrip()
+            + "\n\n[... transcript compressed for storage ...]\n\n"
+            + normalized[-tail_budget:].lstrip()
+        )
+
+    def _find_existing_session_transcript(self, dedupe_key: str) -> Optional[str]:
+        for memory_id, entry in self.lifecycle._manifest.items():
+            metadata = entry.get("metadata", {})
+            if metadata.get("artifact_type") == "session_transcript" and metadata.get("dedupe_key") == dedupe_key:
+                return memory_id
+        return None
 
     def _is_session_transcript_entry(self, entry: Dict[str, Any]) -> bool:
         metadata = entry.get("metadata", {}) or {}
         scope = str(entry.get("scope") or metadata.get("scope") or "")
         if metadata.get("artifact_type") == "session_transcript":
             return True
-        if metadata.get("source") == "auto_capture" and scope.startswith("session:"):
+        if metadata.get("source") in {"auto_capture", "galeharness"} and scope.startswith("session:"):
             return True
         return False
 
@@ -636,7 +695,7 @@ class LayerManagerV5:
             return result
         
         elif layer == "all":
-            # [OK] v5.0 核心：存储 L2 并自动触发 L1/L0 提取
+            # ✅ v5.0 核心：存储 L2 并自动触发 L1/L0 提取
             l2_result = self._store_l2_only(content, effective_title, topic, metadata)
             
             if auto_extract:
@@ -718,11 +777,11 @@ class LayerManagerV5:
         if entry and self._is_session_transcript_entry(entry):
             sync_ok = self._sync_session_transcript_index_memory(l2_id)
             if not sync_ok:
-                print(f"[WARN] Session transcript index sync failed for {l2_id}")
+                print(f"⚠️ Session transcript index sync failed for {l2_id}")
         for pruned_id in prune_result.get("pruned", []):
             removed_ok = self._remove_session_transcript_index_entry(pruned_id)
             if not removed_ok:
-                print(f"[WARN] Session transcript index removal failed for {pruned_id}")
+                print(f"⚠️ Session transcript index removal failed for {pruned_id}")
         if prune_result.get("triggered"):
             result["pruned"] = prune_result.get("pruned", [])
         return result
@@ -1042,7 +1101,7 @@ class LayerManagerV5:
                 valid_until = entry.get("metadata", {}).get("valid_until") if entry else None
                 if valid_until and valid_until < today:
                     item["_expired"] = True
-                    item["_expired_badge"] = "[WARN] 已过期"
+                    item["_expired_badge"] = "⚠️ 已过期"
                 filtered_items.append(item)
             results[layer_name] = filtered_items[:limit]
 
@@ -1469,7 +1528,7 @@ class LayerManagerV5:
         try:
             raw_results = self.vector_store.search(query=query, top_k=max(limit, 10), layer="L2")
         except Exception as e:
-            print(f"[WARN] Vector search failed: {e}")
+            print(f"⚠️ Vector search failed: {e}")
             if debug_info is not None:
                 debug_info["vector"] = {
                     "enabled": False,
@@ -1712,7 +1771,7 @@ class LayerManagerV5:
             "retry_attempted": False,
             "recovered": False,
         }
-        print(f"[WARN] Vector store add failed for {l2_id}: {reason}")
+        print(f"⚠️ Vector store add failed for {l2_id}: {reason}")
         if not self._vector_store_can_add():
             return
         self._vector_store_last_add_failure["retry_attempted"] = True
@@ -1720,14 +1779,14 @@ class LayerManagerV5:
             retry_success = self.vector_store.add(**add_payload)
         except Exception as retry_error:
             self._vector_store_last_add_failure["retry_error"] = str(retry_error)
-            print(f"[WARN] Vector store retry failed for {l2_id}: {retry_error}")
+            print(f"⚠️ Vector store retry failed for {l2_id}: {retry_error}")
             return
         if retry_success:
             self._vector_store_last_add_failure["recovered"] = True
-            print(f"[WARN] Vector store add recovered on retry for {l2_id}")
+            print(f"⚠️ Vector store add recovered on retry for {l2_id}")
             return
         self._vector_store_last_add_failure["retry_error"] = "vector_store.add returned False"
-        print(f"[WARN] Vector store retry returned false for {l2_id}")
+        print(f"⚠️ Vector store retry returned false for {l2_id}")
 
     def _merge_score_field(self, existing: Dict[str, Any], item: Dict[str, Any], field: str) -> None:
         score_counts = existing.setdefault("_score_counts", {})
@@ -1843,5 +1902,5 @@ class LayerManagerV5:
         if full_sync:
             return self.rebuild_aggregates(include_archived=False)
         else:
-            print("[SYNC] 增量同步模式...")
+            print("🔄 增量同步模式...")
             return {"success": False, "message": "增量同步暂未实现"}

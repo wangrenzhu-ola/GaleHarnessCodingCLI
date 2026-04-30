@@ -39,6 +39,7 @@ HKT-Memory v5.0 - 自动分层存储系统
 """
 
 import argparse
+from contextlib import redirect_stdout
 import json
 import os
 import sys
@@ -63,20 +64,25 @@ from layers.manager_v5 import LayerManagerV5
 from config.loader import ConfigLoader
 from runtime.orchestrator import RecallOrchestrator, RecallRequest
 from runtime.provider import LocalMemoryProvider
+from runtime.root import memory_root_status, resolve_memory_root
+from runtime.task_memory import TaskMemoryRuntime, parse_json_payload, skipped_result
 
 
 class HKTMv5:
     """HKT-Memory v5.0 主类"""
     
     def __init__(self, memory_dir: str = None, llm_provider: str = None):
-        self.memory_dir = Path(memory_dir or os.environ.get("HKT_MEMORY_DIR", "memory"))
-        self.memory_dir.mkdir(parents=True, exist_ok=True)
         self.config = ConfigLoader(SCRIPT_DIR).load()
+        resolved_root = resolve_memory_root(memory_dir, config=self.config, cwd=SCRIPT_DIR)
+        self.memory_dir = resolved_root["path"]
+        self.memory_root_source = resolved_root["source"]
+        self.memory_dir.mkdir(parents=True, exist_ok=True)
+        self.llm_provider = llm_provider or os.getenv("L1_EXTRACTOR_PROVIDER", "zhipu")
         
         # 初始化分层管理器
         self.layers = LayerManagerV5(
             base_path=self.memory_dir,
-            llm_provider=llm_provider or os.getenv("L1_EXTRACTOR_PROVIDER", "zhipu"),
+            llm_provider=self.llm_provider,
             config=self.config
         )
         automation_config = self.config.get("automation", {})
@@ -161,6 +167,41 @@ class HKTMv5:
             branch=branch,
             pr=pr,
             pr_id=pr_id,
+        )
+
+    def store_session_transcript(
+        self,
+        content: str,
+        session_id: str = "",
+        title: str = "",
+        topic: str = "session",
+        task_id: str = None,
+        project: str = None,
+        repo_root: str = None,
+        branch: str = None,
+        pr: str = None,
+        pr_id: str = None,
+        source: str = "auto_capture",
+        source_mode: str = "direct",
+        importance: str = "medium",
+        max_chars: int = 12000,
+        metadata: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        return self.layers.store_session_transcript(
+            content=content,
+            session_id=session_id,
+            title=title,
+            topic=topic,
+            task_id=task_id,
+            project=project,
+            repo_root=repo_root,
+            branch=branch,
+            pr_id=pr_id or pr,
+            source=source,
+            source_mode=source_mode,
+            importance=importance,
+            max_chars=max_chars,
+            metadata=metadata,
         )
 
     def list_recent(
@@ -269,6 +310,15 @@ class HKTMv5:
         """获取统计"""
         return self.layers.get_stats()
 
+    def status(self) -> Dict[str, Any]:
+        return memory_root_status(
+            self.memory_dir,
+            source=self.memory_root_source,
+            provider=self.llm_provider,
+            config=self.config,
+            layers=self.layers,
+        )
+
     def forget(self, memory_id: str, force: bool = False) -> Dict[str, Any]:
         return self.layers.forget(memory_id=memory_id, force=force)
 
@@ -330,6 +380,32 @@ class HKTMv5:
     def conflict_scan(self, output_path: str = None) -> Dict[str, Any]:
         return self.layers.scan_conflicts(output_path=output_path)
 
+    def task_recall(self, envelope: Dict[str, Any], limit: int = 5, token_budget: int = 1600) -> Dict[str, Any]:
+        return TaskMemoryRuntime(self).task_recall(envelope, limit=limit, token_budget=token_budget)
+
+    def task_capture(self, event: Dict[str, Any]) -> Dict[str, Any]:
+        return TaskMemoryRuntime(self).task_capture(event)
+
+    def task_ledger(
+        self,
+        project: str,
+        task_id: str,
+        branch: str = None,
+        raw: bool = False,
+    ) -> Dict[str, Any]:
+        return TaskMemoryRuntime(self).task_ledger(project=project, task_id=task_id, branch=branch, raw=raw)
+
+    def task_trace(self, trace_id: str, view: str = "summary") -> Dict[str, Any]:
+        return TaskMemoryRuntime(self).task_trace(trace_id=trace_id, view=view)
+
+
+def _read_json_cli_payload(raw: str, file_path: str, label: str) -> Dict[str, Any]:
+    if file_path:
+        raw = Path(file_path).read_text(encoding="utf-8")
+    if not raw:
+        raise ValueError(f"{label} JSON is required")
+    return parse_json_payload(raw, label)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -339,8 +415,8 @@ def main():
     
     parser.add_argument(
         "--memory-dir",
-        default=os.getenv("HKT_MEMORY_DIR", "memory"),
-        help="记忆存储目录"
+        default=None,
+        help="记忆存储目录（默认按 root 解析优先级选择）"
     )
     parser.add_argument(
         "--llm-provider",
@@ -411,6 +487,23 @@ def main():
     recent_parser.add_argument("--pr", help="PR 过滤")
     recent_parser.add_argument("--pr-id", help="PR ID 过滤")
 
+    store_session_parser = subparsers.add_parser("store-session-transcript", help="存储 session transcript")
+    store_session_parser.add_argument("--content", "-c", required=True, help="Transcript 内容")
+    store_session_parser.add_argument("--session-id", default="", help="Session ID")
+    store_session_parser.add_argument("--title", "-t", default="", help="标题")
+    store_session_parser.add_argument("--topic", default="session", help="主题")
+    store_session_parser.add_argument("--task-id", help="Task ID")
+    store_session_parser.add_argument("--project", help="Project/repo name")
+    store_session_parser.add_argument("--repo-root", help="Repo root path")
+    store_session_parser.add_argument("--branch", help="Git branch")
+    store_session_parser.add_argument("--pr", help="PR")
+    store_session_parser.add_argument("--pr-id", help="PR ID")
+    store_session_parser.add_argument("--source", default="auto_capture", help="Transcript source")
+    store_session_parser.add_argument("--source-mode", default="direct", help="Source mode")
+    store_session_parser.add_argument("--importance", choices=["high", "medium", "low"], default="medium", help="重要性")
+    store_session_parser.add_argument("--max-chars", type=int, default=12000, help="最大存储字符数")
+    store_session_parser.add_argument("--metadata", default="{}", help="JSON metadata")
+
     prefetch_parser = subparsers.add_parser("prefetch", help="预取 orchestrator 依赖的 memory sources")
     prefetch_parser.add_argument("--query", "-q", default="", help="预取 query")
     prefetch_parser.add_argument(
@@ -451,6 +544,30 @@ def main():
     orchestrator_parser.add_argument("--no-session", action="store_true", help="禁用 transcript source")
     orchestrator_parser.add_argument("--no-long-term", action="store_true", help="禁用长期记忆 source")
 
+    task_recall_parser = subparsers.add_parser("task-recall", help="Gale task memory recall JSON contract")
+    task_recall_parser.add_argument("--json", action="store_true", help="输出 JSON（task 命令默认启用）")
+    task_recall_parser.add_argument("--envelope", help="Task envelope JSON")
+    task_recall_parser.add_argument("--envelope-file", help="从文件读取 task envelope JSON")
+    task_recall_parser.add_argument("--limit", "-n", type=int, default=5, help="结果数量")
+    task_recall_parser.add_argument("--token-budget", type=int, default=1600, help="注入 token 预算")
+
+    task_capture_parser = subparsers.add_parser("task-capture", help="Gale task memory capture JSON contract")
+    task_capture_parser.add_argument("--json", action="store_true", help="输出 JSON（task 命令默认启用）")
+    task_capture_parser.add_argument("--event", help="Capture event JSON")
+    task_capture_parser.add_argument("--event-file", help="从文件读取 capture event JSON")
+
+    task_ledger_parser = subparsers.add_parser("task-ledger", help="读取 task-scoped hot ledger")
+    task_ledger_parser.add_argument("--json", action="store_true", help="输出 JSON（task 命令默认启用）")
+    task_ledger_parser.add_argument("--project", required=True, help="项目名")
+    task_ledger_parser.add_argument("--task-id", required=True, help="任务 ID")
+    task_ledger_parser.add_argument("--branch", help="可选 branch scope")
+    task_ledger_parser.add_argument("--raw", action="store_true", help="显式请求 raw events")
+
+    task_trace_parser = subparsers.add_parser("task-trace", help="读取 lightweight task memory trace")
+    task_trace_parser.add_argument("--json", action="store_true", help="输出 JSON（task 命令默认启用）")
+    task_trace_parser.add_argument("--trace-id", required=True, help="Trace ID")
+    task_trace_parser.add_argument("--view", choices=["summary", "raw"], default="summary", help="Trace view")
+
     # Sync command
     sync_parser = subparsers.add_parser("sync", help="同步各层")
     sync_parser.add_argument(
@@ -466,6 +583,11 @@ def main():
     
     # Stats command
     subparsers.add_parser("stats", help="显示统计")
+
+    status_parser = subparsers.add_parser("status", help="显示 memory root/status/doctor 信息")
+    status_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    doctor_parser = subparsers.add_parser("doctor", help="检查 memory root/status/doctor 信息")
+    doctor_parser.add_argument("--json", action="store_true", help="输出 JSON")
 
     forget_parser = subparsers.add_parser("forget", help="遗忘记忆")
     forget_parser.add_argument("--memory-id", required=True, help="记忆ID")
@@ -540,14 +662,25 @@ def main():
         parser.print_help()
         return
     
-    # 初始化
-    memory = HKTMv5(
-        memory_dir=args.memory_dir,
-        llm_provider=args.llm_provider
-    )
+    json_only_commands = {"task-recall", "task-capture", "task-ledger", "task-trace"}
+
+    # 初始化。task-* 命令必须保持 stdout JSON-only，所以初始化期 warning 转到 stderr。
+    if args.command in json_only_commands or (
+        args.command in {"status", "doctor"} and getattr(args, "json", False)
+    ):
+        with redirect_stdout(sys.stderr):
+            memory = HKTMv5(
+                memory_dir=args.memory_dir,
+                llm_provider=args.llm_provider
+            )
+    else:
+        memory = HKTMv5(
+            memory_dir=args.memory_dir,
+            llm_provider=args.llm_provider
+        )
     
     if args.command == "store":
-        print("[WRITE] 存储记忆...")
+        print("📝 存储记忆...")
         print(f"   Layer: {args.layer}")
         print(f"   Topic: {args.topic}")
         print(f"   Title: {args.title or 'Untitled'}")
@@ -562,13 +695,13 @@ def main():
             auto_extract=not args.no_extract
         )
         
-        print("\n[OK] 存储完成!")
+        print("\n✅ 存储完成!")
         print(f"   L2: {result.get('L2', 'N/A')}")
         print(f"   L1: {result.get('L1', 'N/A')}")
         print(f"   L0: {result.get('L0', 'N/A')}")
     
     elif args.command == "retrieve":
-        print(f"[FIND] 检索: {args.query}")
+        print(f"🔍 检索: {args.query}")
         print(f"   Layer: {args.layer}")
         if args.min_similarity is not None:
             print(f"   Min Similarity: {args.min_similarity}")
@@ -594,7 +727,7 @@ def main():
             if layer_name == "debug":
                 continue
             print(f"\n{'='*60}")
-            print(f"[LAYER] {layer_name} 层 ({len(items)} 条结果)")
+            print(f"📂 {layer_name} 层 ({len(items)} 条结果)")
             print(f"{'='*60}")
             
             for i, item in enumerate(items[:5], 1):
@@ -622,7 +755,7 @@ def main():
         if args.debug and results.get("debug"):
             debug_info = results["debug"]
             print(f"\n{'='*60}")
-            print("[TEST] Debug 命中解释")
+            print("🧪 Debug 命中解释")
             print(f"{'='*60}")
             config = debug_info.get("config", {})
             print(
@@ -658,7 +791,7 @@ def main():
             pr=args.pr,
             pr_id=args.pr_id,
         )
-        print("[FIND] Session Search")
+        print("🔎 Session Search")
         print()
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
@@ -672,7 +805,34 @@ def main():
             pr=args.pr,
             pr_id=args.pr_id,
         )
-        print("[TIME] Recent Sessions\n")
+        print("🕘 Recent Sessions\n")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+
+    elif args.command == "store-session-transcript":
+        try:
+            metadata = json.loads(args.metadata or "{}")
+            if not isinstance(metadata, dict):
+                raise ValueError("--metadata must be a JSON object")
+        except Exception as exc:
+            print(json.dumps({"success": False, "error": str(exc)}, ensure_ascii=False, indent=2))
+            sys.exit(1)
+        result = memory.store_session_transcript(
+            content=args.content,
+            session_id=args.session_id,
+            title=args.title,
+            topic=args.topic,
+            task_id=args.task_id,
+            project=args.project,
+            repo_root=args.repo_root,
+            branch=args.branch,
+            pr=args.pr,
+            pr_id=args.pr_id,
+            source=args.source,
+            source_mode=args.source_mode,
+            importance=args.importance,
+            max_chars=args.max_chars,
+            metadata=metadata,
+        )
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
     elif args.command == "prefetch":
@@ -689,7 +849,7 @@ def main():
             pr=args.pr,
             pr_id=args.pr_id,
         )
-        print("[FAST] Prefetch Result\n")
+        print("⚡ Prefetch Result\n")
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
     elif args.command == "orchestrate-recall":
@@ -710,11 +870,40 @@ def main():
             include_long_term=False if args.no_long_term else None,
             token_budget=args.token_budget,
         )
-        print("[NAV] Orchestrated Recall\n")
+        print("🧭 Orchestrated Recall\n")
         print(json.dumps(result, ensure_ascii=False, indent=2))
+
+    elif args.command == "task-recall":
+        try:
+            envelope = _read_json_cli_payload(args.envelope, args.envelope_file, "envelope")
+            result = memory.task_recall(envelope, limit=args.limit, token_budget=args.token_budget)
+        except Exception as exc:
+            result = skipped_result(str(exc))
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+
+    elif args.command == "task-capture":
+        try:
+            event = _read_json_cli_payload(args.event, args.event_file, "event")
+            result = memory.task_capture(event)
+        except Exception as exc:
+            result = skipped_result(str(exc))
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+
+    elif args.command == "task-ledger":
+        result = memory.task_ledger(
+            project=args.project,
+            task_id=args.task_id,
+            branch=args.branch,
+            raw=args.raw,
+        )
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+
+    elif args.command == "task-trace":
+        result = memory.task_trace(trace_id=args.trace_id, view=args.view)
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
     
     elif args.command == "sync":
-        print("[SYNC] 同步各层...")
+        print("🔄 同步各层...")
         if args.full:
             print("   模式: 全量同步")
         else:
@@ -725,48 +914,67 @@ def main():
 
         result = memory.sync(full=args.full, rebuild_index=args.rebuild_index)
         if result:
-            print("[LOOP] 同步结果\n")
+            print("🔁 同步结果\n")
             for key, value in result.items():
                 print(f"   {key}: {value}")
     
     elif args.command == "stats":
-        print("[STAT] 统计信息\n")
+        print("📊 统计信息\n")
         stats = memory.stats()
         
         for layer_name, layer_stats in stats.items():
             print(f"\n{'='*60}")
-            print(f"[LAYER] {layer_name} 层")
+            print(f"📂 {layer_name} 层")
             print(f"{'='*60}")
             for key, value in layer_stats.items():
                 print(f"   {key}: {value}")
 
+    elif args.command in {"status", "doctor"}:
+        status = memory.status()
+        if args.json:
+            print(json.dumps(status, ensure_ascii=False, indent=2, sort_keys=True))
+        else:
+            print("🩺 HKT-Memory Status\n")
+            print(f"   root: {status['root']}")
+            print(f"   root_source: {status['root_source']}")
+            print(f"   provider: {status['provider']}")
+            print(f"   writable: {status['writable']}")
+            print(f"   vector_backend: {status['vector_store']['backend']}")
+            print(f"   vector_available: {status['vector_store']['available']}")
+            print("\n   layers:")
+            for name, info in status["layers"].items():
+                print(f"     {name}: exists={info['exists']} path={info['path']}")
+            print("\n   indexes:")
+            for name, info in status["indexes"].items():
+                print(f"     {name}: exists={info['exists']} path={info['path']}")
+
     elif args.command == "forget":
         result = memory.forget(memory_id=args.memory_id, force=args.force)
-        print("[BRAIN] 遗忘结果\n")
+        print("🧠 遗忘结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "restore":
         result = memory.restore(memory_id=args.memory_id)
-        print("[RECYCLE] 恢复结果\n")
+        print("♻️ 恢复结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "cleanup":
         result = memory.cleanup(dry_run=args.dry_run, scope=args.scope)
-        print("[CLEAN] 清理结果\n")
+        print("🧹 清理结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "pin":
         result = memory.pin(memory_id=args.memory_id, pinned=args.value == "true")
-        print("[PIN] Pin 结果\n")
+        print("📌 Pin 结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "importance":
         result = memory.set_importance(memory_id=args.memory_id, importance=args.value)
-        print("[STAR] 重要性结果\n")
+        print("⭐ 重要性结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
@@ -778,7 +986,7 @@ def main():
             query=args.query,
             note=args.note,
         )
-        print("[HOOK] 反馈结果\n")
+        print("🪝 反馈结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
@@ -800,13 +1008,13 @@ def main():
                 })
                 if skill:
                     analyzer.write_skill(skill)
-                    print(f"\n[SKILL] 已提取并写入技能: {skill['skill_name']}")
+                    print(f"\n✨ 已提取并写入技能: {skill['skill_name']}")
                 else:
-                    print(f"\n[WARN] 反射分析未产出有效 skill")
+                    print(f"\n⚠️ 反射分析未产出有效 skill")
 
     elif args.command == "rebuild":
         result = memory.rebuild(include_archived=args.include_archived)
-        print("[BUILD] 聚合重建结果\n")
+        print("🧱 聚合重建结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
@@ -827,13 +1035,13 @@ def main():
             layer=args.layer,
             auto_extract=args.auto_extract,
         )
-        print("[WRITE] 产物写入结果\n")
+        print("📥 产物写入结果\n")
         for key, value in result.items():
             print(f"   {key}: {value}")
 
     elif args.command == "conflict-scan":
         result = memory.conflict_scan(output_path=args.output)
-        print("[SCAN] 冲突扫描结果\n")
+        print("⚔️ 冲突扫描结果\n")
         for key, value in result.items():
             if key == "conflicts":
                 print(f"   conflicts: {len(value)} entries")
@@ -841,7 +1049,7 @@ def main():
                 print(f"   {key}: {value}")
     
     elif args.command == "test":
-        print("[TEST] 运行测试...\n")
+        print("🧪 运行测试...\n")
         
         test_content = """# MiniMax 语音转纪要工具
 
@@ -884,7 +1092,7 @@ def main():
             total = layer_stats.get('total_entries') or layer_stats.get('total_topics', 0)
             print(f"   {layer}: {total} 条记录")
         
-        print("\n[OK] 测试完成!")
+        print("\n✅ 测试完成!")
         print(f"\n查看生成的文件:")
         print(f"   L2: {args.memory_dir}/L2-Full/daily/")
         print(f"   L1: {args.memory_dir}/L1-Overview/topics/tools.md")
@@ -892,7 +1100,7 @@ def main():
 
     elif args.command == "serve":
         from mcp.server import MemoryMCPServer
-        print(f"[START] 启动 MCP HTTP 服务器 {args.host}:{args.port} ...")
+        print(f"🚀 启动 MCP HTTP 服务器 {args.host}:{args.port} ...")
         server = MemoryMCPServer(args.memory_dir)
         server.start_http(host=args.host, port=args.port)
 

@@ -1,6 +1,6 @@
 ---
 name: "hkt-memory"
-description: "生产级长期记忆系统 v5.2.0，支持 L2→L1/L0 自动分层、MCP 协议、自动捕获与噪声过滤"
+description: "生产级长期记忆系统 v5.3.0，支持 L2→L1/L0 自动分层、MCP 协议、自动捕获、噪声过滤与 Gale task memory runtime"
 triggers:
   - memory
   - recall
@@ -8,9 +8,9 @@ triggers:
   - retrieve
 ---
 
-# HKT-Memory v5.2.0
+# HKT-Memory v5.3.0
 
-> 自动分层长期记忆系统：L2 写入后自动触发 L1/L0 生成，支持 LLM 智能摘要、MCP 协议集成、Claude Code 钩子自动捕获与噪声过滤
+> 自动分层长期记忆系统：L2 写入后自动触发 L1/L0 生成，支持 LLM 智能摘要、MCP 协议集成、Claude Code 钩子自动捕获、噪声过滤与 GaleHarnessCodingCLI 研发任务记忆运行时
 
 ## 核心特性
 
@@ -22,6 +22,7 @@ triggers:
 - **MCP 协议支持**：9+ 个 MCP 工具，兼容 Claude / Cursor 等客户端
 - **Claude Code 钩子集成**：PreCompact 自动回忆、PostToolUse 自动捕获
 - **噪声预过滤**：自动过滤问候语、确认词、纯 emoji 等低信息内容
+- **Gale 任务记忆运行时**：`gale-task-memory.v1` 结构化 recall/capture contract，记录决策、失败路径、验证结果、审查发现与后续行动
 - **REST API 语义端点**：`/store`、`/recall`、`/forget`、`/stats`
 
 ## 快速开始
@@ -39,6 +40,12 @@ uv run scripts/hkt_memory_v5.py store \
 
 # 检索记忆
 uv run scripts/hkt_memory_v5.py retrieve --query "API设计" --layer all
+
+# Gale task memory recall（JSON contract）
+uv run scripts/hkt_memory_v5.py task-recall \
+  --envelope-file /tmp/gale-task-envelope.json \
+  --limit 5 \
+  --token-budget 1200
 ```
 
 ## 架构
@@ -94,6 +101,10 @@ uv run scripts/hkt_memory_v5.py rebuild           # 重建并压缩聚合文件
 # 统计
 uv run scripts/hkt_memory_v5.py stats
 
+# Root/status/doctor
+uv run scripts/hkt_memory_v5.py status
+uv run scripts/hkt_memory_v5.py doctor --json
+
 # 遗忘/恢复
 uv run scripts/hkt_memory_v5.py forget --memory-id "xxx"
 uv run scripts/hkt_memory_v5.py restore --memory-id "xxx"
@@ -106,6 +117,12 @@ uv run scripts/hkt_memory_v5.py importance --memory-id "xxx" --value high
 uv run scripts/hkt_memory_v5.py feedback --label useful --memory-id "xxx"
 uv run scripts/hkt_memory_v5.py feedback --label wrong --memory-id "xxx"
 
+# GaleHarnessCodingCLI task memory runtime
+uv run scripts/hkt_memory_v5.py task-recall --envelope-file task-envelope.json
+uv run scripts/hkt_memory_v5.py task-capture --event-file capture-event.json
+uv run scripts/hkt_memory_v5.py task-ledger --task-id "task-123" --limit 20
+uv run scripts/hkt_memory_v5.py task-trace --task-id "task-123"
+
 # 测试
 uv run scripts/hkt_memory_v5.py test
 
@@ -115,7 +132,7 @@ uv run scripts/hkt_memory_v5.py serve --host 127.0.0.1 --port 8765
 
 ## MCP 与 REST API
 
-HKT-Memory v5.2.0 内置 MCP HTTP 服务器，提供语义化 REST 端点：
+HKT-Memory v5.3.0 内置 MCP HTTP 服务器，提供语义化 REST 端点：
 
 ```bash
 curl -X POST http://localhost:8765/store \
@@ -138,6 +155,17 @@ curl http://localhost:8765/stats
 - **PreCompact**：会话压缩前自动调用 `auto_recall.py`，注入相关历史记忆
 - **PostToolUse**：工具调用后自动调用 `auto_capture.py`，将新信息写入 `session:<id>` scope
 
+## GaleHarnessCodingCLI 任务记忆
+
+v5.3.0 新增面向研发流程的 task memory runtime contract。GaleHarnessCodingCLI 可以在 `gh:plan`、`gh:work`、`gh:debug`、`gh:review`、`gh:commit`、`gh:pr-description` 等技能边界调用 HKTMemory：
+
+- **`task-recall`**：读取 `gale-task-memory.v1` task envelope，返回非信任 memory evidence、trust diagnostics 与可注入上下文
+- **`task-capture`**：写入结构化 capture event，包括 `task_id`、`skill`、`phase`、`branch`、`pr_id`、`files_touched`、`confidence`、`verification`
+- **`task-ledger`**：读取 task-scoped hot ledger，便于同一研发任务内低延迟复用近期事件
+- **`task-trace`**：输出 lightweight trace summary，用于审查一次任务链路中的决策、失败路径、验证结果和后续行动
+
+所有 task runtime 命令默认输出 JSON，适合被 GaleHarnessCodingCLI 或其他 agent runtime 直接消费。
+
 ## 触发条件（Claude Code Skills 集成）
 
 | 触发条件 | 动作 |
@@ -146,7 +174,20 @@ curl http://localhost:8765/stats
 | 需要回忆历史上下文 | `retrieve --layer all` |
 | 需要按主题聚合信息 | `store/retrieve --topic <topic>` |
 | 需要全量重建索引与摘要 | `sync --full` |
-| 需要检查健康状态 | `stats` |
+| 需要检查健康状态 | `status` / `doctor` |
+
+## Memory Root 优先级
+
+HKT-Memory 使用同一套 root 解析规则，供 CLI、MCP 与程序化 `HKTMv5` client 共用。优先级从高到低：
+
+1. 显式传入的 `--memory-dir` 或 `HKTMv5(memory_dir=...)`
+2. `HKT_MEMORY_ROOT`
+3. `HKT_MEMORY_DIR`（兼容旧配置）
+4. `HKT_MEMORY_PUBLIC_ROOT`
+5. `config/default.json` 的 `storage.public_root` 或 `storage.base_dir`
+6. 默认项目本地 `memory`
+
+`status` / `doctor` 会显示实际 root、root 来源、provider、可写性、三层目录、索引文件与 vector backend 状态，便于 GaleHarness 调用侧确认当前使用的 public memory root。
 
 ## 环境变量
 
@@ -155,7 +196,9 @@ curl http://localhost:8765/stats
 | `ZHIPU_API_KEY` | 智谱 AI API Key | - |
 | `OPENAI_API_KEY` | OpenAI API Key | - |
 | `L1_EXTRACTOR_PROVIDER` | LLM 提供商 | `zhipu` |
-| `HKT_MEMORY_DIR` | 记忆存储目录 | `memory` |
+| `HKT_MEMORY_ROOT` | 首选记忆存储目录 | - |
+| `HKT_MEMORY_DIR` | 兼容旧版的记忆存储目录 | - |
+| `HKT_MEMORY_PUBLIC_ROOT` | 公共知识库 root | - |
 | `HKT_MEMORY_LIFECYCLE_ENABLED` | 启用生命周期 | `true` |
 | `HKT_MAX_TOKENS` | auto_recall 输出 token 上限 | `512` |
 | `HKT_QUERY` / `CLAUDE_CONTEXT` | auto_recall 查询词来源 | - |
@@ -190,6 +233,11 @@ HKTMemory/
 ├── governance/                # 治理
 │   ├── errors.py             # 错误跟踪
 │   └── learnings.py          # 学习跟踪
+├── runtime/                   # Agent/runtime 编排
+│   ├── orchestrator.py       # recall 编排
+│   └── task_memory.py        # Gale task memory contract
+├── session/
+│   └── task_ledger.py        # task-scoped hot ledger
 ├── vector_store/             # 向量存储
 ├── mcp/                      # MCP 协议服务
 ├── filters/                  # 噪声预过滤
@@ -209,4 +257,4 @@ HKTMemory/
 
 ## 版本
 
-**当前版本**: v5.2.0
+**当前版本**: v5.3.0

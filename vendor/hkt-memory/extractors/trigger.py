@@ -118,28 +118,28 @@ class LayerTrigger:
         result = {"L2": l2_id}
         l1_summary = None
         
-        print(f"\n[SYNC] LayerTrigger: L2 存储完成，触发分层提取...")
+        print(f"\n🔄 LayerTrigger: L2 存储完成，触发分层提取...")
         print(f"   L2 ID: {l2_id}")
         print(f"   Topic: {topic}")
         print(f"   Title: {title}")
         
         # Step 1: 生成 L1
         if enable_l1:
-            print(f"\n[LIST] Step 1/2: 提取 L1 摘要...")
+            print(f"\n📋 Step 1/2: 提取 L1 摘要...")
             try:
                 l1_summary = self._generate_l1(content, title, topic, l2_id, timestamp)
                 result["L1"] = l1_summary.get("_id", "unknown")
                 result["_triples"] = l1_summary.get("triples", [])
                 result["_valid_until"] = l1_summary.get("valid_until")
-                print(f"   [OK] L1 生成完成: {result['L1']}")
+                print(f"   ✅ L1 生成完成: {result['L1']}")
             except Exception as e:
-                print(f"   [FAIL] L1 生成失败: {e}")
+                print(f"   ❌ L1 生成失败: {e}")
                 import traceback
                 traceback.print_exc()
         
         # Step 2: 生成 L0
         if enable_l0:
-            print(f"\n[FLAG] Step 2/2: 提取 L0 索引...")
+            print(f"\n🔖 Step 2/2: 提取 L0 索引...")
             try:
                 # 如果有 L1，从 L1 提取；否则从内容直接提取
                 if l1_summary:
@@ -147,16 +147,16 @@ class LayerTrigger:
                 else:
                     l0_id = self._generate_l0_from_content(content, title, topic, timestamp, l2_id)
                 result["L0"] = l0_id
-                print(f"   [OK] L0 生成完成: {l0_id}")
+                print(f"   ✅ L0 生成完成: {l0_id}")
             except Exception as e:
-                print(f"   [FAIL] L0 生成失败: {e}")
+                print(f"   ❌ L0 生成失败: {e}")
                 import traceback
                 traceback.print_exc()
         
         # Step 3: 更新关系映射
         self._update_relationships(result)
         
-        print(f"\n[SKILL] 分层提取完成: L2={result.get('L2', 'N/A')}, L1={result.get('L1', 'N/A')}, L0={result.get('L0', 'N/A')}")
+        print(f"\n✨ 分层提取完成: L2={result.get('L2', 'N/A')}, L1={result.get('L1', 'N/A')}, L0={result.get('L0', 'N/A')}")
         return result
     
     def _generate_l1(self, content: str, title: str, topic: str,
@@ -395,7 +395,7 @@ class LayerTrigger:
         - 重新提取（更改提取策略后）
         - 修复损坏的索引
         """
-        print("[SYNC] 开始全量同步...")
+        print("🔄 开始全量同步...")
         cleared = self.clear_aggregates()
         print(f"   已清空聚合层: {cleared}")
         
@@ -428,7 +428,7 @@ class LayerTrigger:
                 layer_type="evergreen" if "evergreen" in str(l2_file) else "daily"
             )
         
-        print(f"\n[OK] 全量同步完成，处理了 {len(l2_files)} 个文件")
+        print(f"\n✅ 全量同步完成，处理了 {len(l2_files)} 个文件")
     
     def _infer_topic(self, content: str) -> str:
         content_lower = content.lower()

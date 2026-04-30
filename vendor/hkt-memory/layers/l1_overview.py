@@ -167,7 +167,7 @@ class L1OverviewLayer:
 ## Milestones
 """
         for milestone in entry['milestones']:
-            status_icon = "[OK]" if milestone.get('completed') else "[PENDING]"
+            status_icon = "✅" if milestone.get('completed') else "⏳"
             content += f"- {status_icon} {milestone.get('name', 'Unnamed')}: {milestone.get('description', '')}\n"
         
         if entry['metadata']:

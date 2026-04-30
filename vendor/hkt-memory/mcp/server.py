@@ -48,6 +48,7 @@ class MemoryMCPServer:
             "memory_recall": self.tools.memory_recall,
             "memory_orchestrate_recall": self.tools.memory_orchestrate_recall,
             "memory_session_search": self.tools.memory_session_search,
+            "memory_store_session_transcript": self.tools.memory_store_session_transcript,
             "memory_store": self.tools.memory_store,
             "memory_forget": self.tools.memory_forget,
             "memory_restore": self.tools.memory_restore,
@@ -57,6 +58,7 @@ class MemoryMCPServer:
             "memory_feedback": self.tools.memory_feedback,
             "memory_cleanup": self.tools.memory_cleanup,
             "memory_rebuild": self.tools.memory_rebuild,
+            "memory_status": self.tools.memory_status,
             "memory_stats": self.tools.memory_stats,
             "memory_list": self.tools.memory_list,
             "self_improvement_log": self.tools.self_improvement_log,
@@ -147,6 +149,27 @@ class MemoryMCPServer:
                     }
                 },
                 {
+                    "name": "memory_store_session_transcript",
+                    "description": "Store a session transcript with provenance, dedupe, compression, and safety metadata",
+                    "parameters": {
+                        "content": {"type": "string", "required": True},
+                        "session_id": {"type": "string"},
+                        "title": {"type": "string", "default": ""},
+                        "topic": {"type": "string", "default": "session"},
+                        "task_id": {"type": "string"},
+                        "project": {"type": "string"},
+                        "repo_root": {"type": "string"},
+                        "branch": {"type": "string"},
+                        "pr": {"type": "string"},
+                        "pr_id": {"type": "string"},
+                        "source": {"type": "string", "default": "auto_capture"},
+                        "source_mode": {"type": "string", "default": "direct"},
+                        "importance": {"type": "string", "default": "medium"},
+                        "max_chars": {"type": "integer", "default": 12000},
+                        "metadata": {"type": "object"}
+                    }
+                },
+                {
                     "name": "memory_store",
                     "description": "Store new memory",
                     "parameters": {
@@ -224,6 +247,11 @@ class MemoryMCPServer:
                     "parameters": {
                         "include_archived": {"type": "boolean", "default": False}
                     }
+                },
+                {
+                    "name": "memory_status",
+                    "description": "Show resolved memory root, provider, writability, layers, and indexes",
+                    "parameters": {}
                 },
                 {
                     "name": "memory_stats",

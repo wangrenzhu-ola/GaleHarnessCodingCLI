@@ -26,9 +26,15 @@ class MemoryTools:
         from layers.manager_v5 import LayerManagerV5
         from runtime.orchestrator import RecallOrchestrator, RecallRequest
         from runtime.provider import LocalMemoryProvider
+        from runtime.root import memory_root_status, resolve_memory_root
 
         config = ConfigLoader(self.memory_dir.parent).load()
+        resolved_root = resolve_memory_root(str(self.memory_dir), config=config, cwd=self.memory_dir.parent)
+        self.memory_dir = resolved_root["path"]
+        self.memory_root_source = resolved_root["source"]
         self.layers = LayerManagerV5(self.memory_dir, config=config)
+        self._config = config
+        self._memory_root_status = memory_root_status
         automation_config = config.get("automation", {})
         orchestrator_config = {
             **automation_config.get("orchestrator", {}),
@@ -43,6 +49,18 @@ class MemoryTools:
         self._recall_request_cls = RecallRequest
         self.learnings = LearningTracker(self.memory_dir / "governance")
         self.errors = ErrorTracker(self.memory_dir / "governance")
+
+    def memory_status(self) -> Dict[str, Any]:
+        try:
+            return self._memory_root_status(
+                self.memory_dir,
+                source=self.memory_root_source,
+                provider="zhipu",
+                config=self._config,
+                layers=self.layers,
+            )
+        except Exception as e:
+            return {"success": False, "error": str(e)}
     
     def memory_recall(self, query: str, layer: str = "all", limit: int = 5, entity: str = None) -> Dict[str, Any]:
         """
@@ -103,6 +121,44 @@ class MemoryTools:
                 branch=branch,
                 pr=pr,
                 pr_id=pr_id,
+            )
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def memory_store_session_transcript(
+        self,
+        content: str,
+        session_id: str = "",
+        title: str = "",
+        topic: str = "session",
+        task_id: str = None,
+        project: str = None,
+        repo_root: str = None,
+        branch: str = None,
+        pr: str = None,
+        pr_id: str = None,
+        source: str = "auto_capture",
+        source_mode: str = "direct",
+        importance: str = "medium",
+        max_chars: int = 12000,
+        metadata: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        try:
+            return self.layers.store_session_transcript(
+                content=content,
+                session_id=session_id,
+                title=title,
+                topic=topic,
+                task_id=task_id,
+                project=project,
+                repo_root=repo_root,
+                branch=branch,
+                pr_id=pr_id or pr,
+                source=source,
+                source_mode=source_mode,
+                importance=importance,
+                max_chars=max_chars,
+                metadata=metadata,
             )
         except Exception as e:
             return {"success": False, "error": str(e)}
