@@ -273,13 +273,14 @@ The orchestrating agent (main conversation) performs these steps:
 Before writing the solution document, resolve the target directory:
 
 1. Run `gale-knowledge resolve-path --type solutions` to get the target directory path (the command outputs a plain path string). If the command fails or `gale-knowledge` is not available, fall back to `docs/solutions`.
-2. Use `<resolved-path>/[category]/` as the target directory for the solution document instead of the hardcoded `docs/solutions/[category]/` path.
+2. Use `<resolved-path>/[category]/` as the primary target directory for the solution document.
+3. Also write a copy to `docs/solutions/[category]/<filename>.md` (dual-write). If this secondary write fails, log a warning but do not fail the workflow.
 
 <!-- /HKT-PATCH:knowledge-write-path -->
 
 5. Validate YAML frontmatter against `references/schema.yaml`
-6. Create directory if needed: `mkdir -p docs/solutions/[category]/`
-7. Write the file: either the updated existing doc or the new `docs/solutions/[category]/[filename].md`
+6. Create directories if needed for both primary (`<resolved-path>/[category]/`) and secondary (`docs/solutions/[category]/`) paths.
+7. Write the file to the primary path (`<resolved-path>/[category]/[filename].md`) and the secondary path (`docs/solutions/[category]/[filename].md`).
 8. **Run `python3 scripts/validate-frontmatter.py <output-path>`** to catch silent-corruption parser-safety issues that the prose rules miss: malformed `---` delimiter lines, unquoted ` #` in scalar values (silent comment truncation), and unquoted `: ` in scalar values (silent mapping confusion). Exit 0 means the doc is parser-safe; exit 1 means the script's stderr names the offending field(s) and what to fix — quote the value(s), re-write the doc, and re-run until exit 0. Do not declare success while validation fails. The script does not enforce schema rules and does not flag YAML reserved-indicator characters (those produce loud parser errors downstream rather than silent corruption — out of scope). Uses Python 3 stdlib only (no PyYAML or other deps).
 
 When creating a new doc, preserve the section order from `assets/resolution-template.md` unless the user explicitly asks for a different structure.

@@ -1,7 +1,8 @@
 /**
  * 知识文档写入器
  *
- * 将 Markdown 文档写入全局知识仓库，写入失败时自动降级到项目本地 docs/ 目录。
+ * 将 Markdown 文档同时写入全局知识仓库（主路径）和项目本地 docs/ 目录（次路径）。
+ * 主路径写入失败时自动降级到项目本地 docs/ 目录。
  */
 
 import { mkdirSync, writeFileSync } from "node:fs"
@@ -30,11 +31,15 @@ export interface WriteKnowledgeDocumentOptions {
 }
 
 export interface WriteResult {
-  /** 最终写入的文件绝对路径 */
+  /** 最终写入的文件绝对路径（向后兼容） */
   path: string
+  /** 主路径（全局知识仓库） */
+  primaryPath: string
+  /** 次路径（项目 docs/），仅在次路径写入成功时设置 */
+  secondaryPath?: string
   /** 是否使用了 fallback（写入项目本地 docs/） */
   usedFallback: boolean
-  /** 如果 fallback，警告信息 */
+  /** 警告信息 */
   warning?: string
 }
 
@@ -43,7 +48,10 @@ export interface WriteResult {
 // ---------------------------------------------------------------------------
 
 /**
- * 将知识文档写入全局知识仓库，失败时降级到项目本地 docs/ 目录
+ * 将知识文档写入全局知识仓库和项目本地 docs/ 目录
+ *
+ * - 主路径：~/.galeharness/knowledge/<project>/<type>/<filename>（必须成功，失败则抛错或降级）
+ * - 次路径：<cwd>/docs/<type>/<filename>（尽力而为，失败仅警告）
  */
 export function writeKnowledgeDocument(options: WriteKnowledgeDocumentOptions): WriteResult {
   const { type, filename, content, cwd } = options
@@ -72,33 +80,54 @@ export function writeKnowledgeDocument(options: WriteKnowledgeDocumentOptions): 
     throw new Error(`Invalid filename: path traversal detected`)
   }
 
+  // 次路径（项目本地 docs/）
+  const secondaryDir = join(workDir, "docs", type)
+  const secondaryPath = join(secondaryDir, filename)
+
+  let primaryError: Error | null = null
+  let secondaryError: Error | null = null
+
+  // Step 1: 主路径写入
   try {
     mkdirSync(dirname(primaryPath), { recursive: true })
     writeFileSync(primaryPath, finalContent, "utf8")
-    return { path: primaryPath, usedFallback: false }
-  } catch (primaryError) {
-    // 写入失败，降级到项目本地 docs/（保留原始错误信息）
-    const primaryWarning = primaryError instanceof Error ? primaryError.message : String(primaryError)
-
-    // Fallback: <cwd>/docs/<type>/
-    const fallbackDir = join(workDir, "docs", type)
-    const fallbackPath = join(fallbackDir, filename)
-    const warning = `Knowledge repo write failed (${primaryWarning}), falling back to ${fallbackPath}`
-
-    try {
-      mkdirSync(fallbackDir, { recursive: true })
-      writeFileSync(fallbackPath, finalContent, "utf8")
-      console.warn(warning)
-      return { path: fallbackPath, usedFallback: true, warning }
-    } catch (fallbackError) {
-      const fallbackMsg = fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
-      // BUG-004: 聚合主路径和 fallback 的错误信息
-      throw new Error(
-        `Failed to write knowledge document to both primary and fallback paths. ` +
-        `Primary error: ${primaryWarning}. Fallback error: ${fallbackMsg}`
-      )
-    }
+  } catch (err) {
+    primaryError = err instanceof Error ? err : new Error(String(err))
   }
+
+  // Step 2: 次路径写入（无论主路径是否成功都尝试）
+  try {
+    mkdirSync(dirname(secondaryPath), { recursive: true })
+    writeFileSync(secondaryPath, finalContent, "utf8")
+  } catch (err) {
+    secondaryError = err instanceof Error ? err : new Error(String(err))
+  }
+
+  // 判断结果
+  if (primaryError === null && secondaryError === null) {
+    // 双写成功
+    return { path: primaryPath, primaryPath, secondaryPath, usedFallback: false }
+  }
+
+  if (primaryError === null && secondaryError !== null) {
+    // 主成功，次失败 -> 仅警告
+    const warning = `Secondary write to docs/ failed: ${secondaryError.message}`
+    console.warn(warning)
+    return { path: primaryPath, primaryPath, usedFallback: false, warning }
+  }
+
+  if (primaryError !== null && secondaryError === null) {
+    // 主失败，次成功 -> fallback 模式（保留向后兼容）
+    const warning = `Knowledge repo write failed (${primaryError.message}), falling back to ${secondaryPath}`
+    console.warn(warning)
+    return { path: secondaryPath, primaryPath, secondaryPath, usedFallback: true, warning }
+  }
+
+  // 双双失败
+  throw new Error(
+    `Failed to write knowledge document to both primary and secondary paths. ` +
+    `Primary error: ${primaryError.message}. Secondary error: ${secondaryError.message}`
+  )
 }
 
 // ---------------------------------------------------------------------------
