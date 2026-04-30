@@ -63,7 +63,7 @@ Before any other action, log the skill start event so this execution appears on 
 
 #### 0.1 Check for Recent Ideation Work
 
-Look in `docs/ideation/` for ideation documents created within the last 30 days.
+Look in `docs/ideation/` and the resolved global knowledge path (`gale-knowledge resolve-path --type ideation`) for ideation documents created within the last 30 days.
 
 Treat a prior ideation doc as relevant when:
 - the topic matches the requested focus
@@ -281,10 +281,21 @@ After all sub-agents return:
 
 After merging and synthesis, read `references/post-ideation-workflow.md` for the adversarial filtering rubric, presentation format, artifact template, handoff options, and quality bar. Do not load this file before Phase 2 agent dispatch completes.
 
+<!-- HKT-PATCH:knowledge-write-path -->
+### Knowledge Repository Write Path
+
+Before writing the ideation artifact, resolve the target directory:
+
+1. Run `gale-knowledge resolve-path --type ideation` to get the target directory path. If the command fails or `gale-knowledge` is not available, fall back to `docs/ideation`.
+2. Write the document to `<resolved-path>/<filename>.md`.
+3. Also write a copy to `docs/ideation/<filename>.md` (dual-write). If this secondary write fails, log a warning but do not fail the workflow.
+
+<!-- /HKT-PATCH:knowledge-write-path -->
+
 <!-- HKT-PATCH:phase-2.5 -->
 ### Phase 2.5: HKTMemory Store
 
-After the ideation artifact is written to `docs/ideation/`:
+After the ideation artifact is written to the resolved knowledge path:
 
 1. Read back the full content of the ideation document
 2. Extract the title and key themes from the frontmatter/content
@@ -302,6 +313,17 @@ After the ideation artifact is written to `docs/ideation/`:
 5. On error, proceed silently — storage is supplementary
 
 **Note:** This enables future ideation sessions to discover and build upon these ideas through Phase 0.5's retrieve step.
+
+<!-- HKT-PATCH:knowledge-commit -->
+### Knowledge Repository Commit
+
+After the ideation document is written:
+
+1. Run `gale-knowledge extract-project` to get the project name. If the command fails or is not available, use the current directory basename as the project name instead.
+2. Run `gale-knowledge commit --project "<project-name>" --type ideation --title "<document-title>"` to commit the knowledge document. If this command fails, log the error but continue — the document has already been written to disk.
+3. If `gale-knowledge` is not on PATH, skip both steps and continue — this must never block the skill.
+
+<!-- /HKT-PATCH:knowledge-commit -->
 
 <!-- HKT-PATCH:gale-task-end -->
 After the ideation workflow is fully complete, log the completion event:
