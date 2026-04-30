@@ -28,20 +28,31 @@ interface SyncItem {
 // Sync logic
 // ---------------------------------------------------------------------------
 
-function listMarkdownFiles(dir: string): string[] {
+function listMarkdownFiles(dir: string, relativeDir = ""): string[] {
   if (!existsSync(dir)) {
     return []
   }
   try {
-    return readdirSync(dir)
-      .filter(name => name.endsWith(".md") && !name.startsWith("."))
-      .filter(name => {
-        try {
-          return statSync(join(dir, name)).isFile()
-        } catch {
-          return false
+    const files: string[] = []
+    for (const name of readdirSync(join(dir, relativeDir))) {
+      if (name.startsWith(".")) {
+        continue
+      }
+
+      const relativePath = join(relativeDir, name)
+      const absolutePath = join(dir, relativePath)
+      try {
+        const stat = statSync(absolutePath)
+        if (stat.isDirectory()) {
+          files.push(...listMarkdownFiles(dir, relativePath))
+        } else if (stat.isFile() && name.endsWith(".md")) {
+          files.push(relativePath)
         }
-      })
+      } catch {
+        // Ignore unreadable entries and keep syncing the rest.
+      }
+    }
+    return files
   } catch {
     return []
   }
