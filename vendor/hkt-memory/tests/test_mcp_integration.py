@@ -199,6 +199,64 @@ def test_memory_session_search_keyword_search_supports_filters(tmp_path):
     assert "vector store" in result["results"][0]["content"]
 
 
+def test_memory_store_session_transcript_tool_writes_recent_searchable_entry(tmp_path):
+    tools = _make_tools(tmp_path)
+    result = tools.memory_store_session_transcript(
+        content="gh:work completed store-session-transcript integration with smoke tests",
+        session_id="session-gale",
+        task_id="task-gale",
+        project="HKTMemory",
+        repo_root="/repo/HKTMemory",
+        branch="gcw/issue-8",
+        pr_id="8",
+        source="galeharness",
+        source_mode="phase_completed",
+        importance="high",
+        metadata={"phase": "gh:work"},
+    )
+
+    assert result["success"] is True
+    assert result["L2"]
+    assert result["metadata"]["source"] == "galeharness"
+    assert result["metadata"]["repo_root"] == "/repo/HKTMemory"
+    assert result["metadata"]["importance"] == "high"
+    assert result["metadata"]["compression"]["stored_chars"] <= result["metadata"]["compression"]["original_chars"]
+
+    recent = tools.memory_session_search(query="", project="HKTMemory", limit=5)
+    assert recent["success"] is True
+    assert recent["count"] == 1
+    assert recent["results"][0]["session_id"] == "session-gale"
+
+    search = tools.memory_session_search(query="smoke tests", project="HKTMemory", limit=5)
+    assert search["success"] is True
+    assert search["count"] == 1
+    assert search["results"][0]["task_id"] == "task-gale"
+
+
+def test_memory_store_session_transcript_tool_deduplicates_and_compresses(tmp_path):
+    tools = _make_tools(tmp_path)
+    content = "important start\n" + ("noise\n" * 200) + "important end"
+    first = tools.memory_store_session_transcript(
+        content=content,
+        session_id="session-dedupe",
+        task_id="task-dedupe",
+        project="HKTMemory",
+        max_chars=120,
+    )
+    second = tools.memory_store_session_transcript(
+        content=content,
+        session_id="session-dedupe",
+        task_id="task-dedupe",
+        project="HKTMemory",
+        max_chars=120,
+    )
+
+    assert first["success"] is True
+    assert first["metadata"]["compression"]["truncated"] is True
+    assert second["deduplicated"] is True
+    assert second["existing_memory_id"] == first["L2"]
+
+
 # ---------------------------------------------------------------------------
 # memory_forget (soft delete semantics)
 # ---------------------------------------------------------------------------

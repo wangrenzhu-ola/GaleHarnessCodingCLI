@@ -22,17 +22,17 @@ def test_l0_layer():
         )
         
         assert memory_id is not None
-        print(f"[OK] L0 store: {memory_id}")
+        print(f"✓ L0 store: {memory_id}")
         
         # 检索
         results = l0.retrieve(query="测试")
         assert len(results) > 0
-        print(f"[OK] L0 retrieve: {len(results)} results")
+        print(f"✓ L0 retrieve: {len(results)} results")
         
         # 统计
         stats = l0.get_stats()
         assert stats['total_topics'] >= 1
-        print(f"[OK] L0 stats: {stats}")
+        print(f"✓ L0 stats: {stats}")
 
 
 def test_l1_layer():
@@ -49,7 +49,7 @@ def test_l1_layer():
         )
         
         assert session_id is not None
-        print(f"[OK] L1 store_session: {session_id}")
+        print(f"✓ L1 store_session: {session_id}")
         
         # 存储项目
         project_id = l1.store_project(
@@ -60,12 +60,12 @@ def test_l1_layer():
         )
         
         assert project_id is not None
-        print(f"[OK] L1 store_project: {project_id}")
+        print(f"✓ L1 store_project: {project_id}")
         
         # 统计
         stats = l1.get_stats()
         assert stats['total_sessions'] >= 1
-        print(f"[OK] L1 stats: {stats}")
+        print(f"✓ L1 stats: {stats}")
 
 
 def test_l2_layer():
@@ -80,7 +80,7 @@ def test_l2_layer():
         )
         
         assert daily_id is not None
-        print(f"[OK] L2 store_daily: {daily_id}")
+        print(f"✓ L2 store_daily: {daily_id}")
         
         # 存储永久记忆
         evergreen_id = l2.store_evergreen(
@@ -90,7 +90,7 @@ def test_l2_layer():
         )
         
         assert evergreen_id is not None
-        print(f"[OK] L2 store_evergreen: {evergreen_id}")
+        print(f"✓ L2 store_evergreen: {evergreen_id}")
         
         # 存储episode
         episode_id = l2.store_episode(
@@ -100,12 +100,12 @@ def test_l2_layer():
         )
         
         assert episode_id is not None
-        print(f"[OK] L2 store_episode: {episode_id}")
+        print(f"✓ L2 store_episode: {episode_id}")
         
         # 搜索
         results = l2.search(query="测试")
         assert len(results) >= 0
-        print(f"[OK] L2 search: {len(results)} results")
+        print(f"✓ L2 search: {len(results)} results")
 
 
 def test_layer_manager():
@@ -122,7 +122,7 @@ def test_layer_manager():
         )
         
         assert 'L2' in ids
-        print(f"[OK] LayerManager store: {ids}")
+        print(f"✓ LayerManager store: {ids}")
         
         # 渐进式检索
         results = manager.progressive_retrieve(
@@ -133,12 +133,12 @@ def test_layer_manager():
         assert 'L0' in results
         assert 'L1' in results
         assert 'L2' in results
-        print(f"[OK] LayerManager progressive_retrieve: OK")
+        print(f"✓ LayerManager progressive_retrieve: OK")
         
         # 统计
         stats = manager.get_stats()
         assert 'L0' in stats
-        print(f"[OK] LayerManager stats: {stats}")
+        print(f"✓ LayerManager stats: {stats}")
 
 
 if __name__ == "__main__":
@@ -156,4 +156,4 @@ if __name__ == "__main__":
     test_layer_manager()
     print()
     
-    print("All tests passed! [OK]")
+    print("All tests passed! ✓")

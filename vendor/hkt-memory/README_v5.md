@@ -1,6 +1,6 @@
-# HKT-Memory v5.0 - 自动分层存储系统
+# HKT-Memory v5.3.0 - 自动分层存储系统
 
-> 修复了 v4 的核心问题：L2 写入后自动触发 L1/L0 生成
+> 修复了 v4 的核心问题：L2 写入后自动触发 L1/L0 生成，并新增面向 GaleHarnessCodingCLI 的结构化 task memory runtime
 
 ---
 
@@ -218,6 +218,12 @@ hkt_memory_v5.py feedback --label missing --topic tools --query "部署窗口"
 hkt_memory_v5.py ingest-artifact --source-mode governed --artifact-type spec --artifact-id change-123 --source-uri openspec/changes/update/spec.md --content-file openspec/changes/update/spec.md
 hkt_memory_v5.py ingest-artifact --source-mode compound --artifact-type implementation --artifact-id closeout-123 --source-uri https://example.com/pr/123 --content "实施总结..."
 
+# GaleHarnessCodingCLI task memory runtime
+hkt_memory_v5.py task-recall --envelope-file task-envelope.json --limit 5 --token-budget 1200
+hkt_memory_v5.py task-capture --event-file capture-event.json
+hkt_memory_v5.py task-ledger --task-id "task-123" --limit 20
+hkt_memory_v5.py task-trace --task-id "task-123"
+
 # 冲突扫描（输出 MEMORY_CONFLICT.md）
 hkt_memory_v5.py conflict-scan
 hkt_memory_v5.py conflict-scan --output /tmp/MEMORY_CONFLICT.md
@@ -247,6 +253,21 @@ hkt_memory_v5.py test
 
 ---
 
+## 🧠 GaleHarnessCodingCLI Task Memory Runtime
+
+v5.3.0 增加 `gale-task-memory.v1` JSON contract，用于把 HKTMemory 接入 GaleHarnessCodingCLI 的真实研发动作。
+
+| 命令 | 用途 |
+|------|------|
+| `task-recall` | 根据当前 mode、repo、branch、task、issue、PR 和文件范围召回非信任 memory evidence |
+| `task-capture` | 按结构化事件写入决策、失败路径、验证结果、代码审查发现和后续行动 |
+| `task-ledger` | 读取 task-scoped hot ledger，供同一研发任务低延迟复用 |
+| `task-trace` | 输出轻量任务轨迹摘要，方便审查一次任务链路 |
+
+capture event 不只是 `store(content)`，而是带 `task_id`、`skill`、`phase`、`branch`、`pr_id`、`files_touched`、`confidence`、`verification` 等字段的结构化研发事件。所有 task runtime 命令默认输出 JSON，适合 Gale 或其他 agent runtime 直接消费。
+
+---
+
 ## 📁 文件清单
 
 ```
@@ -262,6 +283,11 @@ hkt_memory_v5.py test
 │   ├── l1_extractor.py       # L1 LLM提取
 │   ├── l0_extractor.py       # L0 关键词提取
 │   └── trigger.py            # 层间触发器
+├── runtime/
+│   ├── orchestrator.py       # recall 编排
+│   └── task_memory.py        # Gale task memory contract
+├── session/
+│   └── task_ledger.py        # task-scoped hot ledger
 ├── MIGRATION_v4_to_v5.md     # 迁移指南
 └── README_v5.md              # 本文件
 ```
@@ -288,5 +314,5 @@ hkt_memory_v5.py test
 
 ---
 
-*版本: v5.0*  
-*日期: 2026-04-08*
+*版本: v5.3.0*
+*日期: 2026-04-24*
