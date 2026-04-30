@@ -18,11 +18,12 @@ import {
   resolveKnowledgePath,
   extractProjectName,
 } from "../../src/knowledge/home.js"
-import { isValidDocType } from "../../src/knowledge/types.js"
+import { isValidDocType, VALID_DOC_TYPES } from "../../src/knowledge/types.js"
 import initCommand from "./init.js"
 import commitCommand from "./git-ops.js"
 import setupCiCommand from "./ci-setup.js"
 import rebuildIndexCommand from "./rebuild-index.js"
+import syncCommand from "./sync.js"
 
 // ---------------------------------------------------------------------------
 // Subcommands
@@ -47,7 +48,7 @@ const resolvePath = defineCommand({
   args: {
     type: {
       type: "string",
-      description: "Document type (brainstorms | plans | solutions)",
+      description: `Document type (${VALID_DOC_TYPES.join(" | ")})`,
       required: true,
     },
     project: {
@@ -64,7 +65,7 @@ const resolvePath = defineCommand({
     const type = args.type as string
     if (!isValidDocType(type)) {
       process.stderr.write(
-        "Error: --type must be one of: brainstorms, plans, solutions\n",
+        `Error: --type must be one of: ${VALID_DOC_TYPES.join(", ")}\n`,
       )
       process.exit(1)
       return
@@ -113,6 +114,7 @@ const main = defineCommand({
     commit: () => commitCommand,
     "rebuild-index": () => rebuildIndexCommand,
     "setup-ci": () => setupCiCommand,
+    sync: () => syncCommand,
   },
   run: async (ctx) => {
     const hasSubCommand = ctx.rawArgs.some((arg) => !arg.startsWith("-"))

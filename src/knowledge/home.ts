@@ -139,7 +139,7 @@ export function extractProjectName(cwd?: string): string {
  * 如果未提供 projectName，将从当前目录的 git remote 自动提取。
  *
  * @param options - 解析选项
- * @param options.type - 文档类型 (brainstorms | plans | solutions)
+ * @param options.type - 文档类型 (brainstorms | plans | solutions | ideation)
  * @param options.projectName - 项目名（可选）
  * @returns 路径解析结果
  */

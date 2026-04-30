@@ -3,10 +3,10 @@
  */
 
 /** 知识文档类型 */
-export type KnowledgeDocType = 'brainstorms' | 'plans' | 'solutions';
+export type KnowledgeDocType = 'brainstorms' | 'plans' | 'solutions' | 'ideation';
 
 /** 有效文档类型列表 */
-export const VALID_DOC_TYPES: readonly KnowledgeDocType[] = ["brainstorms", "plans", "solutions"] as const
+export const VALID_DOC_TYPES: readonly KnowledgeDocType[] = ["brainstorms", "plans", "solutions", "ideation"] as const
 
 /** 类型守卫：判断字符串是否为有效文档类型 */
 export function isValidDocType(type: string): type is KnowledgeDocType {

@@ -329,6 +329,7 @@ Before writing the output document, resolve the target directory:
 
 1. Run `gale-knowledge resolve-path --type brainstorms` to get the target directory path (the command outputs a plain path string). If the command fails or `gale-knowledge` is not available, fall back to `docs/brainstorms`.
 2. Write the document to `<resolved-path>/<filename>.md`.
+3. Also write a copy to `docs/brainstorms/<filename>.md` (dual-write). If this secondary write fails, log a warning but do not fail the workflow.
 
 <!-- /HKT-PATCH:knowledge-write-path -->
 
