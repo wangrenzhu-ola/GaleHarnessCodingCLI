@@ -9,6 +9,15 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.8.0...galeharness-cli-v2.9.0) (2026-04-30)
+
+
+### Features
+
+* **knowledge:** dual-write global and project docs ([d8768e6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d8768e64833e6e508420b36c7078ae3d571a0ff0))
+* store HKT session transcripts on skill completion ([#81](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/81)) ([5ac3c54](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/5ac3c544a1f2401675bd9da72e55ba3ef7f8dd4d))
+* **workflow:** 强化 brainstorm 和 ideate 严谨性护栏 ([ed089e5](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ed089e5ff6c2b95a2c4171be49ce80c50201d7fb))
+
 ## [2.8.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.7.0...galeharness-cli-v2.8.0) (2026-04-30)
 
 

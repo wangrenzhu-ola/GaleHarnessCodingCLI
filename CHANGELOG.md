@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.9.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.8.0...cli-v2.9.0) (2026-04-30)
+
+
+### Features
+
+* **knowledge:** dual-write global and project docs ([d8768e6](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d8768e64833e6e508420b36c7078ae3d571a0ff0))
+* **repo-health:** add advisory repository health checker ([8eade82](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/8eade82559c4e5376d66b7f2d331869775790f18))
+* **repo-health:** add advisory repository health checker ([7b8330c](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/7b8330c088df6775073d79b8aa648f01f585de16))
+* store HKT session transcripts on skill completion ([#81](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/81)) ([5ac3c54](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/5ac3c544a1f2401675bd9da72e55ba3ef7f8dd4d))
+* **workflow:** 强化 brainstorm 和 ideate 严谨性护栏 ([ed089e5](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ed089e5ff6c2b95a2c4171be49ce80c50201d7fb))
+
+
+### Bug Fixes
+
+* **test:** normalize agent reference paths on Windows ([a2c7124](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/a2c71240905cdb5de365d36697baaa576954f11e))
+* **test:** 修复 agent 引用 contract 测试的 Windows 路径归一化 ([915a8cc](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/915a8ccf0580c206533e84f21e2cffd2663206fc))
+
 ## [2.8.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.7.0...cli-v2.8.0) (2026-04-30)
 
 
