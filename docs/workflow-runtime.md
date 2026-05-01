@@ -4,9 +4,9 @@ This runtime surface adds a typed workflow layer over the existing `gale-task` l
 
 ## Schema surfaces
 
-- `WorkflowDagSpec`: minimal DAG with `nodes[].id`, `kind`, `name`, `skill`, `role`, `dependsOn`, `produces`, and `consumes`.
-- `HandoffArtifactContract`: stable handoff artifact pointer with `artifactId`, `runId`, `kind`, `path` or `url`, optional `sha256`, and metadata.
-- `RunRelationSpec`: parent/child/sibling/blocking relation between run ids.
+- `WorkflowDagSpec`: minimal DAG with required `nodes[].id`, `kind`, and `name`; dependency aliases `dependsOn` and `depends_on`; artifact arrays `produces`, `consumes`, `input_artifacts`, and `output_artifacts`; and issue #96 contract fields `type` (`ai`, `script`, `approval`, `handoff`, `pmo`), `trigger_rule`, `context_boundary` (`handoff`, `fresh`, `inherit`), `validators`, `parallel_group`, and `risk_level`.
+- `HandoffArtifactContract`: stable handoff artifact pointer with `artifactId`, `runId`, enum-checked `kind`, `path` or `url`, optional `sha256`, and metadata.
+- `RunRelationSpec`: enum-checked parent/child/sibling/blocking relation between run ids.
 
 Runtime types live in `src/workflow/schema.ts`.
 
@@ -17,7 +17,9 @@ Runtime types live in `src/workflow/schema.ts`.
 1. DAG node identity and required fields.
 2. Dependency integrity and acyclic DAG shape.
 3. Handoff artifact location/checksum shape.
-4. Run relation required fields and self-relation rejection.
+4. Run relation required fields, enum relation type validation, and self-relation rejection.
+
+Unreadable or malformed validation input exits non-zero. Passive runtime logging remains best-effort: `gale-task log` continues to report ledger errors without failing the invoking skill.
 
 CLI usage:
 
@@ -29,7 +31,25 @@ where `workflow-bundle.json` may contain:
 
 ```json
 {
-  "dag": { "id": "gcw-demo", "nodes": [{ "id": "plan", "kind": "skill", "name": "Plan" }] },
+  "dag": {
+    "id": "gcw-demo",
+    "nodes": [
+      {
+        "id": "plan",
+        "kind": "skill",
+        "name": "Plan",
+        "type": "ai",
+        "depends_on": [],
+        "trigger_rule": "all_success",
+        "context_boundary": "inherit",
+        "input_artifacts": [],
+        "output_artifacts": ["plan"],
+        "validators": ["schema"],
+        "parallel_group": "analysis",
+        "risk_level": "medium"
+      }
+    ]
+  },
   "artifacts": [{ "artifactId": "handoff-1", "runId": "run-1", "kind": "handoff", "path": ".context/handoff.md" }],
   "relations": [{ "runId": "run-1", "relatedRunId": "run-2", "relationType": "child" }]
 }

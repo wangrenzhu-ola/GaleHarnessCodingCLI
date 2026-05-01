@@ -62,10 +62,38 @@ function parseMetadata(event: TaskEvent): Record<string, unknown> {
 export function readWorkflowEventsFromPath(dbPath: string, runId?: string): TaskEvent[] {
   const db = new Database(dbPath, { readonly: true, create: false })
   try {
-    if (runId) {
-      return db.query("SELECT * FROM task_events WHERE task_id = $runId OR parent_task_id = $runId OR parent_run_id = $runId OR related_run_id = $runId ORDER BY timestamp ASC").all({ $runId: runId }) as TaskEvent[]
+    const events = db.query("SELECT * FROM task_events ORDER BY timestamp ASC").all() as TaskEvent[]
+    if (!runId) return events
+
+    const included = new Set<string>([runId])
+    let changed = true
+    while (changed) {
+      changed = false
+      for (const event of events) {
+        const ext = event as TaskEvent & Record<string, string | null | undefined>
+        const parentId = event.parent_task_id ?? ext.parent_run_id ?? undefined
+        if (parentId && included.has(parentId) && !included.has(event.task_id)) {
+          included.add(event.task_id)
+          changed = true
+        }
+        if (included.has(event.task_id) && ext.relation_type === "child" && ext.related_run_id && !included.has(ext.related_run_id)) {
+          included.add(ext.related_run_id)
+          changed = true
+        }
+        if (included.has(event.task_id) && ext.relation_type === "parent" && ext.related_run_id && !included.has(ext.related_run_id)) {
+          included.add(ext.related_run_id)
+          changed = true
+        }
+      }
     }
-    return db.query("SELECT * FROM task_events ORDER BY timestamp ASC").all() as TaskEvent[]
+
+    return events.filter((event) => {
+      const ext = event as TaskEvent & Record<string, string | null | undefined>
+      return included.has(event.task_id)
+        || (ext.related_run_id !== undefined && included.has(ext.related_run_id))
+        || (event.parent_task_id !== undefined && included.has(event.parent_task_id))
+        || (ext.parent_run_id !== undefined && included.has(ext.parent_run_id))
+    })
   } finally {
     db.close()
   }

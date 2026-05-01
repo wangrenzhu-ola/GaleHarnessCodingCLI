@@ -138,10 +138,15 @@ async function main(): Promise<void> {
         process.exit(0)
         return
       }
-      const input = JSON.parse(await readFile(flags.file, "utf8")) as Parameters<typeof validateWorkflowBundle>[0]
-      const result = validateWorkflowBundle(input)
-      process.stdout.write(JSON.stringify(result, null, 2) + "\n")
-      process.exit(result.valid ? 0 : 1)
+      try {
+        const input = JSON.parse(await readFile(flags.file, "utf8")) as Parameters<typeof validateWorkflowBundle>[0]
+        const result = validateWorkflowBundle(input)
+        process.stdout.write(JSON.stringify(result, null, 2) + "\n")
+        process.exit(result.valid ? 0 : 1)
+      } catch (err) {
+        process.stderr.write("[gale-task] validate error: " + (err instanceof Error ? err.message : String(err)) + "\n")
+        process.exit(1)
+      }
       return
     }
 
