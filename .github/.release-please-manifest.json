@@ -1,6 +1,6 @@
 {
-  ".": "2.9.0",
-  "plugins/galeharness-cli": "2.9.0",
+  ".": "2.10.0",
+  "plugins/galeharness-cli": "2.10.0",
   "plugins/coding-tutor": "1.2.0",
   ".claude-plugin": "1.2.0",
   ".cursor-plugin": "1.2.0"

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.9.0...cli-v2.10.0) (2026-05-01)
+
+
+### Features
+
+* add workflow runtime projections ([d063a55](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/d063a55c33859a099eea560c4319812aeaa42c08))
+
 ## [2.9.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.8.0...cli-v2.9.0) (2026-04-30)
 
 
