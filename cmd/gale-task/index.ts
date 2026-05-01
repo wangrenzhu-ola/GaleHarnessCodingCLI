@@ -1,28 +1,10 @@
-/**
- * gale-task CLI entry point
- *
- * Usage:
- *   gale-task log <event_type> [flags]
- *
- * Supported event types:
- *   skill_started   --skill <name> [--title <title>] [--task-id <id>]
- *   skill_completed --skill <name> [--title <title>] [--task-id <id>]
- *   skill_failed    --skill <name> [--error <msg>]   [--task-id <id>]
- *   memory_linked   --skill <name> [--memory-id <id>] [--memory-title <t>] [--task-id <id>]
- *   pr_linked       --skill <name> [--pr-url <url>] [--pr-number <n>]      [--task-id <id>]
- *
- * Contract: all errors are caught, logged to stderr, process.exit(0).
- * The writer MUST never block skills.
- */
-
 import { spawn } from "node:child_process"
+import { readFile } from "node:fs/promises"
 import path from "path"
-import { appendEvent, type TaskEvent } from "../../src/utils/sqlite-writer.js"
-import { readCurrentTask, writeCurrentTask, CONTEXT_FILE } from "./context.js"
-
-// ---------------------------------------------------------------------------
-// Arg parsing helpers
-// ---------------------------------------------------------------------------
+import { appendEvent, DB_PATH, type TaskEvent } from "../../src/utils/sqlite-writer.js"
+import { projectWorkflowRuns, readWorkflowEventsFromPath, rollupWorkflowRun } from "../../src/workflow/projection.js"
+import { validateWorkflowBundle } from "../../src/workflow/validators.js"
+import { readCurrentTask, writeCurrentTask } from "./context.js"
 
 function parseFlags(argv: string[]): Record<string, string> {
   const flags: Record<string, string> = {}
@@ -46,17 +28,47 @@ function parseFlags(argv: string[]): Record<string, string> {
   return flags
 }
 
-// ---------------------------------------------------------------------------
-// Git helpers
-// ---------------------------------------------------------------------------
+function optionalJson(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  try {
+    JSON.parse(value)
+    return value
+  } catch {
+    return JSON.stringify({ value })
+  }
+}
+
+function applyWorkflowFlags(event: TaskEvent, flags: Record<string, string>): TaskEvent {
+  const metadata = optionalJson(flags["metadata-json"] ?? flags["metadata"])
+  return {
+    ...event,
+    ...(flags["run-type"] !== undefined ? { run_type: flags["run-type"] } : {}),
+    ...(flags["parent-run-id"] !== undefined ? { parent_run_id: flags["parent-run-id"] } : {}),
+    ...(flags["related-run-id"] !== undefined ? { related_run_id: flags["related-run-id"] } : {}),
+    ...(flags["relation-type"] !== undefined ? { relation_type: flags["relation-type"] } : {}),
+    ...(flags["node-id"] !== undefined ? { node_id: flags["node-id"] } : {}),
+    ...(flags["review-role"] !== undefined ? { review_role: flags["review-role"] } : {}),
+    ...(flags["artifact-id"] !== undefined ? { artifact_id: flags["artifact-id"] } : {}),
+    ...(flags["artifact-type"] !== undefined ? { artifact_type: flags["artifact-type"] } : {}),
+    ...(flags["artifact-path"] !== undefined ? { artifact_path: flags["artifact-path"] } : {}),
+    ...(flags["artifact-url"] !== undefined ? { artifact_url: flags["artifact-url"] } : {}),
+    ...(flags["artifact-title"] !== undefined ? { artifact_title: flags["artifact-title"] } : {}),
+    ...(metadata !== undefined ? { metadata_json: metadata } : {}),
+  }
+}
+
+function isWorkflowEvent(eventType: string): boolean {
+  return eventType.startsWith("workflow_")
+    || eventType.startsWith("review_role_")
+    || eventType === "handoff_artifact_linked"
+    || eventType === "run_relation_linked"
+}
 
 function spawnCapture(cmd: string, args: string[], cwd: string): Promise<string> {
   return new Promise((resolve) => {
     let stdout = ""
-    let stderr = ""
     const proc = spawn(cmd, args, { cwd, stdio: ["ignore", "pipe", "pipe"] })
     proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString() })
-    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString() })
     proc.on("error", () => resolve(""))
     proc.on("close", (code) => {
       if (code === 0) resolve(stdout.trim())
@@ -66,10 +78,6 @@ function spawnCapture(cmd: string, args: string[], cwd: string): Promise<string>
 }
 
 function extractRepoName(remoteUrl: string): string {
-  // Handle various URL formats:
-  //   git@github.com:org/repo.git
-  //   https://github.com/org/repo.git
-  //   https://github.com/org/repo
   try {
     const cleaned = remoteUrl.replace(/\.git$/, "")
     const parts = cleaned.split(/[/:]/g)
@@ -82,65 +90,86 @@ function extractRepoName(remoteUrl: string): string {
 
 async function detectProject(): Promise<{ project: string; project_path: string }> {
   const cwd = process.cwd()
-
   const [remoteUrl, toplevel] = await Promise.all([
     spawnCapture("git", ["remote", "get-url", "origin"], cwd),
     spawnCapture("git", ["rev-parse", "--show-toplevel"], cwd),
   ])
-
-  const project = remoteUrl ? extractRepoName(remoteUrl) : path.basename(cwd)
-  const project_path = toplevel || cwd
-
-  return { project, project_path }
+  return {
+    project: remoteUrl ? extractRepoName(remoteUrl) : path.basename(cwd),
+    project_path: toplevel || cwd,
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
+async function outputProjection(command: string, argv: string[]): Promise<void> {
+  const flags = parseFlags(argv)
+  const dbPath = flags["db"] ?? DB_PATH
+  const runId = flags["run-id"] ?? flags["task-id"]
+  const events = readWorkflowEventsFromPath(dbPath, runId)
+  if (command === "events") {
+    process.stdout.write(JSON.stringify(events, null, 2) + "\n")
+    return
+  }
+  const runs = projectWorkflowRuns(events)
+  if (command === "graph") {
+    process.stdout.write(JSON.stringify(runs, null, 2) + "\n")
+    return
+  }
+  if (!runId) {
+    process.stderr.write("Usage: gale-task rollup --run-id <id> [--db <path>]\n")
+    process.exit(0)
+    return
+  }
+  process.stdout.write(JSON.stringify(rollupWorkflowRun(runId, runs), null, 2) + "\n")
+}
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2)
 
-  // Expect: log <event_type> [flags]
-  if (argv[0] !== "log" || !argv[1]) {
-    process.stderr.write("Usage: gale-task log <event_type> [--skill <name>] [...flags]\n")
-    process.exit(0)
-    return
-  }
-
-  const eventType = argv[1] as string
-  const flags = parseFlags(argv.slice(2))
-
-  const skill = flags["skill"] ?? ""
-  const title = flags["title"]
-  const error = flags["error"]
-  const memoryId = flags["memory-id"]
-  const memoryTitle = flags["memory-title"]
-  const prUrl = flags["pr-url"]
-  const prNumber = flags["pr-number"]
-  const flagTaskId = flags["task-id"]
-
-  const timestamp = new Date().toISOString()
-
   try {
-    if (eventType === "skill_started") {
-      // ------------------------------------------------------------------
-      // skill_started: generate new task_id, detect project, chain parent
-      // ------------------------------------------------------------------
-      const existingTask = await readCurrentTask()
-      const parentTaskId = existingTask?.task_id ?? undefined
+    if (argv[0] === "events" || argv[0] === "graph" || argv[0] === "rollup") {
+      await outputProjection(argv[0], argv.slice(1))
+      return
+    }
 
+    if (argv[0] === "validate") {
+      const flags = parseFlags(argv.slice(1))
+      if (!flags.file) {
+        process.stderr.write("Usage: gale-task validate --file <workflow-bundle.json>\n")
+        process.exit(0)
+        return
+      }
+      try {
+        const input = JSON.parse(await readFile(flags.file, "utf8")) as Parameters<typeof validateWorkflowBundle>[0]
+        const result = validateWorkflowBundle(input)
+        process.stdout.write(JSON.stringify(result, null, 2) + "\n")
+        process.exit(result.valid ? 0 : 1)
+      } catch (err) {
+        process.stderr.write("[gale-task] validate error: " + (err instanceof Error ? err.message : String(err)) + "\n")
+        process.exit(1)
+      }
+      return
+    }
+
+    if (argv[0] !== "log" || !argv[1]) {
+      process.stderr.write("Usage: gale-task log <event_type> [--skill <name>] [...flags]\n")
+      process.exit(0)
+      return
+    }
+
+    const eventType = argv[1]
+    const flags = parseFlags(argv.slice(2))
+    const skill = flags["skill"] ?? ""
+    const title = flags["title"]
+    const error = flags["error"]
+    const flagTaskId = flags["task-id"] ?? flags["run-id"]
+    const timestamp = new Date().toISOString()
+
+    if (eventType === "skill_started") {
+      const existingTask = await readCurrentTask()
       const taskId = flagTaskId ?? crypto.randomUUID()
       const { project, project_path } = await detectProject()
-
-      // Write new current-task.json in the working project
-      await writeCurrentTask({
-        task_id: taskId,
-        started_at: timestamp,
-        skill,
-      })
-
-      const event: TaskEvent = {
+      await writeCurrentTask({ task_id: taskId, started_at: timestamp, skill })
+      const event = applyWorkflowFlags({
         task_id: taskId,
         event_type: "skill_started",
         timestamp,
@@ -148,121 +177,45 @@ async function main(): Promise<void> {
         project_path,
         skill,
         ...(title !== undefined ? { title } : {}),
-        ...(parentTaskId !== undefined ? { parent_task_id: parentTaskId } : {}),
-      }
-
+        ...(existingTask?.task_id !== undefined ? { parent_task_id: existingTask.task_id } : {}),
+      }, flags)
       await appendEvent(event)
-
-      // Print the generated task_id to stdout for callers to capture
       process.stdout.write(taskId + "\n")
-
-    } else if (eventType === "skill_completed" || eventType === "skill_failed") {
-      // ------------------------------------------------------------------
-      // skill_completed / skill_failed: resolve task_id from context if needed
-      // ------------------------------------------------------------------
-      const currentTask = await readCurrentTask()
-      const taskId = flagTaskId ?? currentTask?.task_id
-      const resolvedSkill = skill || (currentTask?.skill ?? "")
-
-      if (!taskId) {
-        process.stderr.write("[gale-task] No task_id available for event: " + eventType + "\n")
-        process.exit(0)
-        return
-      }
-
-      const { project, project_path } = await detectProject()
-
-      let event: TaskEvent
-      if (eventType === "skill_completed") {
-        event = {
-          task_id: taskId,
-          event_type: "skill_completed",
-          timestamp,
-          project,
-          project_path,
-          skill: resolvedSkill,
-          ...(title !== undefined ? { title } : {}),
-        }
-      } else {
-        event = {
-          task_id: taskId,
-          event_type: "skill_failed",
-          timestamp,
-          project,
-          project_path,
-          skill: resolvedSkill,
-          ...(error !== undefined ? { error } : {}),
-        }
-      }
-
-      await appendEvent(event)
-
-    } else if (eventType === "memory_linked") {
-      // ------------------------------------------------------------------
-      // memory_linked
-      // ------------------------------------------------------------------
-      const currentTask = await readCurrentTask()
-      const taskId = flagTaskId ?? currentTask?.task_id
-      const resolvedSkill = skill || (currentTask?.skill ?? "")
-
-      if (!taskId) {
-        process.stderr.write("[gale-task] No task_id available for event: memory_linked\n")
-        process.exit(0)
-        return
-      }
-
-      const { project, project_path } = await detectProject()
-
-      const event: TaskEvent = {
-        task_id: taskId,
-        event_type: "memory_linked",
-        timestamp,
-        project,
-        project_path,
-        skill: resolvedSkill,
-        ...(memoryId !== undefined ? { memory_id: memoryId } : {}),
-        ...(memoryTitle !== undefined ? { memory_title: memoryTitle } : {}),
-      }
-
-      await appendEvent(event)
-
-    } else if (eventType === "pr_linked") {
-      // ------------------------------------------------------------------
-      // pr_linked
-      // ------------------------------------------------------------------
-      const currentTask = await readCurrentTask()
-      const taskId = flagTaskId ?? currentTask?.task_id
-      const resolvedSkill = skill || (currentTask?.skill ?? "")
-
-      if (!taskId) {
-        process.stderr.write("[gale-task] No task_id available for event: pr_linked\n")
-        process.exit(0)
-        return
-      }
-
-      const { project, project_path } = await detectProject()
-
-      const event: TaskEvent = {
-        task_id: taskId,
-        event_type: "pr_linked",
-        timestamp,
-        project,
-        project_path,
-        skill: resolvedSkill,
-        ...(prUrl !== undefined ? { pr_url: prUrl } : {}),
-        ...(prNumber !== undefined ? { pr_number: prNumber } : {}),
-      }
-
-      await appendEvent(event)
-
-    } else {
-      process.stderr.write("[gale-task] Unknown event_type: " + eventType + "\n")
-      process.exit(0)
+      return
     }
+
+    if (eventType === "skill_completed" || eventType === "skill_failed" || eventType === "memory_linked" || eventType === "pr_linked" || isWorkflowEvent(eventType)) {
+      const currentTask = await readCurrentTask()
+      const taskId = flagTaskId ?? currentTask?.task_id ?? (isWorkflowEvent(eventType) ? crypto.randomUUID() : undefined)
+      const resolvedSkill = skill || (currentTask?.skill ?? "")
+      if (!taskId) {
+        process.stderr.write(`[gale-task] No task_id available for event: ${eventType}\n`)
+        process.exit(0)
+        return
+      }
+      const { project, project_path } = await detectProject()
+      const base: TaskEvent = {
+        task_id: taskId,
+        event_type: eventType as TaskEvent["event_type"],
+        timestamp,
+        project,
+        project_path,
+        skill: resolvedSkill,
+        ...(title !== undefined ? { title } : {}),
+        ...(error !== undefined ? { error } : {}),
+        ...(flags["memory-id"] !== undefined ? { memory_id: flags["memory-id"] } : {}),
+        ...(flags["memory-title"] !== undefined ? { memory_title: flags["memory-title"] } : {}),
+        ...(flags["pr-url"] !== undefined ? { pr_url: flags["pr-url"] } : {}),
+        ...(flags["pr-number"] !== undefined ? { pr_number: flags["pr-number"] } : {}),
+      }
+      await appendEvent(applyWorkflowFlags(base, flags))
+      return
+    }
+
+    process.stderr.write("[gale-task] Unknown event_type: " + eventType + "\n")
+    process.exit(0)
   } catch (err) {
-    process.stderr.write(
-      "[gale-task] Unexpected error: " + (err instanceof Error ? err.message : String(err)) + "\n",
-    )
+    process.stderr.write("[gale-task] Unexpected error: " + (err instanceof Error ? err.message : String(err)) + "\n")
     process.exit(0)
   }
 }

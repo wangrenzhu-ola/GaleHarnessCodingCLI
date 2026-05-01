@@ -8,7 +8,8 @@
     "gale-harness": "src/index.ts",
     "compound-plugin": "src/index.ts",
     "gale-knowledge": "cmd/gale-knowledge/index.ts",
-    "gale-memory": "cmd/gale-memory/index.ts"
+    "gale-memory": "cmd/gale-memory/index.ts",
+    "gale-task": "cmd/gale-task/index.ts"
   },
   "scripts": {
     "dev": "bun run src/index.ts",

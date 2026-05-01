@@ -24,6 +24,16 @@ export type EventType =
   | "skill_failed"
   | "memory_linked"
   | "pr_linked"
+  | "workflow_started"
+  | "workflow_completed"
+  | "workflow_failed"
+  | "workflow_node_started"
+  | "workflow_node_completed"
+  | "workflow_node_failed"
+  | "handoff_artifact_linked"
+  | "review_role_started"
+  | "review_role_completed"
+  | "run_relation_linked"
 
 export interface TaskEvent {
   task_id: string
@@ -39,6 +49,18 @@ export interface TaskEvent {
   pr_number?: string | number
   memory_id?: string
   memory_title?: string
+  run_type?: string
+  parent_run_id?: string
+  related_run_id?: string
+  relation_type?: string
+  node_id?: string
+  review_role?: string
+  artifact_id?: string
+  artifact_type?: string
+  artifact_path?: string
+  artifact_url?: string
+  artifact_title?: string
+  metadata_json?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -66,22 +88,60 @@ const CREATE_TABLE_SQL = `
     pr_url TEXT,
     pr_number INTEGER,
     memory_id TEXT,
-    memory_title TEXT
+    memory_title TEXT,
+    run_type TEXT,
+    parent_run_id TEXT,
+    related_run_id TEXT,
+    relation_type TEXT,
+    node_id TEXT,
+    review_role TEXT,
+    artifact_id TEXT,
+    artifact_type TEXT,
+    artifact_path TEXT,
+    artifact_url TEXT,
+    artifact_title TEXT,
+    metadata_json TEXT
   )
 `
 
 const CREATE_INDEX_TASK_ID_SQL = `CREATE INDEX IF NOT EXISTS idx_task_events_task_id ON task_events(task_id)`
 const CREATE_INDEX_TIMESTAMP_SQL = `CREATE INDEX IF NOT EXISTS idx_task_events_timestamp ON task_events(timestamp)`
 
+const EXTRA_COLUMNS: Record<string, string> = {
+  run_type: "TEXT",
+  parent_run_id: "TEXT",
+  related_run_id: "TEXT",
+  relation_type: "TEXT",
+  node_id: "TEXT",
+  review_role: "TEXT",
+  artifact_id: "TEXT",
+  artifact_type: "TEXT",
+  artifact_path: "TEXT",
+  artifact_url: "TEXT",
+  artifact_title: "TEXT",
+  metadata_json: "TEXT",
+}
+
 const INSERT_SQL = `
   INSERT INTO task_events (
     task_id, event_type, timestamp, project, project_path, skill, title,
-    parent_task_id, error, pr_url, pr_number, memory_id, memory_title
+    parent_task_id, error, pr_url, pr_number, memory_id, memory_title,
+    run_type, parent_run_id, related_run_id, relation_type, node_id, review_role,
+    artifact_id, artifact_type, artifact_path, artifact_url, artifact_title, metadata_json
   ) VALUES (
     $task_id, $event_type, $timestamp, $project, $project_path, $skill, $title,
-    $parent_task_id, $error, $pr_url, $pr_number, $memory_id, $memory_title
+    $parent_task_id, $error, $pr_url, $pr_number, $memory_id, $memory_title,
+    $run_type, $parent_run_id, $related_run_id, $relation_type, $node_id, $review_role,
+    $artifact_id, $artifact_type, $artifact_path, $artifact_url, $artifact_title, $metadata_json
   )
 `
+
+function ensureExtraColumns(db: Database): void {
+  const columns = new Set((db.query("PRAGMA table_info(task_events)").all() as Array<{ name: string }>).map((column) => column.name))
+  for (const [name, type] of Object.entries(EXTRA_COLUMNS)) {
+    if (!columns.has(name)) db.run(`ALTER TABLE task_events ADD COLUMN ${name} ${type}`)
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Retry configuration
@@ -119,6 +179,7 @@ export function writeEvent(event: TaskEvent, dbPath: string = DB_PATH): void {
 
       // Ensure schema exists
       db.run(CREATE_TABLE_SQL)
+      ensureExtraColumns(db)
       db.run(CREATE_INDEX_TASK_ID_SQL)
       db.run(CREATE_INDEX_TIMESTAMP_SQL)
 
@@ -138,6 +199,18 @@ export function writeEvent(event: TaskEvent, dbPath: string = DB_PATH): void {
         $pr_number: event.pr_number != null ? Number(event.pr_number) : null,
         $memory_id: event.memory_id ?? null,
         $memory_title: event.memory_title ?? null,
+        $run_type: event.run_type ?? null,
+        $parent_run_id: event.parent_run_id ?? null,
+        $related_run_id: event.related_run_id ?? null,
+        $relation_type: event.relation_type ?? null,
+        $node_id: event.node_id ?? null,
+        $review_role: event.review_role ?? null,
+        $artifact_id: event.artifact_id ?? null,
+        $artifact_type: event.artifact_type ?? null,
+        $artifact_path: event.artifact_path ?? null,
+        $artifact_url: event.artifact_url ?? null,
+        $artifact_title: event.artifact_title ?? null,
+        $metadata_json: event.metadata_json ?? null,
       })
       stmt.finalize()
     } finally {
