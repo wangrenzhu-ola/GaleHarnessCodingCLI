@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "description": "Canonical Compound Engineering -> GaleHarnessCLI namespace map used by upstream-sync patch adaptation.",
+  "path_prefix_replacements": [
+    {
+      "from": "plugins/compound-engineering/",
+      "to": "plugins/galeharness-cli/"
+    },
+    {
+      "from": "plugins/compound-engineering-plugin/",
+      "to": "plugins/galeharness-cli/"
+    },
+    {
+      "from": ".context/compound-engineering/",
+      "to": ".context/galeharness-cli/"
+    }
+  ],
+  "text_replacements": [
+    {
+      "from": "compound-engineering-plugin",
+      "to": "galeharness-cli"
+    },
+    {
+      "from": "compound-engineering",
+      "to": "galeharness-cli"
+    },
+    {
+      "from": "(?<![A-Za-z0-9_/-])/ce:",
+      "to": "/gh:",
+      "regex": true,
+      "description": "Slash command namespace, without touching URL/path substrings."
+    },
+    {
+      "from": "(?<![A-Za-z0-9_/-])ce:",
+      "to": "gh:",
+      "regex": true,
+      "description": "Bare skill namespace, without corrupting words such as source: or ace:thing."
+    },
+    {
+      "from": "(?<![A-Za-z0-9_-])ce-",
+      "to": "gh-",
+      "regex": true,
+      "description": "Skill directory / command prefix, including path segments after /."
+    }
+  ],
+  "warn_on_tokens": [
+    "compound-engineering-plugin",
+    "plugins/compound-engineering/",
+    "ce:"
+  ]
+}
