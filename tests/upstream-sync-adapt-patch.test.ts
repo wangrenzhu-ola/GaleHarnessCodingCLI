@@ -66,6 +66,47 @@ describe("adapt-patch.py", () => {
     expect(output).toContain("Binary files /dev/null and b/plugins/galeharness-cli/assets/logo.png differ")
   })
 
+  test("does not corrupt non-command text while applying ce-to-gale mapping", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "adapt-safe-namespace-"))
+    const inputPath = path.join(tempDir, "raw.patch")
+    const outputPath = path.join(tempDir, "adapted.patch")
+    await fs.writeFile(
+      inputPath,
+      [
+        "From abc Mon Sep 17 00:00:00 2001\n",
+        "Subject: [PATCH] docs: map ce namespace safely\n",
+        "---\n",
+        " plugins/compound-engineering/skills/ce-demo/SKILL.md | 4 ++++\n",
+        " 1 file changed, 4 insertions(+)\n",
+        "diff --git a/plugins/compound-engineering/skills/ce-demo/SKILL.md b/plugins/compound-engineering/skills/ce-demo/SKILL.md\n",
+        "--- a/plugins/compound-engineering/skills/ce-demo/SKILL.md\n",
+        "+++ b/plugins/compound-engineering/skills/ce-demo/SKILL.md\n",
+        "@@ -1,0 +1,4 @@\n",
+        "+Use ce:plan and /ce:review.\n",
+        "+Keep source: explicit and https://example.com/ace:thing intact.\n",
+        "+Prefer ce-demo only as a command slug.\n",
+      ].join(""),
+      "utf8",
+    )
+
+    const result = await runPython([
+      "--input",
+      inputPath,
+      "--output",
+      outputPath,
+      "--rules",
+      rulesPath,
+    ])
+
+    expect(result.exitCode).toBe(0)
+    const output = await fs.readFile(outputPath, "utf8")
+    expect(output).toContain("plugins/galeharness-cli/skills/gh-demo/SKILL.md")
+    expect(output).toContain("Use gh:plan and /gh:review.")
+    expect(output).toContain("source: explicit")
+    expect(output).toContain("https://example.com/ace:thing")
+    expect(output).toContain("Prefer gh-demo only as a command slug.")
+  })
+
   test("fails fast on invalid JSON rules", async () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "adapt-invalid-rules-"))
     const outputPath = path.join(tempDir, "adapted.patch")

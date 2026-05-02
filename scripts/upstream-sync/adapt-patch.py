@@ -20,12 +20,31 @@ PATH_METADATA_PREFIXES = (
 
 
 def load_rules(rules_path: Path) -> dict:
+    """Load upstream-sync namespace mapping rules.
+
+    `rename-rules.json` is kept as the stable CLI default for backwards
+    compatibility. It may either contain the rules directly or extend the
+    canonical `ce-to-gale-map.json` mapping layer used for repeatable
+    Compound Engineering -> GaleHarnessCLI patch adaptation.
+    """
     try:
-        return json.loads(rules_path.read_text(encoding="utf-8"))
+        data = json.loads(rules_path.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:
         raise SystemExit(f"Rules file not found: {rules_path}") from exc
     except json.JSONDecodeError as exc:
         raise SystemExit(f"Rules file is not valid JSON: {rules_path}: {exc}") from exc
+
+    extended = data.get("extends")
+    if extended:
+        extended_path = (rules_path.parent / extended).resolve()
+        if extended_path == rules_path.resolve():
+            raise SystemExit(f"Rules file cannot extend itself: {rules_path}")
+        base = load_rules(extended_path)
+        overlay = {k: v for k, v in data.items() if k != "extends" and not k.startswith("$")}
+        base.update(overlay)
+        return base
+
+    return data
 
 
 def apply_replacements(text: str, replacements: list[dict]) -> tuple[str, int]:
