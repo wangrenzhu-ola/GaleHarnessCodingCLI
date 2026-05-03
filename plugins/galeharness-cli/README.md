@@ -46,7 +46,7 @@ language: zh-CN  # zh-CN (Chinese, default) or en (English)
 | Component | Count |
 |-----------|-------|
 | Agents | 50+ |
-| Skills | 38 |
+| Skills | 41 |
 
 ## Skills
 
@@ -67,6 +67,9 @@ The primary entry points for engineering work, invoked as slash commands:
 | `/gh:compound` | Document solved problems to compound team knowledge |
 | `/gh:compound-refresh` | Refresh stale or drifting learnings and decide whether to keep, update, replace, or archive them |
 | `/gh:optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring |
+| `/gh:strategy` | Create and maintain a root `STRATEGY.md` product anchor for problem, approach, users, metrics, and tracks |
+| `/gh:product-pulse` | Generate a time-windowed product pulse report from read-only usage, quality, performance, and error signals |
+| `/gh:simplify-code` | Simplify recent code changes for reuse, clarity, quality, and efficiency while preserving behavior |
 
 For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/README.md) for usage guidance, example specs, and links to the schema and workflow docs.
 
