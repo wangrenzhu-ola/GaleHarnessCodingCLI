@@ -100,13 +100,14 @@ expected_files() {
     "compound-plugin$exe" \
     "gale-knowledge$exe" \
     "gale-memory$exe" \
+    "gale-task$exe" \
     "VERSION"
 }
 
 is_expected_file() {
   local entry="$1"
   case "$entry" in
-    "gale-harness$exe" | "compound-plugin$exe" | "gale-knowledge$exe" | "gale-memory$exe" | "VERSION")
+    "gale-harness$exe" | "compound-plugin$exe" | "gale-knowledge$exe" | "gale-memory$exe" | "gale-task$exe" | "VERSION")
       return 0
       ;;
     *)
@@ -189,7 +190,7 @@ fi
 validate_archive_listing "$archive_path"
 tar -xzf "$archive_path" -C "$tmpdir"
 
-for bin in gale-harness compound-plugin gale-knowledge gale-memory; do
+for bin in gale-harness compound-plugin gale-knowledge gale-memory gale-task; do
   src="$tmpdir/$bin$exe"
   if [ ! -f "$src" ] || [ -L "$src" ]; then
     err "archive entry is not a regular file: $bin$exe"
@@ -203,7 +204,7 @@ if [ ! -f "$tmpdir/VERSION" ] || [ -L "$tmpdir/VERSION" ]; then
 fi
 
 mkdir -p "$install_dir"
-for bin in gale-harness compound-plugin gale-knowledge gale-memory; do
+for bin in gale-harness compound-plugin gale-knowledge gale-memory gale-task; do
   src="$tmpdir/$bin$exe"
   dest="$install_dir/$bin$exe"
   if [ -L "$dest" ]; then
@@ -227,6 +228,7 @@ Then verify:
   gale-harness --version
   gale-harness update --check
   gale-memory status
+  gale-task validate --file <workflow-bundle.json>
 
 Gale-managed HKTMemory uses ~/.galeharness/knowledge/<project>/hkt-memory by default.
 If hkt-memory is not on PATH, gale-memory status/start will report a diagnostic instead

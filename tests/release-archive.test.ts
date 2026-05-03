@@ -24,7 +24,7 @@ function validEntries(platform: string, version = "9.8.7"): TarFixtureEntry[] {
 }
 
 describe("release archive verifier", () => {
-  test("accepts a linux archive with all four CLI binaries and VERSION", async () => {
+  test("accepts a linux archive with all release CLI binaries and VERSION", async () => {
     const archive = await writeArchive("galeharness-cli-9.8.7-linux-x64.tar.gz", validEntries("linux-x64"))
 
     expect(() => verifyReleaseArchive(archive)).not.toThrow()

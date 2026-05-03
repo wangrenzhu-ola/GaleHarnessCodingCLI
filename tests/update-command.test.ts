@@ -111,6 +111,7 @@ describe("update utils", () => {
         "compound-plugin.exe",
         "gale-knowledge.exe",
         "gale-memory.exe",
+        "gale-task.exe",
       ])
     })
   })
