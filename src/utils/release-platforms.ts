@@ -5,6 +5,7 @@ export const RELEASE_BINARY_BASENAMES = [
   "compound-plugin",
   "gale-knowledge",
   "gale-memory",
+  "gale-task",
 ] as const
 
 export type ReleaseBinaryBaseName = (typeof RELEASE_BINARY_BASENAMES)[number]

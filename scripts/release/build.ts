@@ -50,6 +50,25 @@ const version = parsed.version || packageJson.version
 const platform = parsed.platform || detectReleasePlatform()
 const platformConfig = getReleasePlatformConfig(platform)
 
+function compileBinary(entrypoint: string, outfile: string): void {
+  execFileSync(
+    "bun",
+    [
+      "build",
+      "--compile",
+      entrypoint,
+      "--outfile",
+      outfile,
+      "--target",
+      platformConfig.bunTarget,
+    ],
+    {
+      cwd: repoRoot,
+      stdio: ["ignore", "ignore", "inherit"],
+    },
+  )
+}
+
 // ── Build ───────────────────────────────────────────────────────────────────
 
 const buildDir = path.join(os.tmpdir(), `galeharness-build-${version}-${platform}`)
@@ -70,22 +89,7 @@ console.error(`[build] Compiling binaries (v${version}, ${platform}, target ${pl
 
 // 1. Compile gale-harness (src/index.ts)
 const galeHarnessBinary = getReleaseBinaryFileName("gale-harness", platform)
-execFileSync(
-  "bun",
-  [
-    "build",
-    "--compile",
-    "src/index.ts",
-    "--outfile",
-    path.join(buildDir, galeHarnessBinary),
-    "--target",
-    platformConfig.bunTarget,
-  ],
-  {
-    cwd: repoRoot,
-    stdio: ["ignore", "ignore", "inherit"],
-  },
-)
+compileBinary("src/index.ts", path.join(buildDir, galeHarnessBinary))
 
 // 2. Copy as compound-plugin (same entry point, different binary name)
 fs.copyFileSync(
@@ -97,23 +101,9 @@ fs.copyFileSync(
 for (const [basename, entrypoint] of [
   ["gale-knowledge", "cmd/gale-knowledge/index.ts"],
   ["gale-memory", "cmd/gale-memory/index.ts"],
+  ["gale-task", "cmd/gale-task/index.ts"],
 ] as const) {
-  execFileSync(
-    "bun",
-    [
-      "build",
-      "--compile",
-      entrypoint,
-      "--outfile",
-      path.join(buildDir, getReleaseBinaryFileName(basename, platform)),
-      "--target",
-      platformConfig.bunTarget,
-    ],
-    {
-      cwd: repoRoot,
-      stdio: ["ignore", "ignore", "inherit"],
-    },
-  )
+  compileBinary(entrypoint, path.join(buildDir, getReleaseBinaryFileName(basename, platform)))
 }
 
 // 4. Write VERSION file

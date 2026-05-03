@@ -110,6 +110,11 @@ jobs:
       - name: Build release binaries
         run: bun run build:release --version ${{ needs.determine-version.outputs.version }} --platform ${{ matrix.platform }}
 
+      - name: Verify release archive contract
+        run: |
+          ARCHIVE="galeharness-cli-${{ needs.determine-version.outputs.version }}-${{ matrix.platform }}.tar.gz"
+          bun run scripts/release/verify-archive.ts "$ARCHIVE"
+
       - name: Upload assets to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
