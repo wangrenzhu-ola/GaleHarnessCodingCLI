@@ -65,3 +65,6 @@ These CE-native agents provide specialized analysis beyond what the persona agen
 3. **For each stack-specific conditional persona**, use file types and changed patterns as a starting point, then decide whether the diff actually introduces meaningful work for that reviewer. Do not spawn language-specific reviewers just because one config or generated file happens to match the extension.
 4. **For CE conditional agents**, spawn when the diff includes migration files (`db/migrate/*.rb`, `db/schema.rb`) or data backfill scripts.
 5. **Announce the team** before spawning with a one-line justification per conditional reviewer selected.
+
+
+`previous-comments` is PR-only and comment-gated: select it only when PR metadata exists and `hasPriorComments == true` after excluding empty approval-only reviews/comments.

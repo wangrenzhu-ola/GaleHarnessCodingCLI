@@ -18,7 +18,7 @@ Search your session history.
 
 **Repo name (pre-resolved):** !`bash scripts/resolve-repo-name.sh`
 
-**Git branch (pre-resolved):** !`git rev-parse --abbrev-ref HEAD 2>/dev/null`
+**Git branch (pre-resolved):** !`git rev-parse --abbrev-ref HEAD 2>/dev/null || true`
 
 If the lines above resolved to plain values (a folder name like `my-repo` and a branch name like `feat/my-branch`), pass them into the Session Historian dispatch so the agent does not waste a turn deriving them. If they still contain backtick command strings or are empty, omit them from the dispatch and let the agent derive them at runtime.
 

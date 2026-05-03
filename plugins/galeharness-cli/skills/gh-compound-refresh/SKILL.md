@@ -74,6 +74,14 @@ For each candidate artifact, classify it into one of five outcomes:
 | **Replace** | The old artifact is now misleading, but there is a known better replacement | Create a trustworthy successor, then delete the old artifact |
 | **Delete** | No longer useful, applicable, or distinct | Delete the file — git history preserves it if anyone needs to recover it later |
 
+## Before deleting: check for inbound links
+
+Delete is safe only after checking for inbound links from other solution, plan, requirement, or pattern docs. Treat citations as evidence, not decoration:
+
+- **Decorative citations** (generic “see also” links with no dependency on the stale artifact) allow Delete when the normal missing-code/no-successor criteria are met.
+- **Substantive citations** (links that rely on the artifact for rationale, implementation steps, or pattern evidence) signal Replace or Update instead of Delete.
+- **Autofix auto-delete** is permitted only when the code is gone, no trustworthy successor exists, and inbound citations are absent or purely decorative.
+
 ## Core Rules
 
 1. **Evidence informs judgment.** The signals below are inputs, not a mechanical scorecard. Use engineering judgment to decide whether the artifact is still trustworthy.

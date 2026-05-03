@@ -233,3 +233,6 @@ Display a brief summary:
 ```
 
 If this is a Claude Code session (per platform detection in Step 3), append: "Run /gh:update to grab the latest plugin version."
+
+
+Agent skill detection checks CLI output first, then falls back to on-disk roots `~/.claude/skills/<skill-name>`, `~/.agents/skills/<skill-name>`, and `~/.codex/skills/<skill-name>` so Codex global skills are detected alongside Claude/Agents installs.

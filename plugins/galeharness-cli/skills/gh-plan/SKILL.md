@@ -1001,3 +1001,16 @@ After the plan document is written and all phases are complete, log the completi
 2. If `gale-task` is not on PATH or the command fails, skip and continue — this must never block the skill.
 
 <!-- /HKT-PATCH:gale-task-end -->
+
+### Post-generation handoff routing
+
+STOP. Load `references/plan-handoff.md` now before continuing. This load is non-optional: `gh:plan` is not complete until the post-generation menu selection has been routed or executed.
+
+Post-generation menu routing is part of this skill, not a prose-only suggestion. Present and route these options inline:
+
+1. **Start `/gh:work`** -- invoke the `gh-work` skill using the platform's skill-invocation primitive, passing the saved plan path as the primary argument.
+2. **Create Issue** -- create or draft the issue using the saved plan path and summary.
+3. **Open in Proof** -- invoke the `proof` HITL flow with the saved plan path, then recommend `/gh:work` when proofing is complete.
+4. **Done for now** -- confirm the plan path and end without starting execution.
+
+Completion check: do not mark the planning flow complete until one menu route has been selected and either executed or explicitly deferred by the user.

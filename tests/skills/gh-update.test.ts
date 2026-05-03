@@ -26,13 +26,17 @@ describe("gh-update SKILL.md", () => {
 // Comparing the installed folder against the latest GitHub release tag caused
 // a persistent false-positive "out of date" whenever `main` was ahead of the
 // last tag, and the prescribed fix reinstalled the same version in a loop.
-describe("gh-update 'Latest upstream version' pre-resolution command", () => {
-  test("declares a 'Latest upstream version' pre-resolution section", () => {
-    expect(SKILL_BODY).toMatch(/\*\*Latest upstream version:\*\*\s*\n!`[^`\n]+`/)
+describe("gh-update runtime probe scripts", () => {
+  test("declares runtime script probes instead of unsafe pre-resolution commands", () => {
+    expect(SKILL_BODY).toContain("## Runtime probes")
+    expect(SKILL_BODY).toContain('bash "${CLAUDE_SKILL_DIR}/scripts/upstream-version.sh"')
+    expect(SKILL_BODY).toContain('bash "${CLAUDE_SKILL_DIR}/scripts/currently-loaded-version.sh"')
+    expect(SKILL_BODY).toContain('bash "${CLAUDE_SKILL_DIR}/scripts/marketplace-name.sh"')
+    expect(SKILL_BODY).not.toMatch(/\*\*Latest upstream version:\*\*\s*\n!`/)
   })
 
   test("returns the version from main's plugin.json, not any release tag", () => {
-    const stdout = runUpstreamCommand(extractUpstreamVersionCommand(SKILL_BODY), {
+    const stdout = runUpstreamCommand(upstreamVersionScript(), {
       pluginJsonVersion: "99.0.0",
       releaseTagVersion: "1.0.0",
     })
@@ -40,23 +44,20 @@ describe("gh-update 'Latest upstream version' pre-resolution command", () => {
     expect(stdout).toBe("99.0.0")
   })
 
-  test("emits __CE_UPDATE_VERSION_FAILED__ when upstream plugin.json cannot be read", () => {
-    const stdout = runUpstreamCommand(extractUpstreamVersionCommand(SKILL_BODY), {
+  test("emits __GH_UPDATE_VERSION_FAILED__ when upstream plugin.json cannot be read", () => {
+    const stdout = runUpstreamCommand(upstreamVersionScript(), {
       ghExitCode: 1,
     })
 
-    expect(stdout).toContain("__CE_UPDATE_VERSION_FAILED__")
+    expect(stdout).toContain("__GH_UPDATE_VERSION_FAILED__")
   })
 })
 
-function extractUpstreamVersionCommand(body: string): string {
-  const match = body.match(/\*\*Latest upstream version:\*\*\s*\n!`([^`\n]+)`/)
-  if (!match) {
-    throw new Error(
-      `Could not extract 'Latest upstream version' pre-resolution command from ${SKILL_PATH}`,
-    )
-  }
-  return match[1]
+function upstreamVersionScript(): string {
+  return path.join(
+    process.cwd(),
+    "plugins/galeharness-cli/skills/gh-update/scripts/upstream-version.sh",
+  )
 }
 
 type MockOptions = {
@@ -111,7 +112,7 @@ esac
     writeFileSync(ghPath, ghScript)
     chmodSync(ghPath, 0o755)
 
-    return execFileSync("bash", ["-c", command], {
+    return execFileSync("bash", [command], {
       env: { ...process.env, PATH: `${mockDir}:${process.env.PATH ?? ""}` },
       encoding: "utf8",
     }).trim()

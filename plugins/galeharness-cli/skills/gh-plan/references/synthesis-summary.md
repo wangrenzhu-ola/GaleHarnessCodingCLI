@@ -241,3 +241,8 @@ The plan's `## Summary` and `## Problem Frame` must serve distinct purposes: Sum
 - Re-statement of the entire brainstorm doc — the synthesis is plan-perspective, not a copy
 - Defensive what-ifs and hedges — if a concern is real, state it as Inferred or Out; if speculation, drop it
 - Open questions surfaced outside the three buckets — by synthesis time, every scope-shaping question must be in **Stated** (asked and answered earlier), **Inferred** (agent's bet for correction), or **Out** (deliberately excluded). There is no fourth status. If a question genuinely cannot be defaulted, pause synthesis and resolve it before presenting — pick the question shape that matches: a blocking multiple-choice tool when options are bounded and meaningfully distinct, prose when option sets would bias the answer per Interaction Rule 5(a). Integrate the answer, then present synthesis. Never present synthesis with adjacent floating questions — that gives the user no clear resolution path
+
+
+## Counter-warning for rich-context invocations
+
+When `gh-plan` is invoked with a rich requirements document, review bundle, or prior `document-review` output, do not drift into a new generic plan. Preserve the source document's decisions, unresolved questions, and scope boundaries, then synthesize implementation steps that `gh-work` can execute. If context conflicts, name the conflict instead of silently replacing the source of truth.

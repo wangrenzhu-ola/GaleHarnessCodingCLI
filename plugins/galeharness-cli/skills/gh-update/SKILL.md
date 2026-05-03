@@ -8,6 +8,7 @@ description: |
   that might stem from a stale GaleHarnessCLI plugin version. This skill only works
   in Claude Code — it relies on the plugin harness cache layout.
 disable-model-invocation: true
+allowed-tools: Bash(bash *upstream-version.sh), Bash(bash *currently-loaded-version.sh), Bash(bash *marketplace-name.sh)
 ce_platforms: [claude]
 ---
 
@@ -20,35 +21,19 @@ Claude Code only.
 > **Note:** This skill updates the **plugin cache** only. To update the CLI binary
 > itself, run `gale-harness update` from your terminal.
 
-## Pre-resolved context
+## Runtime probes
 
-Only the **Skill directory** determines whether this session is Claude Code —
-if empty or unresolved, the skill requires Claude Code. The other sections may
-contain error sentinels even in valid Claude Code sessions; the decision logic
-below handles those cases.
+Only the **Skill directory** determines whether this session is Claude Code -- if empty or unresolved, the skill requires Claude Code. Probe versions at runtime rather than through `!` pre-resolution so Claude Code permission checks do not reject nested command substitutions or bundled shell scripts.
 
-`${CLAUDE_SKILL_DIR}` is a Claude Code-documented substitution that resolves
-at skill-load time. For a marketplace-cached install it looks like
-`~/.claude/plugins/cache/<marketplace>/galeharness-cli/<version>/skills/gh-update`,
-so the currently-loaded version is the basename two `dirname` levels up.
+Run these probes from the skill body using the documented `${CLAUDE_SKILL_DIR}` substitution:
 
-The upstream version comes from `plugins/galeharness-cli/.claude-plugin/plugin.json`
-on `main` rather than the latest GitHub release tag, because the marketplace
-installs plugin contents from `main` HEAD. Comparing against release tags
-false-positives whenever `main` is ahead of the last tag (the normal state
-between releases).
+```bash
+bash "${CLAUDE_SKILL_DIR}/scripts/upstream-version.sh"
+bash "${CLAUDE_SKILL_DIR}/scripts/currently-loaded-version.sh"
+bash "${CLAUDE_SKILL_DIR}/scripts/marketplace-name.sh"
+```
 
-**Skill directory:**
-!`echo "${CLAUDE_SKILL_DIR}"`
-
-**Latest upstream version:**
-!`version=$(gh api repos/wangrenzhu-ola/GaleHarnessCLI/contents/plugins/galeharness-cli/.claude-plugin/plugin.json --jq '.content | @base64d | fromjson | .version' 2>/dev/null) && [ -n "$version" ] && echo "$version" || echo '__CE_UPDATE_VERSION_FAILED__'`
-
-**Currently loaded version:**
-!`echo "${CLAUDE_SKILL_DIR}" | grep -q "/plugins/cache/.*/galeharness-cli/.*/skills/gh-update$" && basename "$(dirname "$(dirname "${CLAUDE_SKILL_DIR}")")" || echo '__CE_UPDATE_NOT_MARKETPLACE__'`
-
-**Marketplace name:**
-!`echo "${CLAUDE_SKILL_DIR}" | grep -q "/plugins/cache/.*/galeharness-cli/.*/skills/gh-update$" && basename "$(dirname "$(dirname "$(dirname "$(dirname "${CLAUDE_SKILL_DIR}")")")")" || echo '__CE_UPDATE_NOT_MARKETPLACE__'`
+The upstream version comes from `plugins/galeharness-cli/.claude-plugin/plugin.json` on `main` rather than the latest GitHub release tag, because the marketplace installs plugin contents from `main` HEAD. Comparing against release tags false-positives whenever `main` is ahead of the last tag.
 
 ## Decision logic
 
@@ -59,11 +44,11 @@ requires Claude Code and stop. No further action.
 
 ### 2. Handle failure cases
 
-If **Latest upstream version** contains `__CE_UPDATE_VERSION_FAILED__`: tell
+If **Latest upstream version** contains `__GH_UPDATE_VERSION_FAILED__`: tell
 the user the upstream version could not be fetched (gh may be unavailable or
 rate-limited) and stop.
 
-If **Currently loaded version** contains `__CE_UPDATE_NOT_MARKETPLACE__`: this
+If **Currently loaded version** contains `__GH_UPDATE_NOT_MARKETPLACE__`: this
 session loaded the skill from outside the standard marketplace cache (typical
 when using `claude --plugin-dir` for local development, or for a non-standard
 install). Tell the user (substituting the actual path):
