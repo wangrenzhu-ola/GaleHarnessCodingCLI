@@ -414,9 +414,9 @@ describe("ce-review contract", () => {
 
     // Branch and standalone modes delegate to resolve-base.sh and check its ERROR: output.
     // The script itself emits ERROR: when the base is unresolved.
-    expect(content).toContain("references/resolve-base.sh")
+    expect(content).toContain("scripts/resolve-base.sh")
     const resolveScript = await readRepoFile(
-      "plugins/galeharness-cli/skills/gh-review/references/resolve-base.sh",
+      "plugins/galeharness-cli/skills/gh-review/scripts/resolve-base.sh",
     )
     expect(resolveScript).toContain("ERROR:")
 
@@ -424,6 +424,49 @@ describe("ce-review contract", () => {
     expect(content).toContain(
       "If the script outputs an error, stop instead of falling back to `git diff HEAD`",
     )
+  })
+
+  test("imports P0 upstream review dispatch fixes", async () => {
+    const content = await readRepoFile("plugins/galeharness-cli/skills/gh-review/SKILL.md")
+    const catalog = await readRepoFile(
+      "plugins/galeharness-cli/skills/gh-review/references/persona-catalog.md",
+    )
+
+    expect(content).toContain("hasPriorComments")
+    expect(content).toMatch(/comment gate for `previous-comments`/i)
+    expect(catalog).toContain("hasPriorComments == true")
+    expect(content).toContain("Bounded parallel dispatch")
+    expect(content).toMatch(/capacity spawn errors as backpressure/i)
+    expect(content).toMatch(/model: "sonnet"/)
+    expect(content).toMatch(/Before showing the first interactive walk-through finding, read `references\/walkthrough.md` in full/)
+  })
+
+  test("JSON-pipeline reviewers can write artifact files", async () => {
+    const reviewers = [
+      "correctness-reviewer",
+      "testing-reviewer",
+      "maintainability-reviewer",
+      "project-standards-reviewer",
+      "security-reviewer",
+      "performance-reviewer",
+      "api-contract-reviewer",
+      "data-migrations-reviewer",
+      "reliability-reviewer",
+      "adversarial-reviewer",
+      "previous-comments-reviewer",
+      "dhh-rails-reviewer",
+      "gale-rails-reviewer",
+      "gale-python-reviewer",
+      "gale-typescript-reviewer",
+      "julik-frontend-races-reviewer",
+      "swift-ios-reviewer",
+    ]
+
+    for (const reviewer of reviewers) {
+      const content = await readRepoFile(`plugins/galeharness-cli/agents/${reviewer}.md`)
+      const parsed = parseFrontmatter(content)
+      expect(String(parsed.data.tools ?? "")).toContain("Write")
+    }
   })
 
   test("orchestration callers pass explicit mode flags", async () => {

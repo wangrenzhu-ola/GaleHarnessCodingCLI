@@ -198,3 +198,8 @@ For the four-option routing question and per-finding walk-through (interactive m
 ### Findings Schema
 
 @./references/findings-schema.json
+
+
+## Dispatch capacity rule
+
+Use bounded parallelism for persona dispatch. Queue selected reviewers, respect the active-subagent limit exposed by the harness, treat capacity spawn errors as backpressure rather than reviewer failure, and fill freed slots until all queued reviewers complete or time out.

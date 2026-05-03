@@ -19,7 +19,7 @@ const resolveBaseScript = path.join(
   "galeharness-cli",
   "skills",
   "gh-review",
-  "references",
+  "scripts",
   "resolve-base.sh",
 )
 

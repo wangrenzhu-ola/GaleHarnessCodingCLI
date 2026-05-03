@@ -308,10 +308,10 @@ If the output is non-empty, inform the user: "You have uncommitted changes on th
 git checkout <branch>
 ```
 
-Then detect the review base branch and compute the merge-base. Run the `references/resolve-base.sh` script, which handles fork-safe remote resolution with multi-fallback detection (PR metadata -> `origin/HEAD` -> `gh repo view` -> common branch names):
+Then detect the review base branch and compute the merge-base. Run the `scripts/resolve-base.sh` script, which handles fork-safe remote resolution with multi-fallback detection (PR metadata -> `origin/HEAD` -> `gh repo view` -> common branch names):
 
 ```
-RESOLVE_OUT=$(bash references/resolve-base.sh) || { echo "ERROR: resolve-base.sh failed"; exit 1; }
+RESOLVE_OUT=$(bash scripts/resolve-base.sh) || { echo "ERROR: resolve-base.sh failed"; exit 1; }
 if [ -z "$RESOLVE_OUT" ] || echo "$RESOLVE_OUT" | grep -q '^ERROR:'; then echo "${RESOLVE_OUT:-ERROR: resolve-base.sh produced no output}"; exit 1; fi
 BASE=$(echo "$RESOLVE_OUT" | sed 's/^BASE://')
 ```
@@ -328,10 +328,10 @@ You may still fetch additional PR metadata with `gh pr view` for title, body, an
 
 **If no argument (standalone on current branch):**
 
-Detect the review base branch and compute the merge-base using the same `references/resolve-base.sh` script as branch mode:
+Detect the review base branch and compute the merge-base using the same `scripts/resolve-base.sh` script as branch mode:
 
 ```
-RESOLVE_OUT=$(bash references/resolve-base.sh) || { echo "ERROR: resolve-base.sh failed"; exit 1; }
+RESOLVE_OUT=$(bash scripts/resolve-base.sh) || { echo "ERROR: resolve-base.sh failed"; exit 1; }
 if [ -z "$RESOLVE_OUT" ] || echo "$RESOLVE_OUT" | grep -q '^ERROR:'; then echo "${RESOLVE_OUT:-ERROR: resolve-base.sh produced no output}"; exit 1; fi
 BASE=$(echo "$RESOLVE_OUT" | sed 's/^BASE://')
 ```
@@ -884,3 +884,14 @@ After the review workflow is fully complete, log the completion event:
 1. Run `gale-task log skill_completed` to record the completion event.
 2. If `gale-task` is not on PATH or the command fails, skip and continue — this must never block the skill.
 <!-- /HKT-PATCH:gale-task-end -->
+
+
+## Upstream P0 review compatibility notes
+
+**PR comment gate for `previous-comments`.** In PR mode, compute `hasPriorComments` from `gh pr view --json state,title,body,files,reviews,comments` (or equivalent API output) before Stage 3. Exclude empty approval-only reviews and empty comments. Select `galeharness-cli:previous-comments-reviewer` only when PR metadata exists and `hasPriorComments == true`; standalone branch mode and PRs with no substantive previous comments skip this persona.
+
+**Bounded parallel dispatch.** Stage 4 reviewer dispatch and Stage 5b validator dispatch use bounded parallel dispatch. Queue selected reviewers, respect the harness active-subagent limit, treat capacity spawn errors as backpressure rather than reviewer failure, and fill freed slots until the queue is drained.
+
+**Model override at dispatch point.** Restate the model override in every subagent dispatch call: in Claude Code pass `model: "sonnet"` for standard persona and CE sub-agents, with escalation allowed for higher-risk reviewers such as `correctness-reviewer`, `security-reviewer`, and `adversarial-reviewer`. On other platforms use the equivalent mid-tier model when supported.
+
+**Walk-through entry.** Before showing the first interactive walk-through finding, read `references/walkthrough.md` in full. The walk-through reference is mandatory for per-finding routing.

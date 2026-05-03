@@ -80,3 +80,8 @@ When the user selects "Create Issue", detect their project tracker:
 After issue creation:
 - Display the issue URL
 - Ask whether to proceed to `/gh:work` using the platform's blocking question tool
+
+
+## Routing contract
+
+For **Start `/gh:work`**, invoke the `gh-work` skill using the platform's skill-invocation primitive and pass the saved plan path. Do not merely tell the user to call `/gh:work`; route or explicitly defer the action.

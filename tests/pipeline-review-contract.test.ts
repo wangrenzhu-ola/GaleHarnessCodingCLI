@@ -20,10 +20,12 @@ describe("gh:work review contract", () => {
     // Phase 3 has a mandatory code review step in the reference file
     expect(shipping).toContain("2. **Code Review**")
 
-    // Two-tier rubric in reference file
-    expect(shipping).toContain("**Tier 1: Inline self-review**")
-    expect(shipping).toContain("**Tier 2: Full review (default)**")
-    expect(shipping).toContain("gh:review")
+    // Risk-scaled review rubric in reference file
+    expect(shipping).toContain("**Tier 1 -- harness-native code review (default)**")
+    expect(shipping).toContain("**Tier 2 -- `gh:review` escalation**")
+    expect(shipping).toContain("Sensitive surface touched")
+    expect(shipping).toContain("Large, diffuse, or cross-cutting changes")
+    expect(shipping).toContain("Explicit request for full review")
     expect(shipping).toContain("mode:autofix")
 
     // Quality checklist includes review

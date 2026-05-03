@@ -2,7 +2,7 @@
 name: gale-python-reviewer
 description: Conditional code-review persona, selected when the diff touches Python code. Reviews changes with wangrenzhu's strict bar for Pythonic clarity, type hints, and maintainability.
 model: inherit
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write
 color: blue
 ---
 

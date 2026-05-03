@@ -20,13 +20,15 @@ This file contains the shipping workflow (Phase 3-4). Load it only when all Phas
 
    Every change gets reviewed before shipping. The depth scales with the change's risk profile, but review itself is never skipped.
 
-   **Tier 2: Full review (default)** -- REQUIRED unless Tier 1 criteria are explicitly met. Invoke the `gh:review` skill with `mode:autofix` to run specialized reviewer agents, auto-apply safe fixes, and record residual downstream work in the per-run artifact. When the plan file path is known, pass it as `plan:<path>`. This is the mandatory default -- proceed to Tier 1 only after confirming every criterion below.
+   **Tier 1 -- harness-native code review (default)** -- Use the harness-native code review first (`/review` in Claude Code, or the equivalent native review surface in other harnesses). This is the default for ordinary, well-scoped changes because it is fast and keeps review close to the current diff.
 
-   **Tier 1: Inline self-review** -- A lighter alternative permitted only when **all four** criteria are true. Before choosing Tier 1, explicitly state which criteria apply and why. If any criterion is uncertain, use Tier 2.
-   - Purely additive (new files only, no existing behavior modified)
-   - Single concern (one skill, one component -- not cross-cutting)
-   - Pattern-following (implementation mirrors an existing example with no novel logic)
-   - Plan-faithful (no scope growth, no deferred questions resolved with surprising answers)
+   **Tier 2 -- `gh:review` escalation** -- Invoke `gh:review mode:autofix` when risk calls for specialized reviewer agents, auto-applied safe fixes, and a durable residual artifact. Escalate when any of these apply:
+   - Sensitive surface touched (security, data migrations, permissions, release automation, billing, authentication, or user data)
+   - Large, diffuse, or cross-cutting changes
+   - Very large changes where multiple review personas materially reduce risk
+   - Explicit request for full review
+
+   When the plan file path is known, pass it as `plan:<path>`. Record whether Tier 1 harness-native or Tier 2 `gh:review` was used in the PR evidence.
 
 3. **Final Validation**
    - All tasks marked completed

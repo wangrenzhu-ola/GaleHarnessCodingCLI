@@ -284,3 +284,8 @@ Before applying, re-read the composed body and apply these cuts:
 **Value-lead check.** Re-read the first sentence of the Summary. If it describes what was moved around, renamed, or added ("This PR introduces three-tier autofix..."), rewrite to lead with what's now possible or what was broken and is now fixed ("Document reviews previously produced 14+ findings requiring user judgment; this PR cuts that to 4-6.").
 
 Large PRs benefit from selectivity, not comprehensiveness.
+
+
+### Model slug URL encoding
+
+When model badges include literal parentheses, URL-encode literal parens as `%28` and `%29`. Examples: `Opus_4.6_%281M,_Extended_Thinking%29`, `Sonnet_4.6_%28200K%29`. Do not emit unencoded parenthesized model slugs in badge URLs.
