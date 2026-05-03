@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.11.0...cli-v2.11.1) (2026-05-03)
+
+
+### Bug Fixes
+
+* **release:** include gale-task in cli archives ([#110](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/110)) ([4a00905](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4a00905bfcf585ae7cbb8d80990c90b03b2a3155))
+
 ## [2.11.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.10.0...cli-v2.11.0) (2026-05-03)
 
 
