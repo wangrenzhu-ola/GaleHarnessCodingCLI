@@ -17,6 +17,21 @@
   ],
   "text_replacements": [
     {
+      "from": "ce-kieran-python-reviewer",
+      "to": "gale-python-reviewer",
+      "description": "GaleHarness keeps the upstream kieran Python reviewer under the Gale namespace."
+    },
+    {
+      "from": "ce-kieran-rails-reviewer",
+      "to": "gale-rails-reviewer",
+      "description": "GaleHarness keeps the upstream kieran Rails reviewer under the Gale namespace."
+    },
+    {
+      "from": "ce-kieran-typescript-reviewer",
+      "to": "gale-typescript-reviewer",
+      "description": "GaleHarness keeps the upstream kieran TypeScript reviewer under the Gale namespace."
+    },
+    {
       "from": "compound-engineering-plugin",
       "to": "galeharness-cli"
     },
@@ -47,5 +62,20 @@
     "compound-engineering-plugin",
     "plugins/compound-engineering/",
     "ce:"
-  ]
+  ],
+  "agent_inventory_decisions": {
+    "upstream_anchor": "compound-engineering-v3.4.1",
+    "renamed_agents": {
+      "ce-kieran-python-reviewer.agent.md": "gale-python-reviewer.md",
+      "ce-kieran-rails-reviewer.agent.md": "gale-rails-reviewer.md",
+      "ce-kieran-typescript-reviewer.agent.md": "gale-typescript-reviewer.md"
+    },
+    "removed_stale_gale_agents": [
+      "cli-readiness-reviewer.md",
+      "cli-agent-readiness-reviewer.md"
+    ],
+    "imported_missing_agents": {
+      "ce-web-researcher.agent.md": "web-researcher.md"
+    }
+  }
 }

@@ -174,8 +174,6 @@ Agents are specialized subagents invoked by skills — you typically don't call 
 |-------|-------------|
 | `agent-native-reviewer` | Verify features are agent-native (action + context parity) |
 | `api-contract-reviewer` | Detect breaking API contract changes |
-| `cli-agent-readiness-reviewer` | Evaluate CLI agent-friendliness against 7 core principles |
-| `cli-readiness-reviewer` | CLI agent-readiness persona for gh:review (conditional, structured JSON) |
 | `architecture-strategist` | Analyze architectural decisions and compliance |
 | `code-simplicity-reviewer` | Final pass for simplicity and minimalism |
 | `correctness-reviewer` | Logic errors, edge cases, state bugs |
@@ -225,6 +223,7 @@ Agents are specialized subagents invoked by skills — you typically don't call 
 | `repo-research-analyst` | Research repository structure and conventions |
 | `session-historian` | Search prior Claude Code, Codex, and Cursor sessions for related investigation context |
 | `slack-researcher` | Search Slack for organizational context relevant to the current task |
+| `web-researcher` | Perform structured external web research for prior art, market signals, and cross-domain analogies |
 
 ### Design
 

@@ -124,7 +124,6 @@ Routing rules:
 | `galeharness-cli:data-migrations-reviewer` | Migrations, schema changes, backfills |
 | `galeharness-cli:reliability-reviewer` | Error handling, retries, timeouts, background jobs |
 | `galeharness-cli:adversarial-reviewer` | Diff >=50 changed non-test/non-generated/non-lockfile lines, or auth, payments, data mutations, external APIs |
-| `galeharness-cli:cli-readiness-reviewer` | CLI command definitions, argument parsing, CLI framework usage, command handler implementations |
 | `galeharness-cli:previous-comments-reviewer` | Reviewing a PR that has existing review comments or threads |
 
 **Stack-specific conditional (selected per diff):**

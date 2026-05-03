@@ -136,6 +136,20 @@ function scanReferenceEntries(
 }
 
 describe("GaleHarnessCLI agent reference contract", () => {
+  test("agent inventory reconciles upstream v3.4.1 rename and stale-reviewer decisions", () => {
+    const agentNames = buildAgentNames()
+
+    expect(agentNames).toContain("web-researcher")
+    expect(agentNames).toContain("gale-python-reviewer")
+    expect(agentNames).toContain("gale-rails-reviewer")
+    expect(agentNames).toContain("gale-typescript-reviewer")
+    expect(agentNames).not.toContain("cli-readiness-reviewer")
+    expect(agentNames).not.toContain("cli-agent-readiness-reviewer")
+    expect(agentNames).not.toContain("kieran-python-reviewer")
+    expect(agentNames).not.toContain("kieran-rails-reviewer")
+    expect(agentNames).not.toContain("kieran-typescript-reviewer")
+  })
+
   test("uses two-segment references for real plugin agents", () => {
     const agentNames = buildAgentNames()
     const skillNames = buildSkillNames()
