@@ -9,6 +9,13 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.10.0...galeharness-cli-v2.11.0) (2026-05-03)
+
+
+### Features
+
+* **upstream:** add strategy pulse simplify skills ([#108](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/108)) ([4f4c0af](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/4f4c0afd7a08135db3e3acb58794c34ad017e9c4))
+
 ## [2.10.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.9.0...galeharness-cli-v2.10.0) (2026-05-01)
 
 
