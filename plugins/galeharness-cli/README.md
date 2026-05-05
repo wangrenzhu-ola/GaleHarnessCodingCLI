@@ -52,26 +52,40 @@ language: zh-CN  # zh-CN (Chinese, default) or en (English)
 
 ### Core Workflow
 
-The primary entry points for engineering work, invoked as slash commands:
+The primary entries form an end-to-end engineering chain:
 
-| Skill | Description |
-|-------|-------------|
-| `/gh:ideate` | Discover high-impact project improvements through divergent ideation and adversarial filtering |
-| `/gh:brainstorm` | Explore requirements and approaches before planning |
-| `/gh:plan` | Create structured plans for any multi-step task -- software features, research workflows, events, study plans -- with automatic confidence checking |
-| `/gh:review` | Structured code review with tiered persona agents, confidence gating, and dedup pipeline |
-| `/gh:work` | Execute work items systematically |
-| `/gh:debug` | Systematically find root causes and fix bugs -- traces causal chains, forms testable hypotheses, and implements test-first fixes |
-| `/gh:work-x` | Morph-X work execution for iOS code-output projects; reduces template-code repetition risk with blueprint constraints, safe transforms, and similarity audit |
-| `/gh:debug-x` | Morph-X debugging workflow for iOS fixes; keeps root-cause discipline while applying blueprint constraints, transforms, and similarity audit |
-| `/gh:compound` | Document solved problems to compound team knowledge |
-| `/gh:compound-refresh` | Refresh stale or drifting learnings and decide whether to keep, update, replace, or archive them |
-| `/gh:optimize` | Run iterative optimization loops with parallel experiments, measurement gates, and LLM-as-judge quality scoring |
-| `/gh:strategy` | Create and maintain a root `STRATEGY.md` product anchor for problem, approach, users, metrics, and tracks |
-| `/gh:product-pulse` | Generate a time-windowed product pulse report from read-only usage, quality, performance, and error signals |
-| `/gh:simplify-code` | Simplify recent code changes for reuse, clarity, quality, and efficiency while preserving behavior |
+```text
+/gh:ideate -> /gh:brainstorm -> /gh:plan -> /gh:work or /gh:work-beta or /gh:work-x -> /gh:review -> /gh-demo-reel -> /gh:compound
+```
+
+Use the horizontal skills (`/gh:debug`, `/gh:optimize`, `/gh:simplify-code`, `/gh:product-pulse`, `/gh:sessions`, `/gh:slack-research`) when the situation calls for them rather than forcing every task through the full chain.
+
+| Skill | When to use it | Output / value |
+|-------|----------------|----------------|
+| `/gh:ideate` | You want grounded improvement ideas or alternative directions before committing to a requirement. | Ranked ideas with constraints, risks, and next-step candidates. |
+| `/gh:brainstorm` | A request is still fuzzy and needs problem framing, assumptions, non-goals, and success criteria. | A requirement-quality brief that can feed `/gh:plan`. |
+| `/gh:plan` | A requirement is ready to decompose into implementation steps or an existing plan needs deepening. | A structured plan with files, risks, tests, and confidence checks. |
+| `/gh:work` | Execute a scoped development task or plan with normal quality gates. | Implemented code plus verification evidence. |
+| `/gh:work-beta` | Execute work while conserving main-agent context via external delegation/Codex-assisted split work. | Same target as `/gh:work`, with beta delegation tradeoffs. |
+| `/gh:work-x` | Execute iOS Swift/ObjC work where Morph-X blueprint constraints and similarity audit reduce template-code repetition risk. | iOS-focused implementation with Morph-X transform/audit evidence. |
+| `/gh:debug` | Investigate errors, test failures, stack traces, or production symptoms where root cause is unknown. | Causal diagnosis, testable hypothesis, fix, and regression verification. |
+| `/gh:debug-x` | Debug iOS Swift/ObjC issues under Morph-X blueprint constraints. | iOS root-cause fix plus similarity/safety audit. |
+| `/gh:review` | Run independent pre-PR or PR review with tiered personas and confidence filtering. | Deduplicated findings, severity, confidence, and fix recommendations. |
+| `/gh-demo-reel` | Capture visual or terminal evidence after a change is working and before/while preparing PR evidence. | GIF, screenshot, or terminal recording URL/path suitable for PR notes. |
+| `/gh:compound` | A problem was solved and should become reusable team knowledge. | A durable learning/solution document for future retrieval. |
+| `/gh:compound-refresh` | Existing `docs/solutions/` knowledge may be stale, duplicated, or drifting. | Keep/update/replace/archive decisions and refreshed docs. |
 
 For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/README.md) for usage guidance, example specs, and links to the schema and workflow docs.
+
+### Strategy, product, and quality helpers
+
+| Skill | When to use it | Output / value |
+|-------|----------------|----------------|
+| `/gh:strategy` | A repo lacks a crisp product anchor, or the team needs to realign on problem, users, metrics, and tracks. | Creates or updates root `STRATEGY.md`; prefer before large multi-track work. |
+| `/gh:product-pulse` | You need a time-windowed read-only pulse of user experience, errors, performance, and quality signals. | Product pulse report with risks, regressions, and follow-up candidates. |
+| `/gh:simplify-code` | Recent changes work but feel too complex, duplicated, or hard to reuse. | Behavior-preserving simplification and clarity improvements. |
+| `/gh:optimize` | There is a measurable target such as performance, search quality, prompt quality, ranking, or clustering. | Metric-driven optimization loop with parallel experiments and judge/measurement gates. |
+| `/gh:polish-beta` | A PR or feature needs browser/dev-server polish after review and CI, especially UI/interaction cleanup. | Testable polish checklist and scoped fix dispatches; beta surface. |
 
 ### Workflow Guardrails
 
@@ -81,10 +95,12 @@ For the source references and integration rationale, see `docs/brainstorms/2026-
 
 ### Research & Context
 
-| Skill | Description |
-|-------|-------------|
-| `/gh:sessions` | Ask questions about session history across Claude Code, Codex, and Cursor |
-| `/gh:slack-research` | Search Slack for interpreted organizational context -- decisions, constraints, and discussion arcs |
+| Skill | When to use it | Output / value |
+|-------|----------------|----------------|
+| `/gh:sessions` | Ask questions about prior Claude Code, Codex, and Cursor coding-agent sessions for the current repo or topic. | Synthesized history, prior decisions, failures, and relevant evidence. |
+| `/gh-session-inventory` | Internal/support skill for discovering session files and metadata before choosing sessions to inspect. | JSONL inventory with platform, branch/CWD hints, timestamps, and keyword match counts. |
+| `/gh-session-extract` | Internal/support skill for extracting a confirmed relevant session's skeleton or error signals. | Bounded skeleton/error excerpts that avoid loading huge raw transcripts. |
+| `/gh:slack-research` | Search Slack for interpreted organizational context -- decisions, constraints, and discussion arcs. | Digest of relevant messages with synthesized context, not a raw message dump. |
 
 ### Git Workflow
 
@@ -119,16 +135,15 @@ Recommended operating model:
 
 ### Workflow Utilities
 
-| Skill | Description |
-|-------|-------------|
-| `/gh-demo-reel` | Capture a visual demo reel (GIF demos, terminal recordings, screenshots) for PRs with project-type-aware tier selection |
-| `/report-bug-ce` | Report a bug in the compound-engineering plugin |
-| `/resolve-pr-feedback` | Resolve PR review feedback in parallel |
-| `/sync` | Sync Claude Code config across machines |
-| `/test-browser` | Run browser tests on PR-affected pages |
-| `/test-xcode` | Build and test iOS apps on simulator using XcodeBuildMCP |
-| `/gh:setup` | Diagnose environment, install missing tools, and bootstrap project config |
-| `/gh:update` | Check compound-engineering plugin version and fix stale cache (Claude Code only) |
+| Skill | When to use it | Output / value |
+|-------|----------------|----------------|
+| `/report-bug-ce` | Report a bug in the compound-engineering plugin. | Structured bug report for plugin maintainers. |
+| `/resolve-pr-feedback` | Triage and resolve PR review feedback in parallel. | Validated fixes or documented rejected feedback. |
+| `/sync` | Sync Claude Code config across machines. | Updated local config state. |
+| `/test-browser` | Run browser tests on pages affected by a PR or branch. | Browser-test evidence and failures. |
+| `/test-xcode` | Build and test iOS apps on simulator using XcodeBuildMCP. | Xcode build/test evidence. |
+| `/gh:setup` | Diagnose environment, install missing tools, and bootstrap project config. | Environment report and setup fixes. |
+| `/gh:update` | Check compound-engineering plugin version and fix stale cache (Claude Code only). | Plugin update/cache status and remediation. |
 
 ### Development Frameworks
 
