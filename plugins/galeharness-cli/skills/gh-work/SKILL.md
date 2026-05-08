@@ -436,6 +436,47 @@ After the work is complete and the shipping workflow has finished (PR created or
 **Note:** This creates a searchable record of completed work for future reference when similar tasks arise.
 <!-- /HKT-PATCH:phase-4.5 -->
 
+## GitNexus Context (Optional Code Intelligence)
+
+`gh:work` may optionally use GitNexus to enrich execution context when the local repo has a GitNexus index. GitNexus provides code-structure awareness, likely file/module hints, and impact analysis that can improve implementation quality. It is **never required** — missing `gitnexus`, a stale index, timeout, or command failure must not block execution.
+
+### Detecting GitNexus Availability
+
+Before using GitNexus, verify the repo is indexed:
+
+```bash
+# Check if gitnexus is available and the repo has an index
+gitnexus list 2>/dev/null && echo "GitNexus available" || echo "GitNexus unavailable — proceeding without it"
+```
+
+For multi-repo environments, use explicit repo labels: `gitnexus list -r <repo-label>`.
+
+### Stable Commands (Preferred)
+
+When GitNexus is available, prefer these stable commands:
+
+- **`gitnexus cypher -r <repo-label>`** — Markdown/file/content lookup. Use for finding relevant files, symbols, or content patterns before implementing changes.
+- **`gitnexus context -r <repo-label>`** — Symbol-level context. Use for understanding the surroundings of a specific function, class, or module being modified.
+- **`gitnexus impact -r <repo-label>`** — Impact analysis. Use for assessing blast radius before changes that touch shared surfaces, callbacks, or exported APIs.
+
+### Best-Effort / Experimental
+
+- **`gitnexus query`** — Best-effort/experimental only. Current versions can emit read-only FTS warnings or return empty markdown-heavy results. Use only when the stable commands above do not cover the need, and treat results as supplementary.
+
+### Integration Points
+
+- **Phase 0 (Input Triage):** After scanning the work area, if GitNexus is available, run `gitnexus cypher` for the key components identified in the prompt or plan. Use findings to refine the task list and identify files likely to change.
+- **Phase 2 (Execute):** Before implementing a unit that touches shared surfaces, `gitnexus impact` can surface callers or consumers that local grep might miss. Cross-check with actual source files — GitNexus findings are guidance only, never primary evidence.
+- **Test Discovery:** When a plan specifies test files, `gitnexus context` around the test entry points can help identify related test utilities or fixtures.
+
+### License Caution
+
+`gitnexus` currently advertises `PolyForm-Noncommercial-1.0.0`; production/company usage needs commercial/legal review. P0 remains optional/local.
+
+### Boundary Note
+
+GitNexus is optional code intelligence for `gh:work`. It is not a mandatory runtime dependency, not a GitHub fact source, and not HKTMemory. Always re-check code and tests independently.
+
 ## Key Principles
 
 ### Start Fast, Execute Faster

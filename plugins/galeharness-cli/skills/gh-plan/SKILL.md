@@ -36,6 +36,47 @@ At the start of execution, use your native file-read tool to read `.compound-eng
 If the config file contains `language: en`, write documents in English.
 If the file is missing, contains `language: zh-CN`, or has no language key, write documents in Chinese (default).
 
+## GitNexus Context (Optional Code Intelligence)
+
+`gh:plan` may optionally use GitNexus to enrich planning context when the local repo has a GitNexus index. GitNexus provides code-structure awareness, likely file/module hints, and impact analysis that can improve plan quality. It is **never required** — missing `gitnexus`, a stale index, timeout, or command failure must not block planning.
+
+### Detecting GitNexus Availability
+
+Before using GitNexus, verify the repo is indexed:
+
+```bash
+# Check if gitnexus is available and the repo has an index
+gitnexus list 2>/dev/null && echo "GitNexus available" || echo "GitNexus unavailable — proceeding without it"
+```
+
+For multi-repo environments, use explicit repo labels: `gitnexus list -r <repo-label>`.
+
+### Stable Commands (Preferred)
+
+When GitNexus is available, prefer these stable commands:
+
+- **`gitnexus cypher -r <repo-label>`** — Markdown/file/content lookup. Use for finding relevant files, symbols, or content patterns.
+- **`gitnexus context -r <repo-label>`** — Symbol-level context. Use for understanding the surroundings of a specific function, class, or module.
+- **`gitnexus impact -r <repo-label>`** — Impact analysis. Use for assessing blast radius before proposing changes that touch shared surfaces.
+
+### Best-Effort / Experimental
+
+- **`gitnexus query`** — Best-effort/experimental only. Current versions can emit read-only FTS warnings or return empty markdown-heavy results. Use only when the stable commands above do not cover the need, and treat results as supplementary.
+
+### Integration Points
+
+- **Phase 1 (Gather Context):** After local research, if GitNexus is available, run `gitnexus cypher` or `gitnexus context` for the key components identified in the planning context summary. Include findings in the `### Relevant Code and Patterns` section of the plan.
+- **Phase 1.5 (Flow and Edge-Case Analysis):** For Standard or Deep plans touching shared surfaces, `gitnexus impact` can help identify cross-layer callers or consumers that local grep might miss.
+- **Phase 3 (Structure the Plan):** GitNexus findings are guidance only, never primary evidence. Always cross-check with actual source files. Do not treat GitNexus output as a substitute for reading code.
+
+### License Caution
+
+`gitnexus` currently advertises `PolyForm-Noncommercial-1.0.0`; production/company usage needs commercial/legal review. P0 remains optional/local.
+
+### Boundary Note
+
+GitNexus is optional code intelligence for `gh:plan`. It is not a mandatory runtime dependency, not a GitHub fact source, and not HKTMemory. Downstream `gh:work` and `gh:debug` must re-check code and tests independently.
+
 ## Core Principles
 
 1. **Use requirements as the source of truth** - If `gh:brainstorm` produced a requirements document, planning should build from it rather than re-inventing behavior.
