@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.11.1...cli-v2.12.0) (2026-05-08)
+
+
+### Miscellaneous Chores
+
+* **cli:** Synchronize galeharness-cli versions
+
 ## [2.11.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.11.0...cli-v2.11.1) (2026-05-03)
 
 
