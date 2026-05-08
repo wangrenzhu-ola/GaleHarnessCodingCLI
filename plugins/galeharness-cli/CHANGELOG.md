@@ -9,6 +9,14 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.12.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.11.1...galeharness-cli-v2.12.0) (2026-05-08)
+
+
+### Features
+
+* add gh-nexus skill for GitNexus code intelligence ([2a76c9b](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/2a76c9b8aadd7cf246bf448338f7cf4cc3a7c72a)), closes [#116](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/116)
+* **skills:** add GitNexus guidance to gh-plan, gh-work, gh-debug ([044b345](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/044b345e459e904b9e5d79bf427361d4222fb2fa)), closes [#115](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/issues/115)
+
 ## [2.11.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.11.0...galeharness-cli-v2.11.1) (2026-05-03)
 
 
