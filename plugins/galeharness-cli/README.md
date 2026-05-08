@@ -46,7 +46,7 @@ language: zh-CN  # zh-CN (Chinese, default) or en (English)
 | Component | Count |
 |-----------|-------|
 | Agents | 50+ |
-| Skills | 41 |
+| Skills | 42 |
 
 ## Skills
 
@@ -74,6 +74,7 @@ Use the horizontal skills (`/gh:debug`, `/gh:optimize`, `/gh:simplify-code`, `/g
 | `/gh-demo-reel` | Capture visual or terminal evidence after a change is working and before/while preparing PR evidence. | GIF, screenshot, or terminal recording URL/path suitable for PR notes. |
 | `/gh:compound` | A problem was solved and should become reusable team knowledge. | A durable learning/solution document for future retrieval. |
 | `/gh:compound-refresh` | Existing `docs/solutions/` knowledge may be stale, duplicated, or drifting. | Keep/update/replace/archive decisions and refreshed docs. |
+| `/gh:nexus` | Analyze repos with GitNexus code intelligence (symbols, cypher queries, impact analysis). | Indexed repo insights, symbol context, change-impact reports. |
 
 For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/README.md) for usage guidance, example specs, and links to the schema and workflow docs.
 
