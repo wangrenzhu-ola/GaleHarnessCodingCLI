@@ -10,6 +10,47 @@ Find root causes, then fix them. This skill investigates bugs systematically —
 
 <bug_description> #$ARGUMENTS </bug_description>
 
+## GitNexus Context (Optional Code Intelligence)
+
+`gh:debug` may optionally use GitNexus to enrich debugging context when the local repo has a GitNexus index. GitNexus provides code-structure awareness, symbol-level context, and impact analysis that can accelerate root-cause identification. It is **never required** — missing `gitnexus`, a stale index, timeout, or command failure must not block debugging.
+
+### Detecting GitNexus Availability
+
+Before using GitNexus, verify the repo is indexed:
+
+```bash
+# Check if gitnexus is available and the repo has an index
+gitnexus list 2>/dev/null && echo "GitNexus available" || echo "GitNexus unavailable — proceeding without it"
+```
+
+For multi-repo environments, use explicit repo labels: `gitnexus list -r <repo-label>`.
+
+### Stable Commands (Preferred)
+
+When GitNexus is available, prefer these stable commands:
+
+- **`gitnexus cypher -r <repo-label>`** — Markdown/file/content lookup. Use for finding relevant files, symbols, or content patterns related to the bug surface.
+- **`gitnexus context -r <repo-label>`** — Symbol-level context. Use for understanding the surroundings of a specific function, class, or module implicated in the error.
+- **`gitnexus impact -r <repo-label>`** — Impact analysis. Use for assessing blast radius when the root cause touches shared surfaces, callbacks, or exported APIs.
+
+### Best-Effort / Experimental
+
+- **`gitnexus query`** — Best-effort/experimental only. Current versions can emit read-only FTS warnings or return empty markdown-heavy results. Use only when the stable commands above do not cover the need, and treat results as supplementary.
+
+### Integration Points
+
+- **Phase 1 (Investigate):** After reproducing the bug and tracing the code path, if GitNexus is available, run `gitnexus cypher` or `gitnexus context` for the error surface and upstream callers. Include findings in the causal chain analysis.
+- **Phase 2 (Root Cause):** When the bug touches shared surfaces, `gitnexus impact` can help identify cross-layer callers or consumers that local grep might miss. Cross-check with actual source files — GitNexus findings are guidance only, never primary evidence.
+- **Phase 3 (Fix):** Before implementing a fix that modifies shared code, `gitnexus impact` can surface other locations that may need the same correction.
+
+### License Caution
+
+`gitnexus` currently advertises `PolyForm-Noncommercial-1.0.0`; production/company usage needs commercial/legal review. P0 remains optional/local.
+
+### Boundary Note
+
+GitNexus is optional code intelligence for `gh:debug`. It is not a mandatory runtime dependency, not a GitHub fact source, and not HKTMemory. Always re-check code and tests independently.
+
 ## Core Principles
 
 These principles govern every phase. They are repeated at decision points because they matter most when the pressure to skip them is highest.
