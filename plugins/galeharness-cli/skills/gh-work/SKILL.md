@@ -12,6 +12,8 @@ Execute work efficiently while maintaining quality and finishing features.
 
 This command takes a work document (plan or specification) or a bare prompt describing the work, and executes it systematically. The focus is on **shipping complete features** by understanding requirements quickly, following existing patterns, and maintaining quality throughout.
 
+**Engineering discipline overlay:** For non-trivial engineering work, bias toward vertical red-green-refactor: choose one observable behavior, create or identify a failing check for that behavior, make the smallest implementation change to pass it, then refactor. Avoid horizontal slices that separately "finish schema/API/UI" without an end-to-end proof. See `../agent-native-architecture/references/engineering-discipline-from-mattpocock-skills.md`.
+
 ## Input Document
 
 <input_document> #$ARGUMENTS </input_document>

@@ -18,6 +18,10 @@ This opens up a new field: software that works the way Claude Code works, applie
 <core_principles>
 ## Core Principles
 
+### Engineering discipline guardrail
+
+When evaluating an agent-native system, also apply the deep-module vocabulary from `references/engineering-discipline-from-mattpocock-skills.md`: module, interface, implementation, depth, seam, adapter, locality, and leverage. Prefer deep modules with small interfaces and large hidden implementation leverage. Treat shallow modules, pass-through helpers, fake seams, and mirror logic as architecture smells. Use the deletion test: if deleting a proposed abstraction barely changes the system or only removes a name, it is probably shallow.
+
 ### 1. Parity
 
 **Whatever the user can do through the UI, the agent should be able to achieve through tools.**
