@@ -48,6 +48,10 @@ language: zh-CN  # zh-CN (Chinese, default) or en (English)
 | Agents | 50+ |
 | Skills | 42 |
 
+## Recent upstream-sync highlights
+
+The latest upstream capability sync improves long-lived PR feedback handling, cross-runtime web research, document-review auto-fix confidence, macOS Bash compatibility, worktree script resolution, and Codex `$CODEX_HOME` support.
+
 ## Skills
 
 ### Core Workflow
