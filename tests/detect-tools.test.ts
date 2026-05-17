@@ -89,6 +89,23 @@ describe("detectInstalledTools", () => {
     expect(results.find((t) => t.name === "copilot")?.detected).toBe(true)
     expect(results.find((t) => t.name === "copilot")?.reason).toContain(".github/skills")
   })
+
+  test("detects Codex from CODEX_HOME when it is not ~/.codex", async () => {
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-codex-home-"))
+    const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-codex-cwd-"))
+    const codexHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-codex-env-"))
+    const previous = process.env.CODEX_HOME
+    process.env.CODEX_HOME = codexHome
+    try {
+      const results = await detectInstalledTools(undefined, tempCwd)
+      const codex = results.find((t) => t.name === "codex")
+      expect(codex?.detected).toBe(true)
+      expect(codex?.reason).toContain(codexHome)
+    } finally {
+      if (previous === undefined) delete process.env.CODEX_HOME
+      else process.env.CODEX_HOME = previous
+    }
+  })
 })
 
 describe("getDetectedTargetNames", () => {

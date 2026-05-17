@@ -8,7 +8,7 @@ import { resolveTargetCapabilities, targets, validateScope, type TargetHandler }
 import { pathExists } from "../utils/files"
 import type { ClaudeToOpenCodeOptions, PermissionMode } from "../converters/claude-to-opencode"
 import { ensureCodexAgentsFile } from "../utils/codex-agents"
-import { expandHome, resolveTargetHome } from "../utils/resolve-home"
+import { expandHome, resolveCodexHome, resolveTargetHome } from "../utils/resolve-home"
 import { resolveTargetOutputRoot } from "../utils/resolve-output"
 import { detectInstalledTools } from "../utils/detect-tools"
 
@@ -112,7 +112,7 @@ export default defineCommand({
     try {
       const plugin = await loadClaudePlugin(resolvedPlugin.path)
       const outputRoot = resolveOutputRoot(args.output)
-      const codexHome = resolveTargetHome(args.codexHome, path.join(os.homedir(), ".codex"))
+      const codexHome = resolveCodexHome(args.codexHome)
       const piHome = resolveTargetHome(args.piHome, path.join(os.homedir(), ".pi", "agent"))
       const claudeHome = resolveTargetHome(args.claudeHome, path.join(os.homedir(), ".claude"))
       const hasExplicitOutput = Boolean(args.output && String(args.output).trim())
