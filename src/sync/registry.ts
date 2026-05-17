@@ -14,6 +14,7 @@ import { syncToPi } from "./pi"
 import { syncToQoder } from "./qoder"
 import { syncToQwen } from "./qwen"
 import { syncToWindsurf } from "./windsurf"
+import { resolveCodexHome } from "../utils/resolve-home"
 
 function getCopilotHomeRoot(home: string): string {
   return path.join(home, ".copilot")
@@ -57,8 +58,13 @@ export const syncTargets: SyncTargetDefinition[] = [
   },
   {
     name: "codex",
-    detectPaths: (home) => [path.join(home, ".codex")],
-    resolveOutputRoot: (home) => path.join(home, ".codex"),
+    detectPaths: (home) => {
+      const defaultRoot = path.join(home, ".codex")
+      if (home !== os.homedir()) return [defaultRoot]
+      const envRoot = resolveCodexHome(undefined)
+      return envRoot === defaultRoot ? [defaultRoot] : [envRoot, defaultRoot]
+    },
+    resolveOutputRoot: () => resolveCodexHome(undefined),
     sync: syncToCodex,
   },
   {
