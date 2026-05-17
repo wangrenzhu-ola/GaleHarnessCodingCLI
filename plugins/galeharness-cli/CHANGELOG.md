@@ -9,6 +9,13 @@ All notable changes to GaleHarnessCLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.12.2](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.12.1...galeharness-cli-v2.12.2) (2026-05-17)
+
+
+### Bug Fixes
+
+* **galeharness-cli:** preserve engineering discipline overlay ([ec9389f](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/ec9389f1307bf6b3dbc58c58867829697e2f9152))
+
 ## [2.12.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/galeharness-cli-v2.12.0...galeharness-cli-v2.12.1) (2026-05-17)
 
 
