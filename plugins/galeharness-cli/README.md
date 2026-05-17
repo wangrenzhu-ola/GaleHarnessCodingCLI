@@ -50,7 +50,18 @@ language: zh-CN  # zh-CN (Chinese, default) or en (English)
 
 ## Recent upstream-sync highlights
 
-The latest upstream capability sync improves long-lived PR feedback handling, cross-runtime web research, document-review auto-fix confidence, macOS Bash compatibility, worktree script resolution, and Codex `$CODEX_HOME` support.
+The latest upstream capability sync preserves GaleHarness-specific `gh:*` workflows while selectively importing high-value fixes from the reference compound-engineering plugin. This was a targeted sync, not a wholesale baseline bump, so local skills such as `/gh:nexus` remain intact.
+
+Highlights:
+
+- `resolve-pr-feedback` now paginates GitHub GraphQL review threads so long-lived PRs do not silently miss comments.
+- `web-researcher` no longer assumes Claude-only `WebSearch` / `WebFetch` tools, making research guidance safer across runtimes.
+- `coherence-reviewer` has stronger document-type adaptation and safer `safe_auto` consistency rules for review-driven fixes.
+- `git-worktree` resolves helper scripts through `${CLAUDE_SKILL_DIR:-.}`, improving both marketplace and local plugin installs.
+- `gh-polish-beta` project detection is compatible with macOS Bash 3.2.
+- CLI install / convert / sync detection now respects `$CODEX_HOME`, keeping Codex profiles isolated from the default home.
+
+Validation covered the full Bun test suite, release metadata validation, namespace leak checks, and Linux + Windows CI.
 
 ## Skills
 
