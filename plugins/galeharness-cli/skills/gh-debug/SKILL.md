@@ -55,10 +55,11 @@ GitNexus is optional code intelligence for `gh:debug`. It is not a mandatory run
 
 These principles govern every phase. They are repeated at decision points because they matter most when the pressure to skip them is highest.
 
-1. **Investigate before fixing.** Do not propose a fix until you can explain the full causal chain from trigger to symptom with no gaps. "Somehow X leads to Y" is a gap.
-2. **Predictions for uncertain links.** When the causal chain has uncertain or non-obvious links, form a prediction — something in a different code path or scenario that must also be true. If the prediction is wrong but a fix "works," you found a symptom, not the cause. When the chain is obvious (missing import, clear null reference), the chain explanation itself is sufficient.
-3. **One change at a time.** Test one hypothesis, change one thing. If you're changing multiple things to "see if it helps," stop — that is shotgun debugging.
-4. **When stuck, diagnose why — don't just try harder.**
+1. **Feedback loop first.** Before changing code, name the shortest reliable feedback loop that can prove or disprove the hypothesis: failing test, focused CLI/script, HTTP/API probe, browser smoke, trace replay, then HITL only when necessary. Prefer the tightest loop that exercises the real failing path. See `../agent-native-architecture/references/engineering-discipline-from-mattpocock-skills.md`.
+2. **Investigate before fixing.** Do not propose a fix until you can explain the full causal chain from trigger to symptom with no gaps. "Somehow X leads to Y" is a gap.
+3. **Predictions for uncertain links.** When the causal chain has uncertain or non-obvious links, form a prediction — something in a different code path or scenario that must also be true. If the prediction is wrong but a fix "works," you found a symptom, not the cause. When the chain is obvious (missing import, clear null reference), the chain explanation itself is sufficient.
+4. **One change at a time.** Test one hypothesis, change one thing. If you're changing multiple things to "see if it helps," stop — that is shotgun debugging.
+5. **When stuck, diagnose why — don't just try harder.**
 
 ## Execution Flow
 
