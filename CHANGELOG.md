@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v3.0.0...cli-v3.0.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **installer:** deploy workflows from release installer ([e92d68b](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/e92d68b51cad611db85b356e6d419bafbcdf410f))
+
 ## [3.0.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cli-v2.12.2...cli-v3.0.0) (2026-06-05)
 
 
