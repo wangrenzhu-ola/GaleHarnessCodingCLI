@@ -66,3 +66,12 @@ describe("upstream PM and simplification capabilities", () => {
     expect(readSkill("gh-simplify-code/SKILL.md")).toContain("Run tests scoped to the changed paths")
   })
 })
+
+describe("upstream polish promotion", () => {
+  test("promotes the browser polish workflow to stable gh:polish", () => {
+    expect(existsSync(path.join(skillRoot, "gh-polish", "SKILL.md"))).toBe(true)
+    expect(existsSync(path.join(skillRoot, "gh-polish-beta"))).toBe(false)
+    expect(readSkill("gh-polish/SKILL.md")).toContain("name: gh:polish")
+    expect(readSkill("gh-polish/SKILL.md")).not.toContain("[BETA]")
+  })
+})

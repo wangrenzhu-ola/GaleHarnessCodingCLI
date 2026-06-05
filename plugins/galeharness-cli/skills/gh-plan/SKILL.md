@@ -136,6 +136,23 @@ Normal editing requests (e.g., "update the test scenarios", "add a new implement
 
 If the plan already has a `deepened: YYYY-MM-DD` frontmatter field and there is no explicit user request to re-deepen, the fast path still applies the same confidence-gap evaluation — it does not force deepening.
 
+#### 0.1a Recognize Approach-Altitude Requests
+
+Some requests are better answered one level up: produce a grounded **approach-plan** -- a plan for *how the deliverable will be made* -- and hold there instead of immediately drafting the deliverable. This runs after Phase 0.1 resume/deepen fast paths and before Phase 0.1b's domain split, so it applies to software and knowledge-work alike.
+
+Two entries, with different gating:
+
+**Explicit (always honored).** When the user asks for the approach itself -- "plan for a plan", "plan the approach", "plan how you'll do X", "don't do it yet -- just plan how you'd approach it" -- enter approach altitude and hold at the approach. Key on language that asks for the approach to producing something, not the thing itself.
+
+**Proactive (rare, conservative).** When the user gives a plain request with no approach-language, offer an approach-plan only when both are clearly high:
+
+- **Method uncertainty** -- the core approach is unsettled enough that competing methods would yield different deliverables.
+- **Cost of getting it wrong** -- producing the wrong deliverable would waste real effort.
+
+If either is low or borderline, stay silent and plan normally. Cost alone never fires the offer.
+
+On explicit entry, or after an accepted proactive offer, read `references/approach-altitude.md` and follow it. Otherwise continue to Phase 0.1b unchanged.
+
 #### 0.1b Classify Task Domain
 
 If the task involves building, modifying, or architecting software (references code, repos, APIs, databases, or asks to build/modify/deploy), continue to Phase 0.2.

@@ -1,6 +1,6 @@
 ---
 name: gh:compound
-description: Document a recently solved problem to compound your team's knowledge
+description: Document a recently solved problem to compound your team's knowledge or update CONCEPTS.md, the project's shared domain vocabulary.
 ---
 
 # /compound
@@ -34,6 +34,7 @@ These files are the durable contract for the workflow. Read them on-demand at th
 
 - `references/schema.yaml` — canonical frontmatter fields and enum values (read when validating YAML)
 - `references/yaml-schema.md` — category mapping from problem_type to directory (read when classifying)
+- `references/concepts-vocabulary.md` — CONCEPTS.md format and inclusion rules (read in Phase 2.4 when domain terms surface)
 - `assets/resolution-template.md` — section structure for new docs (read when assembling)
 
 When spawning subagents, pass the relevant file contents into the task prompt so they have the contract without needing cross-skill paths.
@@ -86,7 +87,7 @@ If the user says yes, dispatch the Session Historian in Phase 1. If no, skip it.
 <critical_requirement>
 **The primary output is ONE file - the final documentation.**
 
-Phase 1 subagents return TEXT DATA to the orchestrator. They must NOT use Write, Edit, or create any files. Only the orchestrator writes files: the solution doc in Phase 2, and — if the Discoverability Check finds a gap — a small edit to a project instruction file (AGENTS.md or CLAUDE.md). The instruction-file edit is maintenance, not a second deliverable; it ensures future agents can discover the knowledge store.
+Phase 1 subagents return TEXT DATA to the orchestrator. They must NOT use Write, Edit, or create any files. Only the orchestrator writes files: the solution doc in Phase 2, `CONCEPTS.md` when Phase 2.4 finds qualifying vocabulary, and — if the Discoverability Check finds a gap — a small edit to a project instruction file (AGENTS.md or CLAUDE.md). The instruction-file edit and vocabulary update are maintenance side effects, not second deliverables; they ensure future agents can discover and ground in the knowledge store.
 </critical_requirement>
 
 
@@ -287,7 +288,6 @@ When creating a new doc, preserve the section order from `assets/resolution-temp
 
 </sequential_tasks>
 
-
 <!-- HKT-PATCH:phase-2.3 -->
 ### Phase 2.3: HKTMemory Store
 
@@ -323,6 +323,17 @@ After the solution document is written and stored to HKTMemory:
 3. If `gale-knowledge` is not on PATH, skip both steps and continue — this must never block the skill.
 
 <!-- /HKT-PATCH:knowledge-commit -->
+
+### Phase 2.4: Vocabulary Capture
+
+After the solution doc is written, validated, and stored, scan the new or updated doc for project-specific terms whose meaning would not be obvious to a new engineer. Read `references/concepts-vocabulary.md` before deciding what qualifies.
+
+- If `CONCEPTS.md` already defines the term accurately, do not edit it.
+- If a qualifying term is missing, add a concise definition to `CONCEPTS.md`.
+- If a definition conflicts with the newly documented learning, update it only when the new learning contains verified evidence; otherwise leave a refresh recommendation in the final report.
+- Do not add general programming vocabulary or transient implementation details.
+
+Treat `CONCEPTS.md` as a glossary side effect of the learning capture, not as the primary deliverable.
 
 ### Phase 2.5: Selective Refresh Check
 

@@ -58,7 +58,7 @@ Highlights:
 - `web-researcher` no longer assumes Claude-only `WebSearch` / `WebFetch` tools, making research guidance safer across runtimes.
 - `coherence-reviewer` has stronger document-type adaptation and safer `safe_auto` consistency rules for review-driven fixes.
 - `git-worktree` resolves helper scripts through `${CLAUDE_SKILL_DIR:-.}`, improving both marketplace and local plugin installs.
-- `gh-polish-beta` project detection is compatible with macOS Bash 3.2.
+- `gh-polish` project detection is compatible with macOS Bash 3.2.
 - CLI install / convert / sync detection now respects `$CODEX_HOME`, keeping Codex profiles isolated from the default home.
 
 Validation covered the full Bun test suite, release metadata validation, namespace leak checks, and Linux + Windows CI.
@@ -101,7 +101,7 @@ For `/gh:optimize`, see [`skills/gh-optimize/README.md`](./skills/gh-optimize/RE
 | `/gh:product-pulse` | You need a time-windowed read-only pulse of user experience, errors, performance, and quality signals. | Product pulse report with risks, regressions, and follow-up candidates. |
 | `/gh:simplify-code` | Recent changes work but feel too complex, duplicated, or hard to reuse. | Behavior-preserving simplification and clarity improvements. |
 | `/gh:optimize` | There is a measurable target such as performance, search quality, prompt quality, ranking, or clustering. | Metric-driven optimization loop with parallel experiments and judge/measurement gates. |
-| `/gh:polish-beta` | A PR or feature needs browser/dev-server polish after review and CI, especially UI/interaction cleanup. | Testable polish checklist and scoped fix dispatches; beta surface. |
+| `/gh:polish` | A PR or feature needs browser/dev-server polish after review and CI, especially UI/interaction cleanup. | Dev-server startup, browser handoff, and iterative polish fixes. |
 
 ### Workflow Guardrails
 
@@ -191,7 +191,7 @@ Recommended operating model:
 
 | Skill | Description |
 |-------|-------------|
-| `gh:polish-beta` | Human-in-the-loop polish phase after /gh:review — verifies review + CI, starts a dev server from `.claude/launch.json`, generates a testable checklist, and dispatches polish sub-agents for fixes. Emits stacked-PR seeds for oversized work |
+| `gh:polish` | Human-in-the-loop polish phase after /gh:review — verifies review + CI, starts a dev server from `.claude/launch.json`, opens the feature, and iterates on visible fixes with the user. |
 | `/lfg` | Full autonomous engineering workflow |
 
 ### Morph-X CLI Utilities

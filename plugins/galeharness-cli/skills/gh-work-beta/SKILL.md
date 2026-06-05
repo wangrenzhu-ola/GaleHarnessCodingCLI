@@ -74,7 +74,7 @@ Store the resolved state for downstream consumption:
 
 Determine how to proceed based on what was provided in `<input_document>`.
 
-**Plan document** (input is a file path to an existing plan or specification) → skip to Phase 1.
+**Plan document** (input is a file path to an existing plan or specification): read the plan's metadata first -- YAML frontmatter for a markdown plan, or visible header text for an HTML plan. If it carries `execution: knowledge-work`, this is a **non-code plan** -- read `references/non-code-execution.md` and follow that carve-out instead of the beta delegation/code lifecycle. Otherwise, skip to Phase 1.
 
 **Bare prompt** (input is a description of work, not a file path):
 
@@ -109,7 +109,7 @@ For any non-trivial bare prompt, form a lightweight execution contract before im
    - Review any references or links provided in the plan
    - If the user explicitly asks for TDD, test-first, or characterization-first execution in this session, honor that request even if the plan has no `Execution note`
    - If anything is unclear or ambiguous, ask clarifying questions now
-   - Get user approval to proceed
+   - If clarifying questions were needed above, get user approval on the resolved answers. If no clarifications were needed, proceed without a separate approval step — plan scope is the plan's authority, not something to renegotiate
    - **Do not skip this** - better to ask questions now than build the wrong thing
    - **Do not edit the plan body during execution.** The plan is a decision artifact; progress lives in git commits and the task tracker. The only plan mutation during gh:work is the final `status: active` -> `status: completed` flip at shipping (see `references/shipping-workflow.md` Phase 4 Step 2). Legacy plans may contain `- [ ]` / `- [x]` marks on unit headings — ignore them as state; per-unit completion is determined during execution by reading the current file state.
    - For non-trivial work, establish the execution contract before editing: current assumptions, minimal change, explicit non-goals, and verification criteria. Derive it from the plan when available; if the plan is thin, state it briefly from the prompt and repo scan.

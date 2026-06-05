@@ -1,6 +1,6 @@
 ---
-name: gh:polish-beta
-description: "[BETA] Start the dev server, open the feature in a browser, and iterate on improvements together."
+name: gh:polish
+description: "Start the dev server, open the feature in a browser, and iterate on improvements together. Manual invocation only — type /gh:polish to run it."
 disable-model-invocation: true
 argument-hint: "[PR number, branch name, or blank for current branch]"
 ---

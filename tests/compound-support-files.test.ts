@@ -4,10 +4,11 @@ import { describe, expect, test } from "bun:test"
 
 const PLUGIN_ROOT = path.join(process.cwd(), "plugins", "galeharness-cli", "skills")
 
-/** Canonical copies live in ce-compound; mirrors must stay identical. */
+/** Canonical copies live in gh-compound; mirrors must stay identical. */
 const SHARED_SUPPORT_FILES = [
   "references/schema.yaml",
   "references/yaml-schema.md",
+  "references/concepts-vocabulary.md",
   "assets/resolution-template.md",
 ]
 
