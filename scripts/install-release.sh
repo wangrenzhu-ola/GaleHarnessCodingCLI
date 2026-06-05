@@ -8,11 +8,19 @@
 #   GALE_RELEASE_ARCHIVE=/path/to/archive.tar.gz
 #                             Install from a local archive, only when CI=1 or
 #                             GALE_INSTALL_ALLOW_LOCAL_ARCHIVE=1
+#   GALE_INSTALL_SKIP_PLUGIN=1
+#                             Install binaries only; skip workflow/plugin install
+#   GALE_INSTALL_TARGETS=all   Override workflow install target(s)
+#   GALE_INSTALL_HERMES=0      Skip Hermes-compatible ~/.hermes install
+#   GALE_INSTALL_HERMES_HOME=~/.hermes
+#                             Override Hermes-compatible Claude home
 
 set -euo pipefail
 
 REPO="wangrenzhu-ola/GaleHarnessCodingCLI"
 TAG_PREFIX="galeharness-cli-v"
+PLUGIN_NAME="galeharness-cli"
+PLUGIN_SOURCE="https://github.com/$REPO"
 
 err() {
   printf 'error: %s\n' "$*" >&2
@@ -215,6 +223,41 @@ done
 
 install -m 0644 "$tmpdir/VERSION" "$install_dir/VERSION"
 
+installed_version="$(tr -d '\r\n' < "$tmpdir/VERSION")"
+plugin_branch="${GALE_INSTALL_PLUGIN_BRANCH:-$TAG_PREFIX$installed_version}"
+plugin_targets="${GALE_INSTALL_TARGETS:-all}"
+plugin_source="${GALE_INSTALL_PLUGIN_SOURCE:-$PLUGIN_SOURCE}"
+hermes_home="${GALE_INSTALL_HERMES_HOME:-$HOME/.hermes}"
+installed_gale_harness="$install_dir/gale-harness$exe"
+
+install_workflows() {
+  if [ "${GALE_INSTALL_SKIP_PLUGIN:-}" = "1" ]; then
+    printf '\nSkipped workflow install because GALE_INSTALL_SKIP_PLUGIN=1.\n'
+    return
+  fi
+
+  if [ ! -x "$installed_gale_harness" ]; then
+    err "installed gale-harness is not executable: $installed_gale_harness"
+    exit 1
+  fi
+
+  need git
+
+  printf '\nInstalling GaleHarnessCLI workflows to detected AI tools (%s)\n' "$plugin_targets"
+  printf 'Plugin source: %s\n' "$plugin_source"
+  printf 'Plugin branch: %s\n' "$plugin_branch"
+  COMPOUND_PLUGIN_GITHUB_SOURCE="$plugin_source" \
+    "$installed_gale_harness" install "$PLUGIN_NAME" --branch "$plugin_branch" --to "$plugin_targets"
+
+  if [ "${GALE_INSTALL_HERMES:-1}" != "0" ]; then
+    printf '\nInstalling Hermes-compatible Claude-style workflows to %s\n' "$hermes_home"
+    COMPOUND_PLUGIN_GITHUB_SOURCE="$plugin_source" \
+      "$installed_gale_harness" install "$PLUGIN_NAME" --branch "$plugin_branch" --to claude --claude-home "$hermes_home"
+  fi
+}
+
+install_workflows
+
 cat <<EOF
 
 Installed to $install_dir
@@ -227,8 +270,6 @@ Then verify:
 
   gale-harness --version
   gale-harness update --check
-  gale-memory status
-  gale-task validate --file <workflow-bundle.json>
 
 Gale-managed HKTMemory uses ~/.galeharness/knowledge/<project>/hkt-memory by default.
 If hkt-memory is not on PATH, gale-memory status/start will report a diagnostic instead

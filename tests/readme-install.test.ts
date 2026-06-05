@@ -13,7 +13,7 @@ describe("README install guidance", () => {
     expect(firstScreen).toContain(
       "curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | bash",
     )
-    expect(firstScreen).toContain("gale-harness --version")
+    expect(firstScreen).toContain("额外安装 Hermes 兼容目录")
   })
 
   test("states the Windows release installer boundary before source-mode setup", async () => {

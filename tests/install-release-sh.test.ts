@@ -8,15 +8,21 @@ import { createTarGz, type TarFixtureEntry } from "./tar-fixtures"
 const repoRoot = path.resolve(import.meta.dir, "..")
 const installerPath = path.join(repoRoot, "scripts", "install-release.sh")
 
-async function writeLocalArchive(version = "9.8.7"): Promise<{ archivePath: string; platform: string }> {
+async function writeLocalArchive(
+  version = "9.8.7",
+  fileOverrides: Record<string, string> = {},
+): Promise<{ archivePath: string; platform: string }> {
   const platform = detectReleasePlatform()
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "install-release-archive-"))
   const archivePath = path.join(dir, `galeharness-cli-${version}-${platform}.tar.gz`)
   const entries: TarFixtureEntry[] = [
-    ...getReleaseBinaryFileNames(platform).map((name) => ({
-      name,
-      content: `#!/usr/bin/env sh\necho ${name} ${version}\n`,
-    })),
+    ...getReleaseBinaryFileNames(platform).map((name) => {
+      const defaultContent = `#!/usr/bin/env sh\necho ${name} ${version}\n`
+      return {
+        name,
+        content: fileOverrides[name] ?? defaultContent,
+      }
+    }),
     { name: "VERSION", content: `${version}\n` },
   ]
   await fs.writeFile(archivePath, createTarGz(entries))
@@ -87,6 +93,64 @@ describeIfUnix("install-release.sh local archive mode", () => {
       expect(stat.isSymbolicLink()).toBe(false)
     }
     expect(await fs.readFile(path.join(installDir, "VERSION"), "utf-8")).toBe("9.8.7\n")
+  })
+
+  test("installs workflows to detected tools and Hermes by default", async () => {
+    const platform = detectReleasePlatform()
+    const galeHarnessName = getReleaseBinaryFileNames(platform).find((name) => name.startsWith("gale-harness"))
+    expect(galeHarnessName).toBeTruthy()
+    const logPath = path.join(await fs.mkdtemp(path.join(os.tmpdir(), "install-release-log-")), "calls.log")
+    const hermesHome = path.join(await fs.mkdtemp(path.join(os.tmpdir(), "install-release-hermes-")), ".hermes")
+    const { archivePath } = await writeLocalArchive("9.8.7", {
+      [galeHarnessName as string]: `#!/usr/bin/env sh
+{
+  printf 'SOURCE=%s\\n' "$COMPOUND_PLUGIN_GITHUB_SOURCE"
+  printf 'ARGS=%s\\n' "$*"
+} >> "$GALE_INSTALL_TEST_LOG"
+`,
+    })
+    const installDir = await fs.mkdtemp(path.join(os.tmpdir(), "install-release-bin-"))
+
+    const result = await runInstaller({
+      GALE_RELEASE_ARCHIVE: archivePath,
+      INSTALL_DIR: installDir,
+      CI: "1",
+      GALE_INSTALL_TEST_LOG: logPath,
+      GALE_INSTALL_HERMES_HOME: hermesHome,
+    })
+
+    expect(result.exitCode).toBe(0)
+    const log = await fs.readFile(logPath, "utf-8")
+    expect(log).toContain("SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI")
+    expect(log).toContain("ARGS=install galeharness-cli --branch galeharness-cli-v9.8.7 --to all")
+    expect(log).toContain(
+      `ARGS=install galeharness-cli --branch galeharness-cli-v9.8.7 --to claude --claude-home ${hermesHome}`,
+    )
+  })
+
+  test("can skip workflow install", async () => {
+    const platform = detectReleasePlatform()
+    const galeHarnessName = getReleaseBinaryFileNames(platform).find((name) => name.startsWith("gale-harness"))
+    expect(galeHarnessName).toBeTruthy()
+    const logPath = path.join(await fs.mkdtemp(path.join(os.tmpdir(), "install-release-log-")), "calls.log")
+    const { archivePath } = await writeLocalArchive("9.8.7", {
+      [galeHarnessName as string]: `#!/usr/bin/env sh
+printf 'unexpected\\n' >> "$GALE_INSTALL_TEST_LOG"
+`,
+    })
+    const installDir = await fs.mkdtemp(path.join(os.tmpdir(), "install-release-bin-"))
+
+    const result = await runInstaller({
+      GALE_RELEASE_ARCHIVE: archivePath,
+      INSTALL_DIR: installDir,
+      CI: "1",
+      GALE_INSTALL_SKIP_PLUGIN: "1",
+      GALE_INSTALL_TEST_LOG: logPath,
+    })
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toContain("Skipped workflow install")
+    await expect(fs.readFile(logPath, "utf-8")).rejects.toThrow()
   })
 
   test("rejects local archives with symlink entries before install", async () => {
