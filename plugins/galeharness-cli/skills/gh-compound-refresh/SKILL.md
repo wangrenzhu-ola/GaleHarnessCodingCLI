@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 Maintain the quality of `docs/solutions/`（或全局知识库）over time. This workflow reviews existing learnings against the current codebase, then refreshes any derived pattern docs that depend on them.
 
+Support file: read `references/concepts-vocabulary.md` before creating, seeding, or materially updating `CONCEPTS.md`.
+
 **Config:**
 At the start of execution, use your native file-read tool to read `.compound-engineering/config.local.yaml` from the repository root. If the file is missing in the current worktree, check the main repository root (the parent of `.git/worktrees`). If the file is missing or unreadable, do not block the workflow — proceed silently with default settings.
 
@@ -190,6 +192,7 @@ A learning has several dimensions that can independently go stale. Surface-level
 - **Related docs** — are cross-referenced learnings and patterns still present and consistent?
 - **Auto memory** (Claude Code only) — does the injected auto-memory block in your system prompt contain entries in the same problem domain? Scan that block directly. If the block is absent, skip this dimension. A memory note describing a different approach than what the learning recommends is a supplementary drift signal.
 - **Overlap** — while investigating, note when another doc in scope covers the same problem domain, references the same files, or recommends a similar solution. For each overlap, record: the two file paths, which dimensions overlap (problem, solution, root cause, files, prevention), and which doc appears broader or more current. These signals feed Phase 1.75 (Document-Set Analysis).
+- **Vocabulary** — note domain terms the learning cites: entities, named processes, and status concepts with project-specific meaning. Check whether `CONCEPTS.md` defines them and whether existing definitions still match current usage. Do not edit `CONCEPTS.md` during investigation; collect the signal for Phase 4.5.
 
 Match investigation depth to the learning's specificity — a learning referencing exact file paths and code snippets needs more verification than one describing a general principle.
 
@@ -560,6 +563,15 @@ Do not let replacement subagents invent frontmatter fields, enum values, or sect
 Delete only when a learning is clearly obsolete, redundant (with no unique content to merge), or its problem domain is gone. Do not delete a document just because it is old — age alone is not a signal.
 
 ## Output Format
+
+### Phase 4.5: Vocabulary Reconciliation
+
+After executing the chosen maintenance actions and before printing the final report, reconcile vocabulary findings:
+
+1. Read `references/concepts-vocabulary.md`.
+2. If `CONCEPTS.md` is missing and the refresh surfaced qualifying terms, create it with a short preamble and the verified terms.
+3. Add missing qualifying terms, update definitions contradicted by verified current evidence, and skip general programming vocabulary or implementation details.
+4. Include vocabulary changes under Applied or Recommended in the report, matching whether the write succeeded.
 
 **The full report MUST be printed as markdown output.** Do not summarize findings internally and then output a one-liner. The report is the deliverable — print every section in full, formatted as readable markdown with headers, tables, and bullet points.
 

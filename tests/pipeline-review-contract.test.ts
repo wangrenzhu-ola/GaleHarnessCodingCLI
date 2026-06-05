@@ -272,6 +272,16 @@ describe("gh:plan remains neutral during gh:work-beta rollout", () => {
     // Planner stays neutral instead of teaching beta-only invocation
     expect(content).not.toContain("delegate:codex")
   })
+
+  test("supports approach-altitude planning before committing to a deliverable", async () => {
+    const content = await readRepoFile("plugins/galeharness-cli/skills/gh-plan/SKILL.md")
+    const reference = await readRepoFile("plugins/galeharness-cli/skills/gh-plan/references/approach-altitude.md")
+
+    expect(content).toContain("#### 0.1a Recognize Approach-Altitude Requests")
+    expect(content).toContain("references/approach-altitude.md")
+    expect(reference).toContain("execution: knowledge-work")
+    expect(reference).toContain("gh:work")
+  })
 })
 
 describe("Karpathy workflow guardrails contract", () => {
@@ -337,7 +347,14 @@ describe("Karpathy workflow guardrails contract", () => {
       expect(content).toContain("Scope Boundaries")
       expect(content).toContain("Execution note")
       expect(content).toContain("Verification")
+      expect(content).toContain("execution: knowledge-work")
+      expect(content).toContain("references/non-code-execution.md")
     }
+
+    const stableCarveOut = await readRepoFile("plugins/galeharness-cli/skills/gh-work/references/non-code-execution.md")
+    const betaCarveOut = await readRepoFile("plugins/galeharness-cli/skills/gh-work-beta/references/non-code-execution.md")
+    expect(stableCarveOut).toContain("Knowledge-Work Carve-Out")
+    expect(betaCarveOut).toContain("No Codex delegation batch")
   })
 
   test("preserves review diff hygiene guardrail outside brainstorm and ideate edits", async () => {
