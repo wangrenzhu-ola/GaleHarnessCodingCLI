@@ -2,6 +2,58 @@
 
 巨风科技研发团队提效工具 —— 基于 Compound Engineering 工作流与 HKTMemory 向量知识库的 AI 驱动开发套件。
 
+## 3.0.1 亮点（相对 2.11.2 / 2.11.x）
+
+3.0.1 的重点是把“装 binary”和“部署 workflow”合成一条命令：不需要 clone 源码，不需要手动写 `COMPOUND_PLUGIN_GITHUB_SOURCE`，也不需要再单独执行 `gale-harness install ...`。
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | bash
+```
+
+这条命令会完成：
+
+- 安装/升级 `gale-harness`、`compound-plugin`、`gale-memory`、`gale-knowledge`、`gale-task` release binary。
+- 从对应 release tag 安装 `galeharness-cli` workflow 到所有检测到的 AI 工具。
+- 额外安装 Hermes 兼容目录 `~/.hermes`。
+- 使用正确的 `GaleHarnessCodingCLI` 仓库作为远程插件源，避免拉到旧 `GaleHarnessCLI` 源。
+- 支持 16 个目标平台：Claude、Codex、Qoder、Kimi、Cursor、Gemini、Copilot、OpenCode、Kilo 等。
+- 包含 3.0.0 引入的上游 workflow 同步、`gh:work-x` / `gh:debug-x` Morph-X 流程、`gh:nexus` 代码智能入口，以及更完整的跨平台转换输出。
+
+### 安装后第一件事：建知识库和 code graph
+
+3.0.1 安装完成后，建议先做两件事，让后续 `gh:` 工作流可以直接复用工程上下文：
+
+```bash
+# 1. 建立全局知识库，后续 brainstorm / plan / work / review / compound 会持续沉淀到这里
+gale-knowledge init
+gale-knowledge resolve-home
+
+# 2. 在项目根目录建立 code graph，给后续查询、影响分析、上下文检索使用
+cd /path/to/your/project
+gitnexus analyze .
+gitnexus status
+```
+
+在 AI 工具里也可以直接用 `gh:nexus`：
+
+```text
+/gh:nexus analyze .
+/gh:nexus context <SymbolName>
+/gh:nexus impact <SymbolName>
+```
+
+`gale-knowledge` 负责团队知识沉淀：需求、计划、实现总结、复盘和 HKTMemory 索引都归到 `~/.galeharness/knowledge/`，换项目也能复用。
+
+`gh:nexus` 的价值很直接：不用它，Agent 只能靠 `grep`、`rg` 和你塞进上下文的代码片段猜关系，大项目很快就会漏调用链、漏影响面。用了它，先 `/gh:nexus analyze .` 建项目 code graph，之后可以按符号查上下文、按调用链定位入口、按 impact 看改一个函数会牵动哪些文件。差距就是：不用时每次都在重复找代码、浪费上下文窗口；用了以后 Agent 先查图再动手，少读无关文件，少问你要背景，改动边界更稳。
+
+`gh:nexus` 会尝试自动安装 `gitnexus@1.6.3`；GitNexus 本身是 PolyForm-Noncommercial-1.0.0 许可，商业场景请自行确认授权。
+
+只想装 binary、不写入任何 AI 工具配置时：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | GALE_INSTALL_SKIP_PLUGIN=1 bash
+```
+
 ## 快速安装 / 新手一键安装
 
 ### macOS / Linux
@@ -10,15 +62,9 @@
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | bash
-gale-harness --version
 ```
 
-安装二进制后，把 `galeharness-cli` workflow 安装到本机 AI 工具。`--to` 是 `install` 子命令的参数，不能写成 `gale-harness --to all`：
-
-```bash
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
-  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to all
-```
+这条命令会安装/升级 `gale-harness` binary，然后自动安装 `galeharness-cli` workflow 到所有检测到的 AI 工具，并额外安装 Hermes 兼容目录 `~/.hermes`。
 
 ### Windows
 
@@ -464,7 +510,13 @@ gale-knowledge rebuild-index --full  # 全量
 curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | bash
 ```
 
-脚本会优先安装到当前 `gale-harness` 所在目录，并移除旧的 `bun link` symlink 后写入编译二进制。没有已安装命令时，默认安装到 `~/.local/bin`。Release assets 覆盖 macOS、Linux、Windows 的 arm64/x64 平台。
+脚本会优先安装到当前 `gale-harness` 所在目录，并移除旧的 `bun link` symlink 后写入编译二进制。没有已安装命令时，默认安装到 `~/.local/bin`。安装 binary 后，脚本会自动从对应 release tag 安装 `galeharness-cli` workflow 到所有检测到的 AI 工具，并额外安装 Hermes 兼容目录 `~/.hermes`。Release assets 覆盖 macOS、Linux、Windows 的 arm64/x64 平台。
+
+只安装 binary、不写入任何 AI 工具配置时：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | GALE_INSTALL_SKIP_PLUGIN=1 bash
+```
 
 #### macOS / Linux 源码安装（贡献者路径）
 
@@ -546,24 +598,21 @@ gale-memory resolve-root
 
 ## AI工具安装
 
-`--to` 是 `install` 子命令的参数。正确形态是 `gale-harness install ... --to <target>`；`gale-harness --to="all"` 会失败，因为顶层 CLI 没有 `--to` 参数。
+Release installer 默认已经执行 AI 工具安装：`curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI/main/scripts/install-release.sh | bash` 会安装/升级 binary，然后自动安装 `galeharness-cli` workflow 到所有检测到的平台，并额外写入 Hermes 兼容目录 `~/.hermes`。
+
+`--to` 是 `install` 子命令的参数。手动安装时正确形态是 `gale-harness install ... --to <target>`；`gale-harness --to="all"` 会失败，因为顶层 CLI 没有 `--to` 参数。
 
 普通使用场景推荐远程 tag 安装；这条命令可以在任意项目目录执行，不依赖当前目录下存在 `./plugins/galeharness-cli`：
 
 ```bash
 # 安装到所有检测到的平台
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
-  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to all
+gale-harness install galeharness-cli --branch galeharness-cli-v3.0.1 --to all
 
 # 指定平台
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
-  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to claude
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
-  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to codex
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
-  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to qoder
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
-  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to kimi
+gale-harness install galeharness-cli --branch galeharness-cli-v3.0.1 --to claude
+gale-harness install galeharness-cli --branch galeharness-cli-v3.0.1 --to codex
+gale-harness install galeharness-cli --branch galeharness-cli-v3.0.1 --to qoder
+gale-harness install galeharness-cli --branch galeharness-cli-v3.0.1 --to kimi
 ```
 
 如果已经 clone 了 GaleHarnessCodingCLI，也可以在本仓库根目录从明确的插件目录安装：
@@ -587,7 +636,7 @@ gale-harness install ./plugins/galeharness-cli --to all
 需要本地路径安装时，先拉取对应 release tag：
 
 ```bash
-git clone --branch galeharness-cli-v3.0.0 --depth 1 https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
+git clone --branch galeharness-cli-v3.0.1 --depth 1 https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
 cd GaleHarnessCodingCLI
 gale-harness install ./plugins/galeharness-cli --to all
 ```
@@ -595,8 +644,7 @@ gale-harness install ./plugins/galeharness-cli --to all
 Hermes 兼容 Claude-style skills/agents 目录时，显式指定 Claude home：
 
 ```bash
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
-  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to claude --claude-home ~/.hermes
+gale-harness install galeharness-cli --branch galeharness-cli-v3.0.1 --to claude --claude-home ~/.hermes
 ```
 
 **支持的平台 (16个)：** `claude`, `opencode`, `codex`, `droid`, `pi`, `gemini`, `copilot`, `kiro`, `windsurf`, `openclaw`, `qwen`, `qoder`, `trae`, `cursor`, `kimi`, `kilo`
@@ -627,8 +675,7 @@ alias ghc='claude --plugin-dir /path/to/GaleHarnessCodingCLI/plugins/galeharness
 **Copilot CLI：**
 
 ```bash
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
-  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to copilot
+gale-harness install galeharness-cli --branch galeharness-cli-v3.0.1 --to copilot
 ```
 
 ### 项目初始化

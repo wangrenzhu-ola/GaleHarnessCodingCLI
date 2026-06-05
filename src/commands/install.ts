@@ -350,7 +350,7 @@ async function resolveGitHubPluginPath(pluginName: string, branch?: string): Pro
 function resolveGitHubSource(): string {
   const override = process.env.COMPOUND_PLUGIN_GITHUB_SOURCE
   if (override && override.trim()) return override.trim()
-  return "https://github.com/wangrenzhu-ola/GaleHarnessCLI"
+  return "https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI"
 }
 
 async function cloneGitHubRepo(source: string, destination: string, branch?: string): Promise<void> {
