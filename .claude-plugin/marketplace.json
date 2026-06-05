@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "GaleHarnessCLI plugin marketplace — galeharness-cli workflows with HKTMemory vector knowledge base",
-    "version": "1.2.0"
+    "version": "3.0.0"
   },
   "plugins": [
     {

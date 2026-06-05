@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cursor-marketplace-v1.2.0...cursor-marketplace-v3.0.0) (2026-06-05)
+
+
+### Features
+
+* **galeharness-cli:** publish upstream workflow sync ([9269cb9](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/commit/9269cb90552be68eb1e072cafbe87c0e0277aca2))
+
 ## [1.2.0](https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI/compare/cursor-marketplace-v1.1.0...cursor-marketplace-v1.2.0) (2026-04-17)
 
 
