@@ -13,6 +13,13 @@ curl -fsSL https://raw.githubusercontent.com/wangrenzhu-ola/GaleHarnessCodingCLI
 gale-harness --version
 ```
 
+安装二进制后，把 `galeharness-cli` workflow 安装到本机 AI 工具。`--to` 是 `install` 子命令的参数，不能写成 `gale-harness --to all`：
+
+```bash
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
+  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to all
+```
+
 ### Windows
 
 Windows release binary installer 尚未进入 P0a 范围。当前不要把 source-mode 的 `scripts/setup.ps1` 当作普通用户默认一键安装；需要在 Windows 上试用或参与开发时，请参考下方“安装方式”里的贡献者源码安装路径。Windows release 安装器会在后续阶段补齐。
@@ -539,7 +546,27 @@ gale-memory resolve-root
 
 ## AI工具安装
 
-在 repo 根目录执行：
+`--to` 是 `install` 子命令的参数。正确形态是 `gale-harness install ... --to <target>`；`gale-harness --to="all"` 会失败，因为顶层 CLI 没有 `--to` 参数。
+
+普通使用场景推荐远程 tag 安装；这条命令可以在任意项目目录执行，不依赖当前目录下存在 `./plugins/galeharness-cli`：
+
+```bash
+# 安装到所有检测到的平台
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
+  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to all
+
+# 指定平台
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
+  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to claude
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
+  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to codex
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
+  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to qoder
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
+  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to kimi
+```
+
+如果已经 clone 了 GaleHarnessCodingCLI，也可以在本仓库根目录从明确的插件目录安装：
 
 ```bash
 # 安装到所有检测到的平台
@@ -551,7 +578,28 @@ gale-harness install ./plugins/galeharness-cli --to cursor
 gale-harness install ./plugins/galeharness-cli --to kimi
 ```
 
-**支持的平台 (15个)：** `claude`, `opencode`, `codex`, `droid`, `pi`, `gemini`, `copilot`, `kiro`, `windsurf`, `openclaw`, `qwen`, `qoder`, `trae`, `cursor`, `kimi`
+从其他项目目录运行下面这种本地路径命令会失败，因为该路径只在 GaleHarnessCodingCLI 仓库内存在：
+
+```bash
+gale-harness install ./plugins/galeharness-cli --to all
+```
+
+需要本地路径安装时，先拉取对应 release tag：
+
+```bash
+git clone --branch galeharness-cli-v3.0.0 --depth 1 https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI.git
+cd GaleHarnessCodingCLI
+gale-harness install ./plugins/galeharness-cli --to all
+```
+
+Hermes 兼容 Claude-style skills/agents 目录时，显式指定 Claude home：
+
+```bash
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
+  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to claude --claude-home ~/.hermes
+```
+
+**支持的平台 (16个)：** `claude`, `opencode`, `codex`, `droid`, `pi`, `gemini`, `copilot`, `kiro`, `windsurf`, `openclaw`, `qwen`, `qoder`, `trae`, `cursor`, `kimi`, `kilo`
 
 **Codex 转换策略：**
 
@@ -579,7 +627,8 @@ alias ghc='claude --plugin-dir /path/to/GaleHarnessCodingCLI/plugins/galeharness
 **Copilot CLI：**
 
 ```bash
-gale-harness install ./plugins/galeharness-cli --to copilot
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/wangrenzhu-ola/GaleHarnessCodingCLI \
+  gale-harness install galeharness-cli --branch galeharness-cli-v3.0.0 --to copilot
 ```
 
 ### 项目初始化
