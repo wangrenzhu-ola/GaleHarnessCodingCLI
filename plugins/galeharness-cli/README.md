@@ -77,7 +77,7 @@ Use the horizontal skills (`/gh:debug`, `/gh:optimize`, `/gh:simplify-code`, `/g
 
 | Skill | When to use it | Output / value |
 |-------|----------------|----------------|
-| `/gh:ideate` | You want grounded improvement ideas or alternative directions before committing to a requirement. | Ranked ideas with constraints, risks, and next-step candidates. |
+| `/gh:ideate` | You want grounded improvement ideas or alternative directions before committing to a requirement. | Ranked ideas in a self-contained HTML artifact by default (`output:md` when markdown is required), with constraints, risks, and next-step candidates. |
 | `/gh:brainstorm` | A request is still fuzzy and needs problem framing, assumptions, non-goals, and success criteria. | A requirement-quality brief that can feed `/gh:plan`. |
 | `/gh:plan` | A requirement is ready to decompose into implementation steps or an existing plan needs deepening. | A structured plan with files, risks, tests, and confidence checks. |
 | `/gh:work` | Execute a scoped development task or plan with normal quality gates. | Implemented code plus verification evidence. |

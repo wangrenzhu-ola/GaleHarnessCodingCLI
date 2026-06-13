@@ -9,7 +9,7 @@ Do not run code-shipping machinery for knowledge-work plans:
 - No branch/worktree setup.
 - No implementation-unit task list keyed on `Files:`.
 - No Test Discovery or system-wide test check.
-- No incremental code commits, PR flow, or `references/shipping-workflow.md` status flip.
+- No incremental code commits, PR flow, or plan-status mutation.
 
 ## Execute The Production Plan
 
