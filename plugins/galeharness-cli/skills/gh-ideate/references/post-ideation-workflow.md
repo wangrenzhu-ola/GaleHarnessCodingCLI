@@ -32,7 +32,7 @@ Target output:
 
 ## Phase 4: Present the Survivors
 
-Present the surviving ideas to the user before writing the durable artifact. This is a review checkpoint, not the final archived result.
+Present a concise survivor summary to the user before writing the durable artifact. This is a review checkpoint, not the final archived result. In default HTML mode, avoid wall-of-text terminal output: the full rich artifact will be written to disk and summarized in chat.
 
 Present only the surviving ideas in structured form:
 
@@ -48,16 +48,11 @@ Then include a brief rejection summary so the user can see what was considered a
 
 Keep the presentation concise. The durable artifact holds the full record.
 
-Allow brief follow-up questions and lightweight clarification before writing the artifact.
-
-Do not write the ideation doc yet unless:
-- the user indicates the candidate set is good enough to preserve
-- the user asks to refine and continue in a way that should be recorded
-- the workflow is about to hand off to `gh:brainstorm`, Proof sharing, or session end
+Allow brief follow-up questions and lightweight clarification, then write the artifact automatically before the next-step menu. The artifact is the review surface; the user can discard it in Phase 6 if the run was exploratory and should not be kept.
 
 ## Phase 5: Write the Ideation Artifact
 
-Write the ideation artifact after the candidate set has been reviewed enough to preserve.
+Write the ideation artifact after the candidate set has been reviewed enough to preserve. Default to a self-contained HTML artifact unless `output:md` was explicitly selected.
 
 **Document Language** — When the skill's config contains `language: zh-CN` (or no language config, defaulting to zh-CN):
 - Write all prose content in Chinese: paragraphs, list items, table content
@@ -73,12 +68,13 @@ Always write or update the artifact before:
 To write the artifact:
 
 1. Ensure `docs/ideation/` exists
-2. Choose the file path:
-   - `docs/ideation/YYYY-MM-DD-<topic>-ideation.md`
-   - `docs/ideation/YYYY-MM-DD-open-ideation.md` when no focus exists
-3. Write or update the ideation document
+2. Resolve output mode:
+   - default `output:html` -> load `references/html-rendering.md` and write `docs/ideation/YYYY-MM-DD-<topic>-ideation.html`
+   - explicit `output:md` -> load `references/markdown-rendering.md` and write `docs/ideation/YYYY-MM-DD-<topic>-ideation.md`
+   - use `docs/ideation/YYYY-MM-DD-open-ideation.<ext>` when no focus exists
+3. Write or update exactly one ideation artifact for this run; HTML and markdown are mutually exclusive unless the user asks for a later conversion
 
-Use this structure and omit clearly irrelevant fields only when necessary:
+For markdown mode, use this structure and omit clearly irrelevant fields only when necessary:
 
 ```markdown
 ---
@@ -101,7 +97,6 @@ focus: <optional focus hint>
 **Downsides:** [Tradeoffs or costs]
 **Confidence:** [0-100%]
 **Complexity:** [Low / Medium / High]
-**Status:** [Unexplored / Explored]
 
 ## Rejection Summary
 
@@ -112,23 +107,25 @@ focus: <optional focus hint>
 
 If resuming:
 - update the existing file in place
-- preserve explored markers
+- preserve existing notes; legacy `Status:` markers may remain but are not the source of truth for handoff
 
 ## Phase 6: Refine or Hand Off
 
-After presenting the results, ask what should happen next.
+After presenting the results and writing the artifact, ask what should happen next.
 
 Offer these options:
 1. brainstorm a selected idea
-2. refine the ideation
-3. share to Proof
-4. end the session
+2. iterate on one idea in this session
+3. share to Proof (markdown output only; if the artifact is HTML, offer to rerun or convert with explicit user approval)
+4. discard the saved artifact
+5. end the session
 
 ### 6.1 Brainstorm a Selected Idea
 
 If the user selects an idea:
-- write or update the ideation doc first
-- mark that idea as `Explored`
+- write or update the ideation artifact first
+- pass the selected idea's substance to `gh:brainstorm` as the seed: title, description, warrant, rationale, downsides, confidence, complexity, and any relevant rejection context
+- do not rely on a status marker as the handoff contract; the saved file is evidence, and the brainstorm seed carries the actionable content
 - note the brainstorm date in the session log
 - invoke `gh:brainstorm` with the selected idea as the seed
 
@@ -148,7 +145,9 @@ After each refinement:
 
 ### 6.3 Share to Proof
 
-If requested, invoke HITL review mode by loading `references/hitl-review.md` from the `proof` skill with:
+If requested, first confirm the artifact is markdown. Proof cannot ingest the default HTML artifact. If the current run wrote HTML, ask whether to create a markdown conversion before sharing; do not silently create a second artifact.
+
+Then invoke HITL review mode by loading `references/hitl-review.md` from the `proof` skill with:
 - `localPath`: the ideation document path
 - `title`: from the document's H1 or filename
 
@@ -157,7 +156,9 @@ Handle the HITL return (sync or warn) and return to the next-step options.
 ### 6.4 End the Session
 
 When ending:
-- offer to commit only the ideation doc
+- report the saved artifact path
+- if the user says to discard it, delete the artifact and say so
+- otherwise offer to commit only the ideation artifact
 - do not create a branch
 - do not push
 - if the user declines, leave the file uncommitted

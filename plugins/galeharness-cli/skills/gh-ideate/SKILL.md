@@ -14,7 +14,7 @@ argument-hint: "[feature, focus area, or constraint]"
 - `gh:brainstorm` answers: "What exactly should one chosen idea mean?"
 - `gh:plan` answers: "How should it be built?"
 
-This workflow produces a ranked ideation artifact in `docs/ideation/`. It does **not** produce requirements, plans, or code.
+This workflow produces a ranked ideation artifact in `docs/ideation/`. By default it writes one self-contained HTML file for human review; pass `output:md` (or configure `ideate_output: md`) when a markdown artifact is required. It does **not** produce requirements, plans, or code.
 
 ## Interaction Method
 
@@ -32,6 +32,7 @@ Interpret any provided argument as optional context. It may be:
 - a path such as `plugins/galeharness-cli/skills/`
 - a constraint such as `low-complexity quick wins`
 - a volume hint such as `top 3`, `100 ideas`, or `raise the bar`
+- an output-mode hint: `output:html` (default) or `output:md`
 
 If no argument is provided, treat the subject as unsettled and run the subject-identification gate before any dispatch.
 
@@ -46,6 +47,13 @@ At the start of execution, use your native file-read tool to read `.compound-eng
 
 If the config file contains `language: en`, write documents in English.
 If the file is missing, contains `language: zh-CN`, or has no language key, write documents in Chinese (default).
+
+
+## Output Mode
+
+Default to `output:html`: write exactly one self-contained `.html` ideation artifact optimized for human reading in a browser. Use `output:md` only when the user explicitly asks for markdown or `.compound-engineering/config.local.yaml` sets `ideate_output: md`. If both prompt and config specify a mode, the prompt wins. HTML and markdown are mutually exclusive for a single run -- do not write both.
+
+When output mode is HTML, load `references/html-rendering.md` before writing the artifact. When output mode is markdown, load `references/markdown-rendering.md` before writing the artifact.
 
 ## Execution Flow
 
@@ -69,7 +77,7 @@ Treat a prior ideation doc as relevant when:
 - the topic matches the requested focus
 - the path or subsystem overlaps the requested focus
 - the request is open-ended and there is an obvious recent open ideation doc
-- the issue-grounded status matches: do not offer to resume a non-issue ideation when the current argument indicates issue-tracker intent, or vice versa — treat these as distinct topics
+- the issue-grounded mode matches: do not offer to resume a non-issue ideation when the current argument indicates issue-tracker intent, or vice versa — treat these as distinct topics
 
 If a relevant doc exists, ask whether to:
 1. continue from it
@@ -78,7 +86,7 @@ If a relevant doc exists, ask whether to:
 If continuing:
 - read the document
 - summarize what has already been explored
-- preserve previous idea statuses
+- preserve any existing legacy idea notes, but do not use status markers as the handoff contract
 - update the existing file instead of creating a duplicate
 
 #### 0.2 Subject-Identification Gate

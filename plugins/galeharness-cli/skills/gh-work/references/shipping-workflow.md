@@ -58,12 +58,9 @@ This file contains the shipping workflow (Phase 3-4). Load it only when all Phas
 
    Note whether the completed work has observable behavior (UI rendering, CLI output, API/library behavior with a runnable example, generated artifacts, or workflow output). The `git-commit-push-pr` skill will ask whether to capture evidence only when evidence is possible.
 
-2. **Update Plan Status**
+2. **Leave The Plan Read-Only**
 
-   If the input document has YAML frontmatter with a `status` field, update it to `completed`:
-   ```
-   status: active  ->  status: completed
-   ```
+   Do not update plan frontmatter or body state during shipping. The plan is a decision artifact; shipped state is derived from git commits, PR metadata, and task-board events. If a legacy plan has `status:` frontmatter, leave it unchanged rather than rewriting history.
 
 3. **Commit and Create Pull Request**
 
